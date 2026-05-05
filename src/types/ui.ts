@@ -25,8 +25,8 @@ export interface TimelineState {
 }
 
 export interface EntitySelection {
-  entityType: string
-  entityId: string
+  type: string
+  id: string
 }
 
 export interface MapState {
@@ -51,6 +51,8 @@ export type ToneName =
   | 'Warning'
   | 'Success'
 
+// Note: GateContext is not directly imported by other type files, but ItineraryItem and Route
+// are defined in trip.ts which imports from this file, so we use unknown here to avoid circular imports
 export interface GateContext {
   gate: unknown
   relatedRoutes: unknown[]

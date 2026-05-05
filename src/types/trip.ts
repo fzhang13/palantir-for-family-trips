@@ -1,6 +1,6 @@
 /// <reference types="google.maps" />
 
-import type { UIState } from './ui'
+import type { PageType, EntitySelection } from './ui'
 import type { WeatherBundle } from './weather'
 
 // Base entity interface
@@ -126,21 +126,34 @@ export interface TripMeta {
   timezone: string
 }
 
-// Trip entities collection
-export interface TripEntities {
-  routes: Route[]
-  locations: Location[]
-  activities: Activity[]
-  meals: Meal[]
-  expenses: Expense[]
-  families: Family[]
-  itinerary: ItineraryItem[]
-}
-
-// Main trip document
+// Main trip document - flat structure matching runtime createInitialTripDocument()
 export interface TripDocument {
-  meta: TripMeta
-  entities: TripEntities
-  ui: UIState
+  selectedPage: PageType
+  selection: EntitySelection | null
+  pageNotes: Record<PageType, string>
+  pageNoteMeta: Record<string, unknown>
+  ui: {
+    searchQuery: string
+    timeline: {
+      mode: 'scenario' | 'reality' | string
+      cursorSlot: number
+    }
+    map: {
+      showRoutes: boolean
+      showFacilities: boolean
+      showTraffic: boolean
+      focusFamilyId: string
+      focusDayId: string
+    }
+  }
+  families: Family[]
+  locations: Location[]
+  routes: Route[]
+  itineraryItems: ItineraryItem[]
+  meals: Meal[]
+  activities: Activity[]
+  stayItems: unknown[]
+  expenses: Expense[]
+  tasks: unknown[]
   weather?: WeatherBundle
 }
