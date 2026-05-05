@@ -20,7 +20,7 @@ export interface Route extends BaseEntity {
     lng: number
   }
   stopLocationIds?: string[]
-  destinationLocationId: string
+  destinationLocationId?: string
   simulationStartSlot: number
   simulationEndSlot: number
   durationSeconds?: number
@@ -187,7 +187,7 @@ export interface Task extends BaseEntity {
   title: string
   dayId: string
   status: 'done' | 'open' | 'blocked'
-  ownerFamilyId: string
+  ownerFamilyId: string | null
   linkedEntityKeys?: string[]
   note?: string
 }
