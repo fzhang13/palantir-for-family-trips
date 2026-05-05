@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const createRouteSchema = z.object({
   familyId: z.string().uuid('Invalid family selected'),
 
-  originLocationId: z.string().uuid().optional(),
+  originLocationId: z.string().uuid('Invalid origin location').optional(),
   // If not provided, use family's origin coordinates
 
   destinationLocationId: z.string().uuid('Destination is required'),
@@ -14,11 +14,11 @@ export const createRouteSchema = z.object({
   day: z.number()
     .int()
     .min(1, 'Day must be at least 1')
-    .max(30, 'Day must be less than 30'),
+    .max(30, 'Day must be at most 30'),
 
   notes: z.string()
     .max(1000, 'Notes must be less than 1000 characters')
     .optional()
 })
 
-export const updateRouteSchema = createRouteSchema.partial()
+export type CreateRouteFormData = z.infer<typeof createRouteSchema>

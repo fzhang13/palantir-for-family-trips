@@ -1,7 +1,42 @@
+interface MapPoint {
+  id: string
+  label: string
+  caption: string
+  familyId: string
+  focusDay: string
+  tone: string
+  position: { lat: number; lng: number }
+}
+
+interface TripMetadata {
+  title: string
+  subtitle: string
+  commandName: string
+  airbnb: {
+    name: string
+    url: string | null
+    manualUrl: string | null
+    location: string
+    checkIn: string
+    checkOut: string
+    gateNote: string
+    parkingNote: string
+    directionsNote: string
+    lockNote: string | null
+    wifiNetwork: string | null
+    wifiPassword: string | null
+    hostName: string | null
+    coHostName: string | null
+    guestSummary: string | null
+    confirmationCode: string | null
+    vehicleFee: string
+  }
+}
+
 const PUBLIC_BASECAMP_LOCATION = 'Pine Mountain Lake, Groveland, CA 95321'
 const PUBLIC_BASECAMP_COORDINATES = { lat: 37.8586, lng: -120.2142 }
 
-export const TRIP_META = {
+export const TRIP_META: TripMetadata = {
   title: 'Pine Mountain Lake / Yosemite Weekend',
   subtitle: 'Thu 4/09 to Sun 4/12',
   commandName: 'Family Trip Command Center',
@@ -26,7 +61,7 @@ export const TRIP_META = {
   },
 }
 
-export const MAP_POINTS = [
+export const MAP_POINTS: MapPoint[] = [
   {
     id: 'sf-silver-peak',
     label: 'Jiangs',

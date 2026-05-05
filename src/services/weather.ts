@@ -1,18 +1,19 @@
-import { DAYS } from './tripData'
+import { DAYS } from '../data/tripData'
+import type { WeatherCondition } from '@/types'
 
 const WEATHER_API_ROOT = 'https://api.weather.gov'
 const DEFAULT_ACCEPT_HEADERS = {
   Accept: 'application/geo+json',
 }
 
-export const DAY_WEATHER_TARGET = {
+export const DAY_WEATHER_TARGET: Record<string, string> = {
   thu: 'basecamp',
   fri: 'basecamp',
   sat: 'yosemite',
   sun: 'basecamp',
 }
 
-function parseTripDate(dayId, year = new Date().getFullYear()) {
+function parseTripDate(dayId: string, year: number = new Date().getFullYear()): Date | null {
   const day = DAYS.find((item) => item.id === dayId)
   const match = day?.shortLabel?.match(/(\d{1,2})\/(\d{1,2})/)
   if (!match) return null
@@ -22,12 +23,12 @@ function parseTripDate(dayId, year = new Date().getFullYear()) {
   return new Date(Date.UTC(year, month, date))
 }
 
-function toIsoDate(date) {
+function toIsoDate(date: Date | null): string {
   if (!(date instanceof Date) || Number.isNaN(date.getTime())) return ''
   return date.toISOString().slice(0, 10)
 }
 
-export function getWeatherIconKey(condition = '') {
+export function getWeatherIconKey(condition: string = ''): WeatherCondition {
   const text = condition.toLowerCase()
 
   if (text.includes('thunder')) return 'storm'
@@ -41,18 +42,18 @@ export function getWeatherIconKey(condition = '') {
   return 'cloud'
 }
 
-function celsiusToFahrenheit(value) {
+function celsiusToFahrenheit(value: number | null | undefined): number | null {
   if (typeof value !== 'number') return null
   return Math.round((value * 9) / 5 + 32)
 }
 
-function formatObservationTemperature(observation) {
+function formatObservationTemperature(observation: any): string | null {
   const celsius = observation?.properties?.temperature?.value
   const fahrenheit = celsiusToFahrenheit(celsius)
   return fahrenheit == null ? null : `${fahrenheit} F`
 }
 
-async function fetchWeatherJson(url) {
+async function fetchWeatherJson(url: string): Promise<any> {
   const response = await fetch(url, { headers: DEFAULT_ACCEPT_HEADERS })
   if (!response.ok) {
     throw new Error(`Weather request failed: ${response.status}`)
@@ -60,7 +61,7 @@ async function fetchWeatherJson(url) {
   return response.json()
 }
 
-async function fetchLatestObservation(stationsUrl) {
+async function fetchLatestObservation(stationsUrl: string | null): Promise<any> {
   if (!stationsUrl) return null
 
   const stations = await fetchWeatherJson(stationsUrl)
@@ -71,7 +72,7 @@ async function fetchLatestObservation(stationsUrl) {
   return fetchWeatherJson(`${stationUrl}/observations/latest`)
 }
 
-export async function fetchWeatherBundle({ label, coordinates }) {
+export async function fetchWeatherBundle({ label, coordinates }: { label: string; coordinates: { lat: number; lng: number } }): Promise<any> {
   if (!coordinates?.lat || !coordinates?.lng) return null
 
   const points = await fetchWeatherJson(`${WEATHER_API_ROOT}/points/${coordinates.lat},${coordinates.lng}`)
@@ -109,7 +110,7 @@ export async function fetchWeatherBundle({ label, coordinates }) {
   }
 }
 
-export function getTripDayWeather(bundleMap, day) {
+export function getTripDayWeather(bundleMap: any, day: any): any {
   const targetKey = DAY_WEATHER_TARGET[day.id]
   const bundle = targetKey ? bundleMap?.[targetKey] : null
   if (!bundle) {
@@ -122,10 +123,10 @@ export function getTripDayWeather(bundleMap, day) {
   }
 
   const targetDate = toIsoDate(parseTripDate(day.id))
-  const forecastPeriod = bundle.forecastPeriods.find((period) => {
+  const forecastPeriod = bundle.forecastPeriods.find((period: any) => {
     const periodDate = toIsoDate(new Date(period.startTime))
     return periodDate === targetDate && period.isDaytime
-  }) || bundle.forecastPeriods.find((period) => toIsoDate(new Date(period.startTime)) === targetDate)
+  }) || bundle.forecastPeriods.find((period: any) => toIsoDate(new Date(period.startTime)) === targetDate)
 
   if (!forecastPeriod) {
     return {
@@ -144,7 +145,7 @@ export function getTripDayWeather(bundleMap, day) {
   }
 }
 
-export function getMapWeather(bundleMap, focusDayId = 'all') {
+export function getMapWeather(bundleMap: any, focusDayId: string = 'all'): any {
   const targetKey = focusDayId !== 'all' ? DAY_WEATHER_TARGET[focusDayId] : 'basecamp'
   const bundle = targetKey ? bundleMap?.[targetKey] : null
   if (!bundle) return null
@@ -160,7 +161,7 @@ export function getMapWeather(bundleMap, focusDayId = 'all') {
   }
 }
 
-export function getMapWeatherTargets(bundleMap, focusDayId = 'all') {
+export function getMapWeatherTargets(bundleMap: any, focusDayId: string = 'all'): any {
   const focusedTargetKey = focusDayId !== 'all' ? DAY_WEATHER_TARGET[focusDayId] : 'basecamp'
   const targets = [
     { id: 'basecamp', label: 'Basecamp', bundle: bundleMap?.basecamp },

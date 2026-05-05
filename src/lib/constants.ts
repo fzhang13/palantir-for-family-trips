@@ -31,6 +31,14 @@ export const WEATHER_ICONS: Record<string, LucideIcon> = {
   snow: Cloud,
 }
 
+export const DESIGN_COLORS = {
+  background: '#0A0C10',
+  surface: '#161B22',
+  textPrimary: '#C9D1D9',
+  textMuted: '#8B949E',
+  border: '#30363D',
+} as const
+
 export const TONE_COLORS = {
   info: '#58A6FF',
   warning: '#D29922',
