@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    // Required to suppress TypeScript 6.0 experimental feature warnings for moduleResolution: "bundler"
     "ignoreDeprecations": "6.0",
     "target": "ES2020",
     "useDefineForClassFields": true,
