@@ -6,6 +6,8 @@ export type PageType =
   | 'expenses'
   | 'families'
 
+// NOTE: Unused placeholder types - actual runtime uses inline types in TripDocument
+// Kept for potential future use, but not currently matching runtime structures
 export interface UIState {
   currentPage: PageType
   timeline: TimelineState
@@ -51,11 +53,22 @@ export type ToneName =
   | 'Warning'
   | 'Success'
 
-// Note: GateContext is not directly imported by other type files, but ItineraryItem and Route
-// are defined in trip.ts which imports from this file, so we use unknown here to avoid circular imports
+// GateContext - matches runtime structure from buildOperationGateContext in App.jsx
 export interface GateContext {
-  gate: unknown
-  relatedRoutes: unknown[]
-  estimatedArrivals: string[]
-  readinessStatus: string
+  dayId: string
+  dayMeta: string
+  theme: string
+  title: string
+  operationLabel: string
+  code: string
+  targetTitle: string
+  targetMeta: string
+  deploymentLabel: string
+  objective: string
+  launchLabel: string
+  etaLabel: string
+  unitCount: number
+  routeCount: number
+  families: unknown[]
+  briefingSummary: string
 }

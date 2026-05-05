@@ -9,17 +9,32 @@ export interface BaseEntity {
   type: string
 }
 
-// Route entity
+// Route entity - matches runtime structure from tripModel.js
 export interface Route extends BaseEntity {
   type: 'route'
+  title: string
+  dayId: string
   familyId: string
-  origin: string
-  destination: string
-  departureTime: string
-  path?: google.maps.LatLng[]
-  durationMinutes?: number
-  distanceMeters?: number
-  status?: 'pending' | 'active' | 'completed'
+  tone: string
+  originCoordinates: {
+    lat: number
+    lng: number
+  }
+  stopLocationIds: string[]
+  destinationLocationId: string
+  simulationStartSlot: number
+  simulationEndSlot: number
+  durationSeconds: number
+  simulationMilestones: Array<{
+    t: number
+    progress: number
+  }>
+  path: Array<{
+    lat: number
+    lng: number
+  }>
+  linkedEntityKey: string
+  dashed?: boolean
 }
 
 // Location entity
@@ -95,16 +110,22 @@ export interface FamilyMember {
   dietaryRestrictions?: string[]
 }
 
-// Itinerary item entity
+// Itinerary item entity - matches runtime structure from tripModel.js
 export interface ItineraryItem extends BaseEntity {
-  type: 'itinerary'
-  itemType: 'travel' | 'activity' | 'meal' | 'gate'
-  linkedEntityId?: string
-  startTime: string
-  endTime?: string
-  label: string
-  familyId?: string
+  type: 'itineraryItem'
+  title: string
+  rowId: string
+  dayId: string
+  startSlot: number
+  span: number
+  color: string
+  familyIds?: string[]
+  routeId?: string
+  locationId?: string
   status?: string
+  riskLevel?: string
+  taskIds?: string[]
+  linkedEntityKeys?: string[]
 }
 
 // Entity discriminated union
@@ -117,7 +138,8 @@ export type Entity =
   | Family
   | ItineraryItem
 
-// Trip metadata
+// NOTE: Unused placeholder type - actual runtime doesn't use a separate TripMeta object
+// Kept for potential future use if we want to extract trip metadata
 export interface TripMeta {
   tripName: string
   startDate: string
