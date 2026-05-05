@@ -1,7 +1,6 @@
 /// <reference types="google.maps" />
 
 import type { PageType, EntitySelection } from './ui'
-import type { WeatherBundle } from './weather'
 
 // Base entity interface
 export interface BaseEntity {
@@ -20,16 +19,16 @@ export interface Route extends BaseEntity {
     lat: number
     lng: number
   }
-  stopLocationIds: string[]
+  stopLocationIds?: string[]
   destinationLocationId: string
   simulationStartSlot: number
   simulationEndSlot: number
-  durationSeconds: number
-  simulationMilestones: Array<{
+  durationSeconds?: number
+  simulationMilestones?: Array<{
     t: number
     progress: number
   }>
-  path: Array<{
+  path?: Array<{
     lat: number
     lng: number
   }>
@@ -37,77 +36,118 @@ export interface Route extends BaseEntity {
   dashed?: boolean
 }
 
-// Location entity
+// Location entity - matches runtime structure from buildLocations in tripModel.js
 export interface Location extends BaseEntity {
   type: 'location'
-  name: string
+  title: string
+  category: 'stay' | 'meal' | 'logistics' | 'park'
+  dayId: string
   address: string
   coordinates: {
     lat: number
     lng: number
   }
-  category: 'stay' | 'activity' | 'meal' | 'transit'
-  metadata?: Record<string, unknown>
+  externalUrl?: string | null
+  summary?: string
+  parkingNote?: string | null
+  accessNote?: string | null
+  directionsNote?: string | null
+  lockNote?: string | null
+  checkIn?: string | null
+  checkOut?: string | null
+  wifiNetwork?: string | null
+  wifiPassword?: string | null
+  hostName?: string | null
+  coHostName?: string | null
+  guestSummary?: string | null
+  confirmationCode?: string | null
+  vehicleFee?: string | null
+  manualUrl?: string | null
+  photos?: Array<{
+    id: string
+    label: string
+    imageUrl: string
+    sourceUrl?: string | null
+  }>
+  linkedEntityKeys?: string[]
+  stopType?: string
+  placesQuery?: string
+  reservationNote?: string
 }
 
-// Activity entity
+// Activity entity - matches runtime structure from buildActivities in tripModel.js
 export interface Activity extends BaseEntity {
   type: 'activity'
-  name: string
-  description?: string
+  title: string
+  dayId: string
+  window: string
+  status: 'Go' | 'Watch'
+  riskLevel: string
+  weatherSensitivity: string
   locationId?: string
-  scheduledTime?: string
-  duration?: number
-  category?: string
-  status?: 'planned' | 'confirmed' | 'completed'
-  notes?: string
-  bullets?: string[]
+  linkedEntityKeys?: string[]
+  taskIds?: string[]
+  description?: string
+  backup?: string
+  note?: string
 }
 
-// Meal entity
+// Meal entity - matches runtime structure from buildMeals in tripModel.js
 export interface Meal extends BaseEntity {
   type: 'meal'
-  name: string
-  mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack'
-  scheduledTime: string
+  title: string
+  dayId: string
+  startSlot: number
+  status: 'Assigned' | 'Pending' | 'Confirmed'
+  owner: string
+  reservationType: string
+  timeLabel: string
   locationId?: string
-  assignedTo?: string[]
-  status: 'planned' | 'shopped' | 'prepped' | 'served'
-  notes?: string
+  linkedEntityKeys?: string[]
+  taskIds?: string[]
+  note?: string
 }
 
-// Expense entity
+// Expense entity - matches runtime structure from buildExpenses in tripModel.js
 export interface Expense extends BaseEntity {
   type: 'expense'
-  description: string
+  title: string
+  payer: string
   amount: number
-  category: string
-  paidBy?: string
-  allocations: ExpenseAllocation[]
-  date?: string
-  notes?: string
+  split: string
+  allocationMode: 'equal' | 'manual' | 'individual'
+  allocations: Record<string, number>
+  settled: boolean
+  linkedEntityKeys?: string[]
+  note?: string
 }
 
-export interface ExpenseAllocation {
-  familyId: string
-  amount: number
-}
-
-// Family entity
+// Family entity - matches runtime structure from buildFamilies in tripModel.js
 export interface Family extends BaseEntity {
   type: 'family'
+  title: string
   name: string
-  members: FamilyMember[]
-  contactInfo?: {
-    phone?: string
-    email?: string
+  shortOrigin: string
+  origin: string
+  originAddress: string
+  originCoordinates: {
+    lat: number
+    lng: number
   }
-}
-
-export interface FamilyMember {
-  name: string
-  role?: string
-  dietaryRestrictions?: string[]
+  arrivalDayId: string
+  eta: string
+  driveTime: string
+  headcount: string
+  vehicle: string
+  vehicleLabel: string
+  responsibility: string
+  readiness: number
+  status: string
+  routeSummary: string
+  plannedStopIds: string[]
+  taskIds: string[]
+  linkedEntityKeys: string[]
+  note: string
 }
 
 // Itinerary item entity - matches runtime structure from tripModel.js
@@ -128,6 +168,30 @@ export interface ItineraryItem extends BaseEntity {
   linkedEntityKeys?: string[]
 }
 
+// StayItem entity - matches runtime structure from buildStayItems in tripModel.js
+export interface StayItem extends BaseEntity {
+  type: 'stayItem'
+  title: string
+  dayId: string
+  locationId: string
+  category: string
+  summary: string
+  linkedEntityKeys?: string[]
+  taskIds?: string[]
+  note?: string
+}
+
+// Task entity - matches runtime structure from buildTasks in tripModel.js
+export interface Task extends BaseEntity {
+  type: 'task'
+  title: string
+  dayId: string
+  status: 'done' | 'open' | 'blocked'
+  ownerFamilyId: string
+  linkedEntityKeys?: string[]
+  note?: string
+}
+
 // Entity discriminated union
 export type Entity =
   | Route
@@ -137,6 +201,8 @@ export type Entity =
   | Expense
   | Family
   | ItineraryItem
+  | StayItem
+  | Task
 
 // NOTE: Unused placeholder type - actual runtime doesn't use a separate TripMeta object
 // Kept for potential future use if we want to extract trip metadata
@@ -174,8 +240,7 @@ export interface TripDocument {
   itineraryItems: ItineraryItem[]
   meals: Meal[]
   activities: Activity[]
-  stayItems: unknown[]
+  stayItems: StayItem[]
   expenses: Expense[]
-  tasks: unknown[]
-  weather?: WeatherBundle
+  tasks: Task[]
 }

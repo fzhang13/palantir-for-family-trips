@@ -53,11 +53,32 @@ export type ToneName =
   | 'Warning'
   | 'Success'
 
+// DayMeta - matches DAYS structure from tripData.js and getDayMeta return value
+export interface DayMeta {
+  id: string
+  shortLabel: string
+  title: string
+  weather: string
+  temperature: string
+  caution: string
+}
+
+// MissionLaunchTheme - matches MISSION_LAUNCH_THEME structure from App.jsx
+export interface MissionLaunchTheme {
+  accent: string
+  accentStrong: string
+  accentSoft: string
+  accentGlow: string
+  accentBorder: string
+  accentText: string
+  panelGlow: string
+}
+
 // GateContext - matches runtime structure from buildOperationGateContext in App.jsx
 export interface GateContext {
   dayId: string
-  dayMeta: string
-  theme: string
+  dayMeta: DayMeta
+  theme: MissionLaunchTheme
   title: string
   operationLabel: string
   code: string
