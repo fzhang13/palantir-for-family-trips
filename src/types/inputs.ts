@@ -32,3 +32,29 @@ export interface CreateLocationInput {
 }
 
 export type CreateRouteInput = z.infer<typeof createRouteSchema>
+
+export interface CreateMealInput {
+  title: string
+  dayId: string
+  timeLabel?: string
+  status?: 'Assigned' | 'Pending' | 'Confirmed'
+  owner?: string
+  reservationType?: string
+  locationId?: string
+  note?: string
+  createLocation?: CreateLocationInput
+}
+
+export interface CreateActivityInput {
+  title: string
+  dayId: string
+  window?: string
+  status?: 'Go' | 'Watch'
+  riskLevel?: string
+  weatherSensitivity?: string
+  locationId?: string
+  description?: string
+  backup?: string
+  note?: string
+  createLocation?: CreateLocationInput
+}
