@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { tripRepository } from '@/repositories'
+import { getTripRepository } from '@/repositories'
+import { DEFAULT_TRIP_ID } from '@/lib/constants'
 import type {
   CreateFamilyInput,
   CreateLocationInput,
@@ -8,7 +9,7 @@ import type {
 } from '@/types/inputs'
 import type { Family, Location, Route } from '@/types'
 
-const DEFAULT_TRIP_ID = 'default'
+const tripRepository = getTripRepository()
 
 // Family Mutations
 export function useAddFamily() {

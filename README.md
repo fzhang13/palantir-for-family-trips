@@ -83,6 +83,46 @@ If you publish this with your own Google Maps key, usage is billed to your Googl
 - The project is optimized for desktop and large-screen dashboard vibes.
 - The UI intentionally leans dense, dramatic, and slightly over-the-top.
 
+## Database Migrations
+
+This project uses Supabase for data persistence. Database schema changes are managed through SQL migration files.
+
+### Creating a New Migration
+
+Generate a new migration file with a timestamp and descriptive name:
+
+```bash
+npm run generate:migration <migration-name>
+```
+
+**Example:**
+
+```bash
+npm run generate:migration add_user_preferences
+```
+
+This creates a new file in `supabase/migrations/` with the format:
+
+```
+YYYYMMDDHHmmss_migration_name.sql
+```
+
+The generated file includes a template for your SQL. Edit it with your schema changes.
+
+### Applying Migrations
+
+**Local development:**
+
+```bash
+supabase db reset
+```
+
+**Push to remote:**
+
+```bash
+supabase db push
+```
+
 ## If You Want To Hack On It
 
 Good places to start:

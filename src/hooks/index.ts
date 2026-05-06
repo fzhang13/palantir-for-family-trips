@@ -4,6 +4,7 @@ export { useTimelineSimulation } from './useTimelineSimulation'
 export { useRoutePlayback } from './useRoutePlayback'
 export { useExpenseCalculations } from './useExpenseCalculations'
 export { useGoogleMaps } from './useGoogleMaps'
+export { useDirections } from './useDirections'
 
 // React Query hooks
 export { useFamilies, useLocations, useRoutes, useTrip } from './useTripQueries'

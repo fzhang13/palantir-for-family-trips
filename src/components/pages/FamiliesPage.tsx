@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { Plus, Edit2, Trash2, Users, MapPin, Calendar, Car } from 'lucide-react'
 import { useFamilies, useDeleteFamily } from '@/hooks'
-import { AddFamilyModal } from '@/components/modals'
+import { AddFamilyModal, EditFamilyModal } from '@/components/modals'
 import type { Family } from '@/types'
 
 export function FamiliesPage() {
   const { data: families = [], isLoading, isError } = useFamilies()
   const deleteFamily = useDeleteFamily()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [editingFamily, setEditingFamily] = useState<Family | null>(null)
 
   const handleDelete = (familyId: string) => {
     if (window.confirm('Are you sure you want to delete this family?')) {
@@ -73,6 +74,7 @@ export function FamiliesPage() {
             <FamilyCard
               key={family.id}
               family={family}
+              onEdit={setEditingFamily}
               onDelete={handleDelete}
             />
           ))}
@@ -84,16 +86,26 @@ export function FamiliesPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
       />
+
+      {/* Edit Family Modal */}
+      {editingFamily && (
+        <EditFamilyModal
+          isOpen={true}
+          onClose={() => setEditingFamily(null)}
+          family={editingFamily}
+        />
+      )}
     </div>
   )
 }
 
 interface FamilyCardProps {
   family: Family
+  onEdit: (family: Family) => void
   onDelete: (familyId: string) => void
 }
 
-function FamilyCard({ family, onDelete }: FamilyCardProps) {
+function FamilyCard({ family, onEdit, onDelete }: FamilyCardProps) {
   return (
     <div className="border border-[#30363D] rounded bg-[#161B22] p-5 hover:border-[#58A6FF] transition-colors">
       {/* Header */}
@@ -109,9 +121,7 @@ function FamilyCard({ family, onDelete }: FamilyCardProps) {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => {
-              alert('Edit functionality coming soon')
-            }}
+            onClick={() => onEdit(family)}
             className="p-1.5 rounded text-[#8B949E] hover:text-[#58A6FF] hover:bg-[#21262D] transition-colors"
             aria-label={`Edit ${family.name || family.title}`}
           >

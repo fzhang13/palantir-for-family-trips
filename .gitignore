@@ -5,4 +5,4 @@ test-results
 .env.local
 .env.*
 !.env.example
-/docs/superpowers/
+/docs/

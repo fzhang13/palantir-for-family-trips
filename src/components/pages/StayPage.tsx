@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { Plus, Edit2, Trash2, MapPin, Home, Calendar, FileText } from 'lucide-react'
 import { useLocations, useDeleteLocation } from '@/hooks'
-import { AddLocationModal } from '@/components/modals'
+import { AddLocationModal, EditLocationModal } from '@/components/modals'
 import type { Location } from '@/types'
 
 export function StayPage() {
   const { data: allLocations = [], isLoading, isError } = useLocations()
   const deleteLocation = useDeleteLocation()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [editingLocation, setEditingLocation] = useState<Location | null>(null)
 
   // Filter locations to only show 'stay' category
   const stayLocations = allLocations.filter(location => location.category === 'stay')
@@ -76,6 +77,7 @@ export function StayPage() {
             <StayCard
               key={location.id}
               location={location}
+              onEdit={setEditingLocation}
               onDelete={handleDelete}
             />
           ))}
@@ -87,16 +89,26 @@ export function StayPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
       />
+
+      {/* Edit Location Modal */}
+      {editingLocation && (
+        <EditLocationModal
+          isOpen={true}
+          onClose={() => setEditingLocation(null)}
+          location={editingLocation}
+        />
+      )}
     </div>
   )
 }
 
 interface StayCardProps {
   location: Location
+  onEdit: (location: Location) => void
   onDelete: (locationId: string) => void
 }
 
-function StayCard({ location, onDelete }: StayCardProps) {
+function StayCard({ location, onEdit, onDelete }: StayCardProps) {
   return (
     <div className="border border-[#30363D] rounded bg-[#161B22] p-5 hover:border-[#58A6FF] transition-colors">
       {/* Header */}
@@ -112,9 +124,7 @@ function StayCard({ location, onDelete }: StayCardProps) {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => {
-              alert('Edit functionality coming soon')
-            }}
+            onClick={() => onEdit(location)}
             className="p-1.5 rounded text-[#8B949E] hover:text-[#58A6FF] hover:bg-[#21262D] transition-colors"
             aria-label={`Edit ${location.title}`}
           >

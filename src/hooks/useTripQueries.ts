@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
-import { tripRepository } from '@/repositories'
+import { getTripRepository } from '@/repositories'
+import { DEFAULT_TRIP_ID } from '@/lib/constants'
 
-const DEFAULT_TRIP_ID = 'default'
+const tripRepository = getTripRepository()
 
 export function useFamilies(tripId: string = DEFAULT_TRIP_ID) {
   return useQuery({

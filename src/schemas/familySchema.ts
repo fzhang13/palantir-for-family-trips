@@ -8,6 +8,10 @@ export const createFamilySchema = z.object({
     lat: z.number().min(-90).max(90),
     lng: z.number().min(-180).max(180),
   }),
+
+  // Optional place data from autocomplete
+  placeId: z.string().optional(),
+
   vehicle: z.enum(['SUV', 'Sedan', 'Van', 'Truck']).optional(),
   vehicleLabel: z.string().optional(),
   headcount: z.string().optional(),

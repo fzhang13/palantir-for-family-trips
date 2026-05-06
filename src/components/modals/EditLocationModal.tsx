@@ -1,82 +1,83 @@
-import { useForm } from 'react-hook-form'
+import { useForm, useFormState } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'react-hot-toast'
 import { BaseModal } from './BaseModal'
 import { AddressAutocomplete } from '@/components/forms'
 import { createLocationSchema, type CreateLocationFormData } from '@/schemas'
-import { useAddLocation } from '@/hooks/useTripMutations'
-import { DEFAULT_TRIP_ID } from '@/lib/constants'
+import { useUpdateLocation } from '@/hooks'
+import type { Location } from '@/types'
 
-interface AddLocationModalProps {
+interface EditLocationModalProps {
   isOpen: boolean
   onClose: () => void
+  location: Location
 }
 
-export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
-  const addLocation = useAddLocation()
+export function EditLocationModal({ isOpen, onClose, location }: EditLocationModalProps) {
+  const updateLocation = useUpdateLocation()
+
+  const form = useForm<CreateLocationFormData>({
+    resolver: zodResolver(createLocationSchema),
+    defaultValues: {
+      title: location.title,
+      address: location.address,
+      category: location.category as 'stay' | 'meal' | 'logistics',
+      coordinates: location.coordinates,
+      summary: location.summary || '',
+    },
+  })
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    reset,
+    formState: { errors, isSubmitting },
     watch,
     setValue,
-  } = useForm<CreateLocationFormData>({
-    resolver: zodResolver(createLocationSchema),
-    defaultValues: {
-      title: '',
-      category: 'stay',
-      address: '',
-      coordinates: {
-        lat: 0,
-        lng: 0,
-      },
-      summary: '',
-    },
-  })
+    control,
+  } = form
 
-  const onSubmit = (data: CreateLocationFormData) => {
-    addLocation.mutate(
-      {
-        tripId: DEFAULT_TRIP_ID,
-        location: data,
-      },
-      {
-        onSuccess: () => {
-          reset()
-          onClose()
-        },
-      }
-    )
+  const { isDirty } = useFormState({ control })
+
+  const onSubmit = async (data: CreateLocationFormData) => {
+    try {
+      await updateLocation.mutateAsync({ locationId: location.id, updates: data })
+      toast.success('Location updated successfully')
+      onClose()
+    } catch (error) {
+      toast.error('Failed to update location')
+      console.error('Update location error:', error)
+    }
   }
 
   const handleClose = () => {
-    reset()
+    if (isDirty) {
+      const confirmed = window.confirm('You have unsaved changes. Discard them?')
+      if (!confirmed) return
+    }
     onClose()
   }
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} title="Add Location">
+    <BaseModal isOpen={isOpen} onClose={handleClose} title="Edit Location">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Location Name */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label htmlFor="title" className="block text-sm font-medium text-[#C9D1D9] mb-1">
             Location Name *
           </label>
           <input
+            id="title"
             {...register('title')}
             type="text"
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none"
             placeholder="e.g., Grand Canyon Viewpoint"
           />
-          {errors.title && (
-            <p className="mt-1 text-sm text-[#F85149]">{errors.title.message}</p>
-          )}
+          {errors.title && <p className="mt-1 text-sm text-[#F85149]">{errors.title.message}</p>}
         </div>
 
         {/* Address */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label htmlFor="address" className="block text-sm font-medium text-[#C9D1D9] mb-1">
             Address *
           </label>
           <AddressAutocomplete
@@ -99,10 +100,11 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
 
         {/* Category */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label htmlFor="category" className="block text-sm font-medium text-[#C9D1D9] mb-1">
             Category *
           </label>
           <select
+            id="category"
             {...register('category')}
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
@@ -115,12 +117,13 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
           )}
         </div>
 
-        {/* Summary (Optional) */}
+        {/* Summary */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label htmlFor="summary" className="block text-sm font-medium text-[#C9D1D9] mb-1">
             Summary
           </label>
           <textarea
+            id="summary"
             {...register('summary')}
             rows={3}
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none resize-none"
@@ -142,10 +145,10 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
           </button>
           <button
             type="submit"
-            disabled={addLocation.isPending}
+            disabled={isSubmitting || updateLocation.isPending}
             className="px-4 py-2 rounded bg-[#238636] text-white hover:bg-[#2EA043] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {addLocation.isPending ? 'Adding...' : 'Add Location'}
+            {isSubmitting || updateLocation.isPending ? 'Updating...' : 'Update Location'}
           </button>
         </div>
       </form>

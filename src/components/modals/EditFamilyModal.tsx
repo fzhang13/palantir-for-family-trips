@@ -1,99 +1,107 @@
-import { useForm } from 'react-hook-form'
+import { useForm, useFormState } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'react-hot-toast'
 import { BaseModal } from './BaseModal'
 import { AddressAutocomplete } from '@/components/forms'
 import { createFamilySchema, type CreateFamilyFormData } from '@/schemas'
-import { useAddFamily } from '@/hooks/useTripMutations'
-import { DEFAULT_TRIP_ID } from '@/lib/constants'
-import type { CreateFamilyInput } from '@/types/inputs'
+import { useUpdateFamily } from '@/hooks'
+import type { Family } from '@/types'
 
-interface AddFamilyModalProps {
+interface EditFamilyModalProps {
   isOpen: boolean
   onClose: () => void
+  family: Family
 }
 
-export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
-  const addFamily = useAddFamily()
+export function EditFamilyModal({ isOpen, onClose, family }: EditFamilyModalProps) {
+  const updateFamily = useUpdateFamily()
+
+  const form = useForm<CreateFamilyFormData>({
+    resolver: zodResolver(createFamilySchema),
+    defaultValues: {
+      name: family.name,
+      origin: family.origin,
+      originAddress: family.originAddress,
+      originCoordinates: family.originCoordinates,
+      vehicle: family.vehicle as 'SUV' | 'Sedan' | 'Van' | 'Truck' | undefined,
+      vehicleLabel: family.vehicleLabel,
+      headcount: family.headcount,
+      responsibility: family.responsibility,
+      note: family.note || '',
+      arrivalDayId: family.arrivalDayId as 'thu' | 'fri' | 'sat' | 'sun' | undefined,
+      eta: family.eta,
+      driveTime: family.driveTime,
+    },
+  })
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    reset,
+    formState: { errors, isSubmitting },
     watch,
     setValue,
-  } = useForm<CreateFamilyFormData>({
-    resolver: zodResolver(createFamilySchema),
-    defaultValues: {
-      name: '',
-      origin: '',
-      originAddress: '',
-      originCoordinates: { lat: 0, lng: 0 },
-      vehicle: 'SUV',
-      arrivalDayId: 'thu',
-    },
-  })
+    control,
+  } = form
 
-  const onSubmit = (data: CreateFamilyFormData) => {
-    addFamily.mutate(
-      {
-        tripId: DEFAULT_TRIP_ID,
-        family: data as CreateFamilyInput,
-      },
-      {
-        onSuccess: () => {
-          reset()
-          onClose()
-        },
-      }
-    )
+  const { isDirty } = useFormState({ control })
+
+  const onSubmit = async (data: CreateFamilyFormData) => {
+    try {
+      await updateFamily.mutateAsync({ familyId: family.id, updates: data })
+      toast.success('Family updated successfully')
+      onClose()
+    } catch (error) {
+      toast.error('Failed to update family')
+      console.error('Update family error:', error)
+    }
   }
 
   const handleClose = () => {
-    reset()
+    if (isDirty) {
+      const confirmed = window.confirm('You have unsaved changes. Discard them?')
+      if (!confirmed) return
+    }
     onClose()
   }
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} title="Add Family">
+    <BaseModal isOpen={isOpen} onClose={handleClose} title="Edit Family">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Family Name */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label htmlFor="name" className="block text-sm font-medium text-[#C9D1D9] mb-1">
             Family Name *
           </label>
           <input
+            id="name"
             {...register('name')}
             type="text"
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none"
             placeholder="e.g., The Smiths"
           />
-          {errors.name && (
-            <p className="mt-1 text-sm text-[#F85149]">{errors.name.message}</p>
-          )}
+          {errors.name && <p className="mt-1 text-sm text-[#F85149]">{errors.name.message}</p>}
         </div>
 
         {/* Origin City */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label htmlFor="origin" className="block text-sm font-medium text-[#C9D1D9] mb-1">
             Origin City *
           </label>
           <input
+            id="origin"
             {...register('origin')}
             type="text"
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none"
             placeholder="e.g., San Francisco"
           />
           {errors.origin && (
-            <p className="mt-1 text-sm text-[#F85149]">
-              {errors.origin.message}
-            </p>
+            <p className="mt-1 text-sm text-[#F85149]">{errors.origin.message}</p>
           )}
         </div>
 
         {/* Origin Address */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label htmlFor="originAddress" className="block text-sm font-medium text-[#C9D1D9] mb-1">
             Origin Address *
           </label>
           <AddressAutocomplete
@@ -115,13 +123,15 @@ export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
 
         {/* Vehicle Type */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label htmlFor="vehicle" className="block text-sm font-medium text-[#C9D1D9] mb-1">
             Vehicle Type
           </label>
           <select
+            id="vehicle"
             {...register('vehicle')}
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
+            <option value="">Select vehicle</option>
             <option value="SUV">SUV</option>
             <option value="Sedan">Sedan</option>
             <option value="Van">Van</option>
@@ -131,10 +141,11 @@ export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
 
         {/* Headcount */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label htmlFor="headcount" className="block text-sm font-medium text-[#C9D1D9] mb-1">
             Headcount
           </label>
           <input
+            id="headcount"
             {...register('headcount')}
             type="text"
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none"
@@ -144,10 +155,11 @@ export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
 
         {/* Responsibility */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label htmlFor="responsibility" className="block text-sm font-medium text-[#C9D1D9] mb-1">
             Responsibility
           </label>
           <input
+            id="responsibility"
             {...register('responsibility')}
             type="text"
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none"
@@ -157,13 +169,15 @@ export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
 
         {/* Arrival Day */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label htmlFor="arrivalDayId" className="block text-sm font-medium text-[#C9D1D9] mb-1">
             Arrival Day
           </label>
           <select
+            id="arrivalDayId"
             {...register('arrivalDayId')}
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
+            <option value="">Select day</option>
             <option value="thu">Thursday</option>
             <option value="fri">Friday</option>
             <option value="sat">Saturday</option>
@@ -173,18 +187,17 @@ export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
 
         {/* Notes */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label htmlFor="note" className="block text-sm font-medium text-[#C9D1D9] mb-1">
             Notes
           </label>
           <textarea
+            id="note"
             {...register('note')}
             rows={3}
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none resize-none"
             placeholder="Additional notes..."
           />
-          {errors.note && (
-            <p className="mt-1 text-sm text-[#F85149]">{errors.note.message}</p>
-          )}
+          {errors.note && <p className="mt-1 text-sm text-[#F85149]">{errors.note.message}</p>}
         </div>
 
         {/* Actions */}
@@ -198,10 +211,10 @@ export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
           </button>
           <button
             type="submit"
-            disabled={addFamily.isPending}
+            disabled={isSubmitting || updateFamily.isPending}
             className="px-4 py-2 rounded bg-[#238636] text-white hover:bg-[#2EA043] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {addFamily.isPending ? 'Adding...' : 'Add Family'}
+            {isSubmitting || updateFamily.isPending ? 'Updating...' : 'Update Family'}
           </button>
         </div>
       </form>

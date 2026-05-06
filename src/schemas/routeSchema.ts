@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const createRouteSchema = z.object({
   familyId: z.string().uuid('Invalid family selected'),
 
-  originLocationId: z.string().uuid('Invalid origin location').optional(),
+  originLocationId: z.string().uuid('Invalid origin location').optional().or(z.literal('').transform(() => undefined)),
   // If not provided, use family's origin coordinates
 
   destinationLocationId: z.string().uuid('Destination is required'),
@@ -18,7 +18,15 @@ export const createRouteSchema = z.object({
 
   notes: z.string()
     .max(1000, 'Notes must be less than 1000 characters')
-    .optional()
+    .optional(),
+
+  // Optional fields added by the modal after fetching directions
+  path: z.array(z.object({
+    lat: z.number(),
+    lng: z.number()
+  })).optional(),
+
+  durationSeconds: z.number().optional()
 })
 
 export type CreateRouteFormData = z.infer<typeof createRouteSchema>

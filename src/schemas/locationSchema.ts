@@ -8,6 +8,10 @@ export const createLocationSchema = z.object({
     lat: z.number().min(-90).max(90, 'Invalid latitude'),
     lng: z.number().min(-180).max(180, 'Invalid longitude'),
   }),
+
+  // Optional place data from autocomplete
+  placeId: z.string().optional(),
+
   summary: z.string().max(1000, 'Summary too long').optional(),
 })
 

@@ -1,4 +1,6 @@
 export * from './ui'
 export * from './pages'
 export * from './modals'
+export { MapContainer, RouteRenderer } from './map'
 export { ErrorBoundary } from './ErrorBoundary'
+export { AddressAutocomplete } from './forms'
