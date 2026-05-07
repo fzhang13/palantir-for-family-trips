@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import type { TripDocument, Entity, EntitySelection, PageType } from '@/types'
-import { getEntityById, getEntityBySelection } from '@/models/tripModel'
+import { getEntityById, getEntityBySelection } from '@/utils/trip'
 
 interface UseTripSelectionReturn {
   selection: EntitySelection | null
