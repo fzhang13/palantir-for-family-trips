@@ -1,4 +1,4 @@
-import type { Entity, Family, TripDocument, ItineraryItem } from '@/types'
+import type { Entity, Family, TripDocument, ItineraryItem, EntitySelection } from '@/types'
 
 /**
  * Add family metadata to entity
@@ -34,6 +34,45 @@ export function makeEntityKey(entityType: string, entityId: string): string {
 export function parseEntityKey(key: string): { type: string; id: string } {
   const [type, id] = key.split(':')
   return { type, id }
+}
+
+/**
+ * Map entity type to collection name in TripDocument
+ */
+export const COLLECTION_BY_TYPE: Record<string, string> = {
+  family: 'families',
+  location: 'locations',
+  route: 'routes',
+  itineraryItem: 'itineraryItems',
+  meal: 'meals',
+  activity: 'activities',
+  stayItem: 'stayItems',
+  expense: 'expenses',
+  task: 'tasks',
+}
+
+/**
+ * Get collection from TripDocument by entity type
+ */
+export function getCollection(doc: TripDocument, type: string): any[] {
+  const collectionName = COLLECTION_BY_TYPE[type]
+  if (!collectionName) return []
+  return (doc[collectionName as keyof TripDocument] as any) || []
+}
+
+/**
+ * Get entity by type and id from TripDocument
+ */
+export function getEntityById(doc: TripDocument, type: string, id: string): any | null {
+  return getCollection(doc, type).find((item: any) => item.id === id) || null
+}
+
+/**
+ * Get entity by selection from TripDocument
+ */
+export function getEntityBySelection(doc: TripDocument, selection: EntitySelection | null): any | null {
+  if (!selection?.type || !selection?.id) return null
+  return getEntityById(doc, selection.type, selection.id)
 }
 
 /**
@@ -78,12 +117,9 @@ export function buildOperationGateContext(
     return r.title
   })
 
-  const readinessStatus = relatedRoutes.length > 0 ? 'ready' : 'pending'
-
   return {
     gate,
     relatedRoutes,
     estimatedArrivals,
-    readinessStatus,
   }
 }
