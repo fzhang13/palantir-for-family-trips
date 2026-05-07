@@ -8,7 +8,7 @@ export interface BaseEntity {
   type: string
 }
 
-// Route entity - matches runtime structure from tripModel.js
+// Route entity
 export interface Route extends BaseEntity {
   type: 'route'
   title: string
@@ -36,7 +36,7 @@ export interface Route extends BaseEntity {
   dashed?: boolean
 }
 
-// Location entity - matches runtime structure from buildLocations in tripModel.js
+// Location entity
 export interface Location extends BaseEntity {
   type: 'location'
   title: string
@@ -82,7 +82,7 @@ export interface Location extends BaseEntity {
   endDayNumber?: number | null
 }
 
-// Activity entity - matches runtime structure from buildActivities in tripModel.js
+// Activity entity
 export interface Activity extends BaseEntity {
   type: 'activity'
   title: string
@@ -112,7 +112,7 @@ export interface Activity extends BaseEntity {
   } | null
 }
 
-// Meal entity - matches runtime structure from buildMeals in tripModel.js
+// Meal entity
 export interface Meal extends BaseEntity {
   type: 'meal'
   title: string
@@ -133,7 +133,7 @@ export interface Meal extends BaseEntity {
   familyIds?: string[]  // Array of family IDs (from junction table)
 }
 
-// Expense entity - matches runtime structure from buildExpenses in tripModel.js
+// Expense entity
 export interface Expense extends BaseEntity {
   type: 'expense'
   title: string
@@ -147,7 +147,7 @@ export interface Expense extends BaseEntity {
   note?: string
 }
 
-// Family entity - matches runtime structure from buildFamilies in tripModel.js
+// Family entity
 export interface Family extends BaseEntity {
   type: 'family'
   title: string
@@ -174,7 +174,7 @@ export interface Family extends BaseEntity {
   note: string
 }
 
-// Itinerary item entity - matches runtime structure from tripModel.js
+// Itinerary item entity
 export interface ItineraryItem extends BaseEntity {
   type: 'itineraryItem'
   title: string
@@ -192,7 +192,7 @@ export interface ItineraryItem extends BaseEntity {
   linkedEntityKeys?: string[]
 }
 
-// StayItem entity - matches runtime structure from buildStayItems in tripModel.js
+// StayItem entity
 export interface StayItem extends BaseEntity {
   type: 'stayItem'
   title: string
@@ -208,7 +208,7 @@ export interface StayItem extends BaseEntity {
   endDayNumber?: number | null
 }
 
-// Task entity - matches runtime structure from buildTasks in tripModel.js
+// Task entity
 export interface Task extends BaseEntity {
   type: 'task'
   title: string
