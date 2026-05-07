@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type { TripDocument, Entity, EntitySelection, PageType } from '@/types'
 import { getEntityById, getEntityBySelection } from '@/utils/trip'
 
@@ -13,10 +13,10 @@ interface UseTripSelectionReturn {
 
 export function useTripSelection(
   doc: TripDocument,
-  _currentPage: PageType,
-  onUpdateDoc: (updater: (doc: TripDocument) => TripDocument) => void
+  _currentPage: PageType
 ): UseTripSelectionReturn {
-  const selection = doc.selection
+  // Selection is now ephemeral React state (not persisted)
+  const [selection, setSelection] = useState<EntitySelection | null>(doc.selection || null)
 
   const selectedEntity = useMemo(() => {
     return getEntityBySelection(doc, selection)
@@ -24,12 +24,9 @@ export function useTripSelection(
 
   const selectEntity = useCallback(
     (entityType: string, entityId: string) => {
-      onUpdateDoc((doc) => ({
-        ...doc,
-        selection: { type: entityType, id: entityId },
-      }))
+      setSelection({ type: entityType, id: entityId })
     },
-    [onUpdateDoc]
+    []
   )
 
   const selectEntityByRef = useCallback(
@@ -40,11 +37,8 @@ export function useTripSelection(
   )
 
   const clearSelection = useCallback(() => {
-    onUpdateDoc((doc) => ({
-      ...doc,
-      selection: null,
-    }))
-  }, [onUpdateDoc])
+    setSelection(null)
+  }, [])
 
   const canSelectEntity = useCallback(
     (entityType: string, entityId: string) => {

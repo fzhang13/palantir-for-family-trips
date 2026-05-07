@@ -80,7 +80,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     console.warn('updateDoc is deprecated - use React Query mutation hooks')
   }, [])
 
-  const selection = useTripSelection(doc, currentPage, noopUpdateDoc)
+  const selection = useTripSelection(doc, currentPage)
   const timeline = useTimelineSimulation(doc, noopUpdateDoc)
   const expenses = useExpenseCalculations(doc, noopUpdateDoc)
 
