@@ -245,7 +245,6 @@ export const INITIAL_FAMILIES = [
     headcount: '2 adults, 1 kid',
     vehicle: 'SUV',
     responsibility: 'Firewood + snacks',
-    readiness: 82,
     routeSummary: 'Single-leg drive from LA to Pine Mountain Lake',
     checklist: [
       { id: 'car-pack', label: 'Car packed night before', done: true },
@@ -265,7 +264,6 @@ export const INITIAL_FAMILIES = [
     headcount: '2 adults, 1 kid',
     vehicle: 'SUV',
     responsibility: 'Coolers + breakfast fruit',
-    readiness: 88,
     routeSummary: 'Short Bay Area drive with a quick Oakdale reset before Pine Mountain Lake',
     checklist: [
       { id: 'lake-gear', label: 'Lake towels and floaties', done: true },
@@ -285,7 +283,6 @@ export const INITIAL_FAMILIES = [
     headcount: '2 adults, 1 kid',
     vehicle: 'SUV',
     responsibility: 'Grill kit + Saturday lunch',
-    readiness: 71,
     routeSummary: 'Friday arrival from Reno straight into Pine Mountain Lake',
     checklist: [
       { id: 'late-arrival', label: 'Friday arrival window confirmed', done: true },

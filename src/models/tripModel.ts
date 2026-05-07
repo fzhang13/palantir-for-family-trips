@@ -591,14 +591,13 @@ function buildFamilies() {
       origin: 'Los Angeles',
       originAddress: '2800 E Observatory Rd, Los Angeles, CA 90027',
       originCoordinates: { lat: 34.1184, lng: -118.3004 },
-      arrivalDayId: 'thu',
+      arrivalDayId: 'day1',
       eta: 'Thu 4:00 PM',
       driveTime: '5.5 hrs',
       headcount: '2 adults, 1 kid',
       vehicle: 'SUV',
       vehicleLabel: 'Vehicle 1',
       responsibility: 'Firewood + snacks',
-      readiness: 82,
       status: 'Transit',
       routeSummary: 'Plan lunch in Kettleman City and a final light break in Oakdale before the last mountain leg into Pine Mountain Lake.',
       plannedStopIds: ['north-star-kettleman-lunch', 'north-star-oakdale-break'],
@@ -620,14 +619,13 @@ function buildFamilies() {
       origin: 'San Francisco',
       originAddress: '1 Ferry Building, San Francisco, CA 94111',
       originCoordinates: { lat: 37.7955, lng: -122.3937 },
-      arrivalDayId: 'thu',
+      arrivalDayId: 'day1',
       eta: 'Thu 4:00 PM',
       driveTime: '3.5 hrs',
       headcount: '2 adults, 1 kid',
       vehicle: 'SUV',
       vehicleLabel: 'Vehicle 2',
       responsibility: 'Coolers + breakfast fruit',
-      readiness: 88,
       status: 'Transit',
       routeSummary: 'Plan a quick Oakdale Cheese reset stop before the final push into Pine Mountain Lake.',
       plannedStopIds: ['north-star-oakdale-break'],
@@ -648,14 +646,13 @@ function buildFamilies() {
       origin: 'Reno',
       originAddress: '10 N Virginia St, Reno, NV 89501',
       originCoordinates: { lat: 39.5296, lng: -119.8138 },
-      arrivalDayId: 'fri',
+      arrivalDayId: 'day2',
       eta: 'Fri 1:00 PM',
       driveTime: '5 hrs',
       headcount: '2 adults, 1 kid',
       vehicle: 'SUV',
       vehicleLabel: 'Vehicle 3',
       responsibility: 'Grill kit + Saturday lunch',
-      readiness: 71,
       status: 'Friday Arrival',
       routeSummary: 'Friday arrival push from Reno straight into Pine Mountain Lake.',
       plannedStopIds: [],
@@ -2200,7 +2197,6 @@ export function migrateLegacyState(raw: any) {
       return existing
         ? {
             ...family,
-            readiness: typeof existing.readiness === 'number' ? existing.readiness : family.readiness,
             status: existing.status || family.status,
             responsibility: existing.responsibility || family.responsibility,
             routeSummary: existing.routeSummary || family.routeSummary,
@@ -2320,7 +2316,6 @@ function refreshSeededDoc(doc) {
   return {
     ...doc,
     families: refreshSeededCollection(doc.families, seeded.families, [
-      'readiness',
       'status',
       'responsibility',
       'note',
@@ -2709,12 +2704,7 @@ export function getTasksByFamily(doc: any, familyId: any) {
   return doc.tasks.filter((task: any) => task.ownerFamilyId === familyId)
 }
 
-export function getFamilyReadiness(doc: any, familyId: any) {
-  const tasks = getTasksByFamily(doc, familyId)
-  if (!tasks.length) return 100
-  const doneCount: any = tasks.filter((task: any) => task.status === 'done').length
-  return Math.round((doneCount / tasks.length) * 100)
-}
+
 
 export function getTasksForDay(doc: any, dayId: any) {
   return doc.tasks.filter((task: any) => task.dayId === dayId)

@@ -19,7 +19,7 @@ export function AtHomeToggle({
   tripId
 }: AtHomeToggleProps) {
   // Query stay location for the selected date
-  const { data: stayLocation, isLoading, error } = useQuery({
+  const { data: stayLocation, isLoading } = useQuery({
     queryKey: ['stay-location', currentDate, tripId],
     queryFn: async () => {
       if (!supabase) {

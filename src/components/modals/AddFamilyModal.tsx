@@ -31,7 +31,7 @@ export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
       originAddress: '',
       originCoordinates: { lat: 0, lng: 0 },
       vehicle: 'SUV',
-      arrivalDayId: 'thu',
+      arrivalDayId: '',
     },
   })
 
@@ -159,18 +159,16 @@ export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
 
         {/* Arrival Day */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
             Arrival Day
           </label>
-          <select
+          <input
             {...register('arrivalDayId')}
-            className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
-          >
-            <option value="thu">Thursday</option>
-            <option value="fri">Friday</option>
-            <option value="sat">Saturday</option>
-            <option value="sun">Sunday</option>
-          </select>
+            type="text"
+            placeholder="e.g., day1, day2"
+            className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] placeholder-[#6E7681] focus:border-[#58A6FF] focus:outline-none"
+          />
+          <p className="text-xs text-[#8B949E] mt-1">Enter day ID (e.g., day1 for first day of trip)</p>
         </div>
 
         {/* Notes */}

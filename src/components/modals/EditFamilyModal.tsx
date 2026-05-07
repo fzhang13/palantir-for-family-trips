@@ -29,7 +29,7 @@ export function EditFamilyModal({ isOpen, onClose, family }: EditFamilyModalProp
       headcount: family.headcount,
       responsibility: family.responsibility,
       note: family.note || '',
-      arrivalDayId: family.arrivalDayId as 'thu' | 'fri' | 'sat' | 'sun' | undefined,
+      arrivalDayId: family.arrivalDayId,
       eta: family.eta,
       driveTime: family.driveTime,
     },
@@ -174,17 +174,14 @@ export function EditFamilyModal({ isOpen, onClose, family }: EditFamilyModalProp
           <label htmlFor="arrivalDayId" className="block text-sm font-medium text-[#C9D1D9] mb-1">
             Arrival Day
           </label>
-          <select
+          <input
             id="arrivalDayId"
             {...register('arrivalDayId')}
-            className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
-          >
-            <option value="">Select day</option>
-            <option value="thu">Thursday</option>
-            <option value="fri">Friday</option>
-            <option value="sat">Saturday</option>
-            <option value="sun">Sunday</option>
-          </select>
+            type="text"
+            className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] placeholder-[#6E7681] focus:border-[#58A6FF] focus:outline-none"
+            placeholder="e.g., day1, day2"
+          />
+          <p className="mt-1 text-xs text-[#8B949E]">Enter day ID (e.g., day1 for first day of trip)</p>
         </div>
 
         {/* Notes */}

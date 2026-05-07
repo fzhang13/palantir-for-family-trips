@@ -5,7 +5,7 @@ import {
   TripDaySelector,
   TimePeriodPicker
 } from '@/components/forms'
-import { useUpdateActivity, useActiveTripId } from '@/hooks'
+import { useUpdateActivity, useActiveTripId, useLocations } from '@/hooks'
 import { fetchWeather, type WeatherForecast } from '@/lib/weatherService'
 import type { Activity } from '@/types'
 import type { CreateActivityInput, CreateLocationInput } from '@/types/inputs'
@@ -38,6 +38,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
   const [description, setDescription] = useState(activity.description || '')
   const [note, setNote] = useState(activity.note || '')
 
+  const { data: locations = [] } = useLocations(activeTripId || undefined)
   const updateActivity = useUpdateActivity()
 
   // Update form when activity prop changes
@@ -54,24 +55,32 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
     setNote(activity.note || '')
 
     // Pre-populate location if exists
-    if (activity.location) {
+    const activityLocation = activity.locationId
+      ? locations.find(loc => loc.id === activity.locationId)
+      : undefined
+
+    if (activityLocation) {
       setLocationData({
-        title: activity.location.title,
-        address: activity.location.address,
-        coordinates: activity.location.coordinates,
-        placeId: activity.location.placeId || activity.location.place_id,
+        title: activityLocation.title,
+        address: activityLocation.address,
+        coordinates: activityLocation.coordinates,
+        placeId: activityLocation.placeId || undefined,
         category: 'activity'
       })
     }
 
     // Pre-populate backup location if exists
-    if (activity.backupLocation) {
+    const backupLocation = activity.backupLocationId
+      ? locations.find(loc => loc.id === activity.backupLocationId)
+      : undefined
+
+    if (backupLocation) {
       setHasBackup(true)
       setBackupLocationData({
-        title: activity.backupLocation.title,
-        address: activity.backupLocation.address,
-        coordinates: activity.backupLocation.coordinates,
-        placeId: activity.backupLocation.placeId || activity.backupLocation.place_id,
+        title: backupLocation.title,
+        address: backupLocation.address,
+        coordinates: backupLocation.coordinates,
+        placeId: backupLocation.placeId || undefined,
         category: 'activity'
       })
     }
@@ -80,7 +89,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
     if (activity.weatherData) {
       setWeather(activity.weatherData as WeatherForecast)
     }
-  }, [activity])
+  }, [activity, locations])
 
   // Auto-fetch weather when location and date are set
   useEffect(() => {
@@ -236,11 +245,11 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
             onChange={(address, place) => {
               if (!address) return
 
-              const lat = place?.location?.lat() ?? 0
-              const lng = place?.location?.lng() ?? 0
+              const lat = place?.geometry?.location?.lat() ?? 0
+              const lng = place?.geometry?.location?.lng() ?? 0
 
               setLocationData({
-                title: place?.displayName || address.split(',')[0],
+                title: place?.name|| address.split(',')[0],
                 address,
                 coordinates: { lat, lng },
                 placeId: place?.place_id,
@@ -322,11 +331,11 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
                 onChange={(address, place) => {
                   if (!address) return
 
-                  const lat = place?.location?.lat() ?? 0
-                  const lng = place?.location?.lng() ?? 0
+                  const lat = place?.geometry?.location?.lat() ?? 0
+                  const lng = place?.geometry?.location?.lng() ?? 0
 
                   setBackupLocationData({
-                    title: place?.displayName || address.split(',')[0],
+                    title: place?.name|| address.split(',')[0],
                     address,
                     coordinates: { lat, lng },
                     placeId: place?.place_id,

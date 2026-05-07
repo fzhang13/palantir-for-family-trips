@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { TIME_PERIODS, isTimeInPeriod } from '@/lib/dateUtils'
+import { TIME_PERIODS } from '@/lib/dateUtils'
 
 interface TimePeriodPickerProps {
   timePeriod: 'morning' | 'afternoon' | 'evening' | 'all_day' | 'flexible'
@@ -26,7 +26,7 @@ export function TimePeriodPicker({
     const { start, end } = TIME_PERIODS[period]
     const options: string[] = []
 
-    let current = start
+    let current: string = start
     while (current < end) {
       options.push(current)
       // Increment by 30 minutes

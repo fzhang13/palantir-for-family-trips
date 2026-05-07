@@ -11,7 +11,7 @@ export function useActiveTripId() {
     queryFn: async () => {
       // Validate localStorage ID if it exists
       if (activeTripId) {
-        const { data } = await supabase
+        const { data } = await supabase!
           .from('trips')
           .select('id')
           .eq('id', activeTripId)

@@ -160,9 +160,8 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
         {/* Trip Day Selector (replaces date picker) */}
         <TripDaySelector
           value={activityDate}
-          onChange={(date, tripId, dayNumber) => {
+          onChange={(date) => {
             setActivityDate(date)
-            // Could store tripId if needed for validation
           }}
           error={!activityDate ? 'Please select a day' : undefined}
         />
@@ -230,11 +229,11 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
             onChange={(address, place) => {
               if (!address) return
 
-              const lat = place?.location?.lat() ?? 0
-              const lng = place?.location?.lng() ?? 0
+              const lat = place?.geometry?.location?.lat() ?? 0
+              const lng = place?.geometry?.location?.lng() ?? 0
 
               setLocationData({
-                title: place?.displayName || address.split(',')[0],
+                title: place?.name|| address.split(',')[0],
                 address,
                 coordinates: { lat, lng },
                 placeId: place?.place_id,
@@ -319,11 +318,11 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
                 onChange={(address, place) => {
                   if (!address) return
 
-                  const lat = place?.location?.lat() ?? 0
-                  const lng = place?.location?.lng() ?? 0
+                  const lat = place?.geometry?.location?.lat() ?? 0
+                  const lng = place?.geometry?.location?.lng() ?? 0
 
                   setBackupLocationData({
-                    title: place?.displayName || address.split(',')[0],
+                    title: place?.name|| address.split(',')[0],
                     address,
                     coordinates: { lat, lng },
                     placeId: place?.place_id,

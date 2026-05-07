@@ -166,35 +166,16 @@ function FamilyCard({ family, onEdit, onDelete }: FamilyCardProps) {
           </div>
         )}
 
-        {/* Readiness Bar */}
-        {typeof family.readiness === 'number' && (
-          <div className="pt-2">
-            <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-[#8B949E]">Readiness</span>
-              <span className="font-mono text-[#C9D1D9]">{family.readiness}%</span>
-            </div>
-            <div className="w-full bg-[#0d1117] rounded-full h-2">
-              <div
-                className="bg-[#3FB950] h-2 rounded-full transition-all"
-                style={{ width: `${family.readiness}%` }}
-              />
-            </div>
-          </div>
-        )}
+
       </div>
     </div>
   )
 }
 
 function getDayLabel(dayId: string): string {
-  const dayMap: Record<string, string> = {
-    thu: 'Thursday',
-    fri: 'Friday',
-    sat: 'Saturday',
-    sun: 'Sunday',
-    mon: 'Monday',
-    tue: 'Tuesday',
-    wed: 'Wednesday',
+  if (dayId.startsWith('day')) {
+    const num = dayId.replace('day', '')
+    return `Day ${num}`
   }
-  return dayMap[dayId.toLowerCase()] || dayId
+  return dayId
 }

@@ -11,7 +11,7 @@ export interface CreateFamilyInput {
   headcount?: string
   responsibility?: string
   note?: string
-  arrivalDayId?: string
+  arrivalDayId?: string // ISO date from TripDaySelector
   eta?: string
   driveTime?: string
 }

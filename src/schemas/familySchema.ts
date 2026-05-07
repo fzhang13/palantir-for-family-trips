@@ -17,7 +17,7 @@ export const createFamilySchema = z.object({
   headcount: z.string().optional(),
   responsibility: z.string().optional(),
   note: z.string().max(500, 'Note too long').optional(),
-  arrivalDayId: z.enum(['thu', 'fri', 'sat', 'sun']).optional(),
+  arrivalDayId: z.string().optional(),
   eta: z.string().optional(),
   driveTime: z.string().optional(),
 })

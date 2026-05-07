@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { TripDocument } from '@/types'
 import { clampTimelineCursor, getCurrentTripCursor } from '@/utils/timeline'
 
@@ -13,74 +13,36 @@ interface UseTimelineSimulationReturn {
   setPlaybackSpeed: (speed: number) => void
 }
 
-export function useTimelineSimulation(
-  doc: TripDocument,
-  onUpdateDoc: (updater: (doc: TripDocument) => TripDocument) => void
-): UseTimelineSimulationReturn {
-  const cursorSlot = doc.ui.timeline.cursorSlot
-  const isPlaying = doc.ui.timeline.mode === 'scenario'
+export function useTimelineSimulation(doc: TripDocument): UseTimelineSimulationReturn {
+  // Timeline state is now ephemeral (not persisted)
+  const [cursorSlot, setCursorSlot] = useState<number>(doc.ui?.timeline?.cursorSlot || 0)
+  const [isPlaying, setIsPlaying] = useState(false)
   const playbackSpeed = 1
-
-  // Suppress unused warning - used in effect below
-  void playbackSpeed
 
   const animationFrameRef = useRef<number | undefined>(undefined)
   const lastTickRef = useRef<number>(Date.now())
 
   const play = useCallback(() => {
-    onUpdateDoc((doc) => ({
-      ...doc,
-      ui: {
-        ...doc.ui,
-        timeline: {
-          ...doc.ui.timeline,
-          mode: 'scenario',
-        },
-      },
-    }))
-  }, [onUpdateDoc])
+    setIsPlaying(true)
+  }, [])
 
   const pause = useCallback(() => {
-    onUpdateDoc((doc) => ({
-      ...doc,
-      ui: {
-        ...doc.ui,
-        timeline: {
-          ...doc.ui.timeline,
-          mode: 'reality',
-        },
-      },
-    }))
-  }, [onUpdateDoc])
+    setIsPlaying(false)
+  }, [])
 
-  const jumpToCursor = useCallback(
-    (slot: number) => {
-      const clamped = clampTimelineCursor(slot)
-      onUpdateDoc((doc) => ({
-        ...doc,
-        ui: {
-          ...doc.ui,
-          timeline: {
-            ...doc.ui.timeline,
-            cursorSlot: clamped,
-          },
-        },
-      }))
-    },
-    [onUpdateDoc]
-  )
+  const jumpToCursor = useCallback((slot: number) => {
+    const clamped = clampTimelineCursor(slot)
+    setCursorSlot(clamped)
+  }, [])
 
   const resetToLive = useCallback(() => {
     const liveCursor = getCurrentTripCursor(new Date())
     jumpToCursor(liveCursor)
   }, [jumpToCursor])
 
-  const setPlaybackSpeed = useCallback(
-    (_speed: number) => {
-      // Playback speed not implemented in this version
-    },
-    []
-  )
+  const setPlaybackSpeedImpl = useCallback((_speed: number) => {
+    // Playback speed not implemented in this version
+  }, [])
 
   // Animation loop
   useEffect(() => {
@@ -98,16 +60,7 @@ export function useTimelineSimulation(
       // Advance cursor based on playback speed (4 slots per second)
       if (delta > 250) {
         lastTickRef.current = now
-        onUpdateDoc((doc) => ({
-          ...doc,
-          ui: {
-            ...doc.ui,
-            timeline: {
-              ...doc.ui.timeline,
-              cursorSlot: doc.ui.timeline.cursorSlot + 1,
-            },
-          },
-        }))
+        setCursorSlot((prev) => prev + 1)
       }
 
       animationFrameRef.current = requestAnimationFrame(animate)
@@ -120,7 +73,7 @@ export function useTimelineSimulation(
         cancelAnimationFrame(animationFrameRef.current)
       }
     }
-  }, [isPlaying, onUpdateDoc])
+  }, [isPlaying])
 
   return {
     cursorSlot,
@@ -130,6 +83,6 @@ export function useTimelineSimulation(
     pause,
     jumpToCursor,
     resetToLive,
-    setPlaybackSpeed,
+    setPlaybackSpeed: setPlaybackSpeedImpl,
   }
 }

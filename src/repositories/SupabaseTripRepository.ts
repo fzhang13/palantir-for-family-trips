@@ -197,14 +197,13 @@ export class SupabaseTripRepository implements TripRepository {
       origin: input.origin,
       origin_address: input.originAddress,
       origin_coordinates: input.originCoordinates,
-      arrival_day_id: input.arrivalDayId || 'thu',
+      arrival_day_id: input.arrivalDayId || null,
       eta: input.eta || 'TBD',
       drive_time: input.driveTime || 'TBD',
       headcount: input.headcount || '',
       vehicle: input.vehicle || 'SUV',
       vehicle_label: input.vehicleLabel || 'Vehicle',
       responsibility: input.responsibility || '',
-      readiness: 0,
       status: 'Transit',
       route_summary: '',
       planned_stop_ids: [],
@@ -619,7 +618,7 @@ export class SupabaseTripRepository implements TripRepository {
     }
 
     // Update meal with both new and old fields
-    const { data, error } = await this.client
+    const { error } = await this.client
       .from('meals')
       .update({ ...newFields, ...oldFields })
       .eq('id', mealId)
@@ -1027,14 +1026,13 @@ export class SupabaseTripRepository implements TripRepository {
     origin: (row.origin as string) || '',
     originAddress: (row.origin_address as string) || '',
     originCoordinates: (row.origin_coordinates as { lat: number; lng: number }) || { lat: 0, lng: 0 },
-    arrivalDayId: (row.arrival_day_id as string) || 'thu',
+    arrivalDayId: (row.arrival_day_id as string) || '',
     eta: (row.eta as string) || '',
     driveTime: (row.drive_time as string) || '',
     headcount: (row.headcount as string) || '',
     vehicle: (row.vehicle as string) || '',
     vehicleLabel: (row.vehicle_label as string) || '',
     responsibility: (row.responsibility as string) || '',
-    readiness: (row.readiness as number) || 0,
     status: (row.status as string) || 'Transit',
     routeSummary: (row.route_summary as string) || '',
     plannedStopIds: (row.planned_stop_ids as string[]) || [],
@@ -1216,7 +1214,6 @@ export class SupabaseTripRepository implements TripRepository {
     if (updates.vehicle !== undefined) row.vehicle = updates.vehicle
     if (updates.vehicleLabel !== undefined) row.vehicle_label = updates.vehicleLabel
     if (updates.responsibility !== undefined) row.responsibility = updates.responsibility
-    if (updates.readiness !== undefined) row.readiness = updates.readiness
     if (updates.status !== undefined) row.status = updates.status
     if (updates.routeSummary !== undefined) row.route_summary = updates.routeSummary
     if (updates.plannedStopIds !== undefined) row.planned_stop_ids = updates.plannedStopIds
@@ -1274,44 +1271,6 @@ export class SupabaseTripRepository implements TripRepository {
     if (updates.simulationMilestones !== undefined) row.simulation_milestones = updates.simulationMilestones
     if (updates.path !== undefined) row.path = updates.path
     if (updates.dashed !== undefined) row.dashed = updates.dashed
-    return row
-  }
-
-  private mapMealToDb(updates: Partial<import('@/types').Meal>): Record<string, unknown> {
-    const row: Record<string, unknown> = {}
-    if (updates.title !== undefined) row.title = updates.title
-    if (updates.dayId !== undefined) row.day_id = updates.dayId
-    if (updates.startSlot !== undefined) row.start_slot = updates.startSlot
-    if (updates.status !== undefined) row.status = updates.status
-    if (updates.owner !== undefined) row.owner = updates.owner
-    if (updates.reservationType !== undefined) row.reservation_type = updates.reservationType
-    if (updates.timeLabel !== undefined) row.time_label = updates.timeLabel
-    if (updates.locationId !== undefined) row.location_id = updates.locationId
-    if (updates.note !== undefined) row.note = updates.note
-    if (updates.mealDate !== undefined) row.meal_date = updates.mealDate
-    if (updates.mealType !== undefined) row.meal_type = updates.mealType
-    if (updates.requiresReservation !== undefined) row.requires_reservation = updates.requiresReservation
-    return row
-  }
-
-  private mapActivityToDb(updates: Partial<import('@/types').Activity>): Record<string, unknown> {
-    const row: Record<string, unknown> = {}
-    if (updates.title !== undefined) row.title = updates.title
-    if (updates.dayId !== undefined) row.day_id = updates.dayId
-    if (updates.window !== undefined) row.window = updates.window
-    if (updates.status !== undefined) row.status = updates.status
-    if (updates.riskLevel !== undefined) row.risk_level = updates.riskLevel
-    if (updates.weatherSensitivity !== undefined) row.weather_sensitivity = updates.weatherSensitivity
-    if (updates.locationId !== undefined) row.location_id = updates.locationId
-    if (updates.description !== undefined) row.description = updates.description
-    if (updates.backup !== undefined) row.backup = updates.backup
-    if (updates.note !== undefined) row.note = updates.note
-    if (updates.activityDate !== undefined) row.activity_date = updates.activityDate
-    if (updates.timePeriod !== undefined) row.time_period = updates.timePeriod
-    if (updates.startTime !== undefined) row.start_time = updates.startTime
-    if (updates.endTime !== undefined) row.end_time = updates.endTime
-    if (updates.backupLocationId !== undefined) row.backup_location_id = updates.backupLocationId
-    if (updates.weatherData !== undefined) row.weather_data = updates.weatherData
     return row
   }
 

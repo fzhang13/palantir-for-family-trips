@@ -81,7 +81,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const selection = useTripSelection(doc, currentPage)
-  const timeline = useTimelineSimulation(doc, noopUpdateDoc)
+  const timeline = useTimelineSimulation(doc)
   const expenses = useExpenseCalculations(doc, noopUpdateDoc)
 
   const updatePageNote = useCallback(

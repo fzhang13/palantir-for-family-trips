@@ -166,7 +166,6 @@ export interface Family extends BaseEntity {
   vehicle: string
   vehicleLabel: string
   responsibility: string
-  readiness: number
   status: string
   routeSummary: string
   plannedStopIds: string[]

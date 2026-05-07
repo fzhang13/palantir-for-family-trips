@@ -20,3 +20,10 @@ Do not deviate without explicit user approval.
 - Use semantic colors strictly for status.
 - Ensure all numerical data uses monospace fonts for alignment.
 - Keep the UI responsive but optimized for large dashboard displays.
+
+## Database
+- For all database migration, should use the following script to generate migration
+
+```bash
+npm run generate:migration <name_of_migration>
+```

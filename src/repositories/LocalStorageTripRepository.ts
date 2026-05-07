@@ -1,10 +1,13 @@
-import type { TripDocument, Family, Location, Route, TripMeta } from '@/types'
+import type { TripDocument, Family, Location, Route, Meal, Activity, TripMeta } from '@/types'
 import type {
   CreateFamilyInput,
   CreateLocationInput,
   CreateRouteInput,
+  CreateMealInput,
+  CreateActivityInput,
+  CreateTripInput,
 } from '@/types/inputs'
-import type { TripRepository } from './TripRepository'
+import type { TripRepository, Trip } from './TripRepository'
 import { generateFamilyId, generateLocationId, generateRouteId } from '@/utils/idGenerator'
 import { TRIP_DOCUMENT_STORAGE_KEY } from '@/models/tripModel'
 
@@ -51,6 +54,22 @@ export class LocalStorageTripRepository implements TripRepository {
     this.saveTrip(tripId, trip)
   }
 
+  async archiveTrip(_tripId: string): Promise<void> {
+    throw new Error('archiveTrip not supported in localStorage mode')
+  }
+
+  async unarchiveTrip(_tripId: string): Promise<void> {
+    throw new Error('unarchiveTrip not supported in localStorage mode')
+  }
+
+  async createTrip(_input: CreateTripInput): Promise<Trip> {
+    throw new Error('createTrip not supported in localStorage mode')
+  }
+
+  async getActiveTripId(): Promise<string | null> {
+    return null
+  }
+
   // Family CRUD
   async getFamilies(tripId: string): Promise<Family[]> {
     const trip = this.getStoredTrip(tripId)
@@ -80,14 +99,13 @@ export class LocalStorageTripRepository implements TripRepository {
       origin: input.origin,
       originAddress: input.originAddress,
       originCoordinates: input.originCoordinates,
-      arrivalDayId: input.arrivalDayId || 'thu',
+      arrivalDayId: input.arrivalDayId || '',
       eta: input.eta || 'TBD',
       driveTime: input.driveTime || 'TBD',
       headcount: input.headcount || '',
       vehicle: input.vehicle || 'SUV',
       vehicleLabel: input.vehicleLabel || 'Vehicle',
       responsibility: input.responsibility || '',
-      readiness: 0,
       status: 'Transit',
       routeSummary: '',
       plannedStopIds: [],
@@ -154,7 +172,7 @@ export class LocalStorageTripRepository implements TripRepository {
   async addLocation(
     tripId: string,
     input: CreateLocationInput
-  ): Promise<Location> {
+  ): Promise<{ location: Location; entityId?: string }> {
     const trip = this.getStoredTrip(tripId)
     const newLocation: Location = {
       id: generateLocationId(),
@@ -177,7 +195,7 @@ export class LocalStorageTripRepository implements TripRepository {
 
     trip.locations.push(newLocation)
     this.saveTrip(tripId, trip)
-    return newLocation
+    return { location: newLocation }
   }
 
   async updateLocation(
@@ -293,6 +311,40 @@ export class LocalStorageTripRepository implements TripRepository {
     const trip = this.getStoredTrip(tripId)
     trip.routes = trip.routes.filter((r) => r.id !== routeId)
     this.saveTrip(tripId, trip)
+  }
+
+  // Meal CRUD
+  async getMeals(_tripId: string): Promise<Meal[]> {
+    return []
+  }
+
+  async addMeal(_tripId: string, _input: CreateMealInput): Promise<Meal> {
+    throw new Error('addMeal not supported in localStorage mode')
+  }
+
+  async updateMeal(_tripId: string, _mealId: string, _updates: Partial<Meal>): Promise<Meal> {
+    throw new Error('updateMeal not supported in localStorage mode')
+  }
+
+  async deleteMeal(_tripId: string, _mealId: string): Promise<void> {
+    throw new Error('deleteMeal not supported in localStorage mode')
+  }
+
+  // Activity CRUD
+  async getActivities(_tripId: string): Promise<Activity[]> {
+    return []
+  }
+
+  async addActivity(_tripId: string, _input: CreateActivityInput): Promise<Activity> {
+    throw new Error('addActivity not supported in localStorage mode')
+  }
+
+  async updateActivity(_tripId: string, _activityId: string, _updates: Partial<Activity>): Promise<Activity> {
+    throw new Error('updateActivity not supported in localStorage mode')
+  }
+
+  async deleteActivity(_tripId: string, _activityId: string): Promise<void> {
+    throw new Error('deleteActivity not supported in localStorage mode')
   }
 }
 
