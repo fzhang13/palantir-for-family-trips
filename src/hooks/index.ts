@@ -1,4 +1,3 @@
-export { usePersistedTripState } from './usePersistedTripState'
 export { useTripSelection } from './useTripSelection'
 export { useTimelineSimulation } from './useTimelineSimulation'
 export { useRoutePlayback } from './useRoutePlayback'
