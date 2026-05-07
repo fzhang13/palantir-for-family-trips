@@ -37,7 +37,6 @@ export function MapContainer({ routes, selectedRouteId }: MapContainerProps) {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           }
-          console.log('📍 User location:', userLocation)
           map.setCenter(userLocation)
           map.setZoom(12)
         },

@@ -468,7 +468,7 @@ export class SupabaseTripRepository implements TripRepository {
   async addMeal(tripId: string, input: CreateMealInput): Promise<Meal> {
     await this.ensureTrip(tripId)
 
-    // Step 1: Create location if provided
+    // Step 1: Create location if provided, or use existing location ID
     let locationId: string | null = null
     if (input.createLocation) {
       const { location } = await this.addLocation(
@@ -480,6 +480,9 @@ export class SupabaseTripRepository implements TripRepository {
         true // Skip entity creation - we'll create the meal below
       )
       locationId = location.id
+    } else if (input.locationId) {
+      // Reference an existing location (e.g., stay location for "eating at home")
+      locationId = input.locationId
     }
 
     // Step 2: Build new field values from input
@@ -615,6 +618,9 @@ export class SupabaseTripRepository implements TripRepository {
         true
       )
       newFields.location_id = location.id
+    } else if (updates.locationId !== undefined) {
+      // Reference an existing location (e.g., stay location for "eating at home")
+      newFields.location_id = updates.locationId
     }
 
     // Update meal with both new and old fields
@@ -714,7 +720,7 @@ export class SupabaseTripRepository implements TripRepository {
   async addActivity(tripId: string, input: CreateActivityInput): Promise<Activity> {
     await this.ensureTrip(tripId)
 
-    // Step 1: Create locations if provided
+    // Step 1: Create locations if provided, or use existing location IDs
     let locationId: string | null = null
     let backupLocationId: string | null = null
 
@@ -728,6 +734,9 @@ export class SupabaseTripRepository implements TripRepository {
         true // Skip entity creation - we'll create the activity below
       )
       locationId = location.id
+    } else if (input.locationId) {
+      // Reference an existing location
+      locationId = input.locationId
     }
 
     if (input.createBackupLocation) {
@@ -854,6 +863,9 @@ export class SupabaseTripRepository implements TripRepository {
         true
       )
       newFields.location_id = location.id
+    } else if (updates.locationId !== undefined) {
+      // Reference an existing location
+      newFields.location_id = updates.locationId
     }
 
     if (updates.createBackupLocation) {

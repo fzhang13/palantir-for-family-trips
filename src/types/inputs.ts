@@ -45,7 +45,8 @@ export interface CreateMealInput {
   status: 'Assigned' | 'Pending' | 'Confirmed'
   familyIds?: string[] // Array of family IDs
   requiresReservation?: boolean
-  createLocation?: CreateLocationInput
+  createLocation?: CreateLocationInput // Create a new location
+  locationId?: string // Reference an existing location (e.g., stay location for "eating at home")
   note?: string
   // Deprecated fields (kept for backward compat, auto-derived by repository)
   dayId?: string
@@ -61,7 +62,8 @@ export interface CreateActivityInput {
   riskLevel?: string
   weatherSensitivity?: string
   familyIds?: string[] // Array of family IDs
-  createLocation?: CreateLocationInput
+  createLocation?: CreateLocationInput // Create a new location
+  locationId?: string // Reference an existing location
   description?: string
   backup?: string
   note?: string

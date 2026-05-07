@@ -1,4 +1,4 @@
-import { Edit2, Trash2, MapPin, Users, UtensilsCrossed, Clock } from 'lucide-react'
+import { Edit2, Trash2, MapPin, Users, UtensilsCrossed, Clock, Thermometer } from 'lucide-react'
 import type { Meal, Activity, Location, Family } from '@/types'
 
 interface TimelineItemProps {
@@ -101,7 +101,7 @@ export function TimelineItem({ item, onClick, onEdit, onDelete, locations = [], 
     >
       <div className="flex items-start justify-between gap-3">
         {/* Left: Time/Window with icon */}
-        <div className="flex items-center gap-2 text-sm font-mono text-[#8B949E] whitespace-nowrap">
+        <div className="flex items-center gap-2 text-sm font-mono text-[#8B949E] whitespace-nowrap w-48">
           {mealTypeIcon}
           {timeDisplay}
         </div>
@@ -137,10 +137,11 @@ export function TimelineItem({ item, onClick, onEdit, onDelete, locations = [], 
             )}
 
             {/* Weather indicator (activities only) */}
-            {!isMeal && (item as Activity).weatherSensitivity && (
+            {!isMeal && (item as Activity).weatherData && (
               <div className="flex items-center gap-1 text-xs text-[#8B949E]">
+                <Thermometer size={12} />
                 <span>
-                  Weather: {(item as Activity).weatherSensitivity}
+                  {(item as Activity).weatherData?.temperature}°F • {(item as Activity).weatherData?.condition}
                 </span>
               </div>
             )}

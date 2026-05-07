@@ -337,10 +337,13 @@ export function useAddMeal() {
 export function useUpdateMeal() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ tripId, mealId, updates }: { tripId: string; mealId: string; updates: Partial<import('@/types').Meal> }) =>
+    mutationFn: ({ tripId, mealId, updates }: { tripId: string; mealId: string; updates: Partial<import('@/types/inputs').CreateMealInput> }) =>
       tripRepository.updateMeal(tripId, mealId, updates),
-    onSuccess: (_, { tripId }) => {
+    onSuccess: (_, { tripId, updates }) => {
       queryClient.invalidateQueries({ queryKey: ['meals', tripId] })
+      if (updates.createLocation) {
+        queryClient.invalidateQueries({ queryKey: ['locations', tripId] })
+      }
     },
   })
 }
@@ -375,10 +378,13 @@ export function useAddActivity() {
 export function useUpdateActivity() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ tripId, activityId, updates }: { tripId: string; activityId: string; updates: Partial<import('@/types').Activity> }) =>
+    mutationFn: ({ tripId, activityId, updates }: { tripId: string; activityId: string; updates: Partial<import('@/types/inputs').CreateActivityInput> }) =>
       tripRepository.updateActivity(tripId, activityId, updates),
-    onSuccess: (_, { tripId }) => {
+    onSuccess: (_, { tripId, updates }) => {
       queryClient.invalidateQueries({ queryKey: ['activities', tripId] })
+      if (updates.createLocation) {
+        queryClient.invalidateQueries({ queryKey: ['locations', tripId] })
+      }
     },
   })
 }

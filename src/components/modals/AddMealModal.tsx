@@ -1,5 +1,5 @@
 // src/components/modals/AddMealModal.tsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { BaseModal } from './BaseModal'
 import {
   AddressAutocomplete,
@@ -27,11 +27,17 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
   const [requiresReservation, setRequiresReservation] = useState(false)
   const [isAtHome, setIsAtHome] = useState(false)
   const [locationData, setLocationData] = useState<CreateLocationInput | null>(null)
+  const [stayLocationId, setStayLocationId] = useState<string | null>(null)
   const [note, setNote] = useState('')
 
   const { data: families = [] } = useFamilies()
   const { data: existingMeals = [] } = useMealsForConflictCheck(activeTripId || '')
   const addMeal = useAddMeal()
+
+  // Memoize the location ID callback to prevent unnecessary re-renders
+  const handleLocationIdChange = useCallback((locationId: string | null) => {
+    setStayLocationId(locationId)
+  }, [])
 
   // Conflict detection
   const [conflict, setConflict] = useState<{ hasConflict: boolean; message: string }>({
@@ -71,7 +77,11 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
       requiresReservation,
       familyIds: selectedFamilyIds,
       note: note.trim() || undefined,
-      createLocation: locationData || undefined,
+      // Use locationId when eating at home, createLocation when searching for a place
+      ...(isAtHome
+        ? { locationId: stayLocationId || undefined }
+        : { createLocation: locationData || undefined }
+      ),
       // Keep old fields for backward compatibility
       dayId: 'thu', // Will be ignored by new logic
     }
@@ -202,13 +212,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
           isAtHome={isAtHome}
           onToggle={setIsAtHome}
           currentDate={mealDate}
-          onLocationAutoFill={(location) => {
-            if (location) {
-              setLocationData(location)
-            } else {
-              setLocationData(null)
-            }
-          }}
+          onLocationIdChange={handleLocationIdChange}
           tripId={activeTripId || ''}
         />
 
@@ -231,7 +235,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
                   address,
                   coordinates: { lat, lng },
                   placeId: place?.place_id,
-                  category: 'meal',
+                  category: 'meal' as const,
                 })
               }}
               onCoordinatesChange={(lat, lng) => {

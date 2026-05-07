@@ -1,17 +1,34 @@
-import { X, MapPin } from 'lucide-react'
-import type { Meal, Activity } from '@/types'
+import { X, MapPin, Thermometer, ExternalLink } from 'lucide-react'
+import type { Meal, Activity, Location } from '@/types'
+import { formatFullDate } from '@/lib/dateUtils'
 
 interface DetailSidePanelProps {
   item: Meal | Activity | null
   onClose: () => void
   onEdit: () => void
   onDelete: () => void
+  locations?: Location[]
 }
 
-export function DetailSidePanel({ item, onClose, onEdit, onDelete }: DetailSidePanelProps) {
+export function DetailSidePanel({ item, onClose, onEdit, onDelete, locations = [] }: DetailSidePanelProps) {
   if (!item) return null
 
   const isMeal = item.type === 'meal'
+
+  // Get location details
+  const location = item.locationId
+    ? locations.find(loc => loc.id === item.locationId)
+    : undefined
+
+  // Generate Google Maps link from coordinates
+  const getGoogleMapsLink = (coords: { lat: number; lng: number } | null | undefined): string | null => {
+    if (!coords || typeof coords.lat !== 'number' || typeof coords.lng !== 'number') {
+      return null
+    }
+    return `https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lng}`
+  }
+
+  const mapsLink = location?.coordinates ? getGoogleMapsLink(location.coordinates as { lat: number; lng: number }) : null
 
   return (
     <>
@@ -42,7 +59,16 @@ export function DetailSidePanel({ item, onClose, onEdit, onDelete }: DetailSideP
           {/* Day */}
           <div>
             <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">Day</div>
-            <div className="text-[#C9D1D9]">{item.dayId}</div>
+            <div className="text-[#C9D1D9]">
+              {(() => {
+                const date = isMeal
+                  ? (item as Meal).mealDate
+                  : (item as Activity).activityDate
+                return date
+                  ? formatFullDate(new Date(date + 'T00:00:00'))
+                  : item.dayId
+              })()}
+            </div>
           </div>
 
           {/* Status */}
@@ -55,9 +81,18 @@ export function DetailSidePanel({ item, onClose, onEdit, onDelete }: DetailSideP
           {isMeal && (
             <>
               <div>
-                <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">Time</div>
-                <div className="text-[#C9D1D9] font-mono">
-                  {(item as Meal).timeLabel || 'Time TBD'}
+                <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">Meal Type</div>
+                <div className="text-[#C9D1D9]">
+                  {(() => {
+                    const meal = item as Meal
+                    const typeLabels: Record<string, string> = {
+                      breakfast: 'Breakfast',
+                      brunch: 'Brunch',
+                      lunch: 'Lunch',
+                      dinner: 'Dinner'
+                    }
+                    return meal.mealType ? typeLabels[meal.mealType] : 'Not specified'
+                  })()}
                 </div>
               </div>
               {(item as Meal).owner && (
@@ -90,10 +125,14 @@ export function DetailSidePanel({ item, onClose, onEdit, onDelete }: DetailSideP
                   <div className="text-[#C9D1D9]">{(item as Activity).riskLevel}</div>
                 </div>
               )}
-              {(item as Activity).weatherSensitivity && (
+              {(item as Activity).weatherData && (
                 <div>
-                  <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">Weather Sensitivity</div>
-                  <div className="text-[#C9D1D9]">{(item as Activity).weatherSensitivity}</div>
+                  <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">Weather</div>
+                  <div className="flex items-center gap-2 text-[#C9D1D9]">
+                    <Thermometer size={14} className="text-[#8B949E]" />
+                    <span>{(item as Activity).weatherData.temperature}°F</span>
+                    <span className="text-[#8B949E]">• {(item as Activity).weatherData.condition}</span>
+                  </div>
                 </div>
               )}
               {(item as Activity).description && (
@@ -115,9 +154,21 @@ export function DetailSidePanel({ item, onClose, onEdit, onDelete }: DetailSideP
           {item.locationId && (
             <div>
               <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">Location</div>
-              <div className="flex items-center gap-2 text-[#C9D1D9]">
-                <MapPin size={14} />
-                <span>Location linked</span>
+              <div className="flex items-center gap-2">
+                <MapPin size={14} className="text-[#8B949E]" />
+                {mapsLink ? (
+                  <a
+                    href={mapsLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#58A6FF] hover:text-[#79C0FF] transition-colors flex items-center gap-1"
+                  >
+                    <span>{location?.title || 'Location linked'}</span>
+                    <ExternalLink size={12} />
+                  </a>
+                ) : (
+                  <span className="text-[#C9D1D9]">{location?.title || 'Location linked'}</span>
+                )}
               </div>
             </div>
           )}

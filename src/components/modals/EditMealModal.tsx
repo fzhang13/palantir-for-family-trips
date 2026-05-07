@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { BaseModal } from './BaseModal'
 import {
   AddressAutocomplete,
@@ -35,11 +35,17 @@ export function EditMealModal({ isOpen, onClose, meal }: EditMealModalProps) {
   )
   const [isAtHome, setIsAtHome] = useState(false)
   const [locationData, setLocationData] = useState<CreateLocationInput | null>(null)
+  const [stayLocationId, setStayLocationId] = useState<string | null>(null)
   const [note, setNote] = useState(meal.note || '')
 
   const { data: families = [] } = useFamilies()
   const { data: locations = [] } = useLocations(activeTripId || undefined)
   const updateMeal = useUpdateMeal()
+
+  // Memoize the location ID callback to prevent unnecessary re-renders
+  const handleLocationIdChange = useCallback((locationId: string | null) => {
+    setStayLocationId(locationId)
+  }, [])
 
   // Update form when meal prop changes
   useEffect(() => {
@@ -85,7 +91,11 @@ export function EditMealModal({ isOpen, onClose, meal }: EditMealModalProps) {
       status,
       familyIds: selectedFamilyIds,
       requiresReservation,
-      createLocation: locationData || undefined,
+      // Use locationId when eating at home, createLocation when searching for a place
+      ...(isAtHome
+        ? { locationId: stayLocationId || undefined }
+        : { createLocation: locationData || undefined }
+      ),
       note: note.trim() || undefined,
     }
 
@@ -208,13 +218,7 @@ export function EditMealModal({ isOpen, onClose, meal }: EditMealModalProps) {
           isAtHome={isAtHome}
           onToggle={setIsAtHome}
           currentDate={mealDate}
-          onLocationAutoFill={(location) => {
-            if (location) {
-              setLocationData(location)
-            } else {
-              setLocationData(null)
-            }
-          }}
+          onLocationIdChange={handleLocationIdChange}
           tripId={activeTripId || ''}
         />
 
@@ -237,7 +241,7 @@ export function EditMealModal({ isOpen, onClose, meal }: EditMealModalProps) {
                   address,
                   coordinates: { lat, lng },
                   placeId: place?.place_id,
-                  category: 'meal',
+                  category: 'meal' as const,
                 })
               }}
               onCoordinatesChange={(lat, lng) => {

@@ -34,11 +34,7 @@ export function ActivitiesPage() {
       { id: 'all', label: 'All Days' },
       ...availableDates.map(date => ({
         id: date,
-        label: new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
-          weekday: 'short',
-          month: 'short',
-          day: 'numeric'
-        })
+        label: formatFullDate(new Date(date + 'T00:00:00'))
       }))
     ]
   }, [availableDates])
@@ -188,6 +184,7 @@ export function ActivitiesPage() {
         onClose={() => setSelectedActivity(null)}
         onEdit={() => selectedActivity && handleEdit(selectedActivity)}
         onDelete={() => selectedActivity && handleDelete(selectedActivity.id)}
+        locations={locations}
       />
 
       {/* Add Modal */}

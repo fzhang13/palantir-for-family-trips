@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Plus, Edit2, Trash2, MapPin, Home, Calendar, FileText } from 'lucide-react'
+import { Plus, Edit2, Trash2, MapPin, Home, Calendar, FileText, Wifi, Key, Lock } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
 import { useLocations, useDeleteLocation, useActiveTripId } from '@/hooks'
 import { AddLocationModal, EditLocationModal } from '@/components/modals'
 import type { Location } from '@/types'
@@ -212,12 +213,89 @@ function StayCard({ location, onEdit, onDelete }: StayCardProps) {
 
         {/* Host information */}
         {(location.hostName || location.coHostName) && (
-          <div className="text-sm">
+          <div className="text-sm pt-2 border-t border-[#30363D]">
             <span className="text-[#8B949E]">Host:</span>
             <p className="text-[#C9D1D9]">
               {location.hostName}
               {location.coHostName && ` & ${location.coHostName}`}
             </p>
+          </div>
+        )}
+
+        {/* Access Information */}
+        {(location.accessNote || location.lockNote || location.checkIn || location.checkOut) && (
+          <div className="pt-2 border-t border-[#30363D]">
+            <div className="flex items-center gap-2 mb-2">
+              <Key size={14} className="text-[#8B949E]" />
+              <span className="text-xs text-[#8B949E] uppercase tracking-wider">Access Info</span>
+            </div>
+            <div className="space-y-2 text-sm">
+              {(location.checkIn || location.checkOut) && (
+                <div className="grid grid-cols-2 gap-2">
+                  {location.checkIn && (
+                    <div>
+                      <span className="text-[#8B949E] text-xs">Check-in time:</span>
+                      <p className="text-[#C9D1D9] font-mono">{location.checkIn}</p>
+                    </div>
+                  )}
+                  {location.checkOut && (
+                    <div>
+                      <span className="text-[#8B949E] text-xs">Check-out time:</span>
+                      <p className="text-[#C9D1D9] font-mono">{location.checkOut}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              {location.accessNote && (
+                <div>
+                  <span className="text-[#8B949E] text-xs">Access:</span>
+                  <p className="text-[#C9D1D9] mt-0.5">{location.accessNote}</p>
+                </div>
+              )}
+              {location.lockNote && (
+                <div className="flex items-start gap-2">
+                  <Lock size={12} className="text-[#8B949E] mt-1 flex-shrink-0" />
+                  <div>
+                    <span className="text-[#8B949E] text-xs">Lock code:</span>
+                    <p className="text-[#C9D1D9] font-mono mt-0.5">{location.lockNote}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* WiFi Information */}
+        {(location.wifiNetwork || location.wifiPassword) && (
+          <div className="pt-2 border-t border-[#30363D]">
+            <div className="flex items-center gap-2 mb-2">
+              <Wifi size={14} className="text-[#8B949E]" />
+              <span className="text-xs text-[#8B949E] uppercase tracking-wider">WiFi</span>
+            </div>
+            <div className="space-y-2 text-sm">
+              {location.wifiNetwork && (
+                <div>
+                  <span className="text-[#8B949E] text-xs">Network:</span>
+                  <p className="text-[#C9D1D9] font-mono">{location.wifiNetwork}</p>
+                </div>
+              )}
+              {location.wifiPassword && (
+                <div>
+                  <span className="text-[#8B949E] text-xs">Password:</span>
+                  <p className="text-[#C9D1D9] font-mono">{location.wifiPassword}</p>
+                </div>
+              )}
+              {location.wifiNetwork && location.wifiPassword && (
+                <div className="bg-white p-3 rounded inline-block">
+                  <QRCodeSVG
+                    value={`WIFI:T:WPA;S:${location.wifiNetwork};P:${location.wifiPassword};;`}
+                    size={120}
+                    level="M"
+                  />
+                  <p className="text-[#8B949E] text-xs text-center mt-2">Scan to connect</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

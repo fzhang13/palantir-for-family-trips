@@ -1,65 +1,65 @@
 import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import type { CreateLocationInput } from '@/types/inputs'
+import { useTripMetadata } from '@/hooks'
 
 interface AtHomeToggleProps {
   isAtHome: boolean
   onToggle: (isAtHome: boolean) => void
   currentDate: string // ISO date to find stay location
-  onLocationAutoFill: (location: CreateLocationInput | null) => void
-  tripId?: string // Optional: filter by specific trip
+  onLocationIdChange: (locationId: string | null) => void
+  tripId: string
 }
 
 export function AtHomeToggle({
   isAtHome,
   onToggle,
   currentDate,
-  onLocationAutoFill,
+  onLocationIdChange,
   tripId
 }: AtHomeToggleProps) {
+  // Get trip metadata to calculate day number
+  const { data: tripMeta } = useTripMetadata(tripId)
+
   // Query stay location for the selected date
   const { data: stayLocation, isLoading } = useQuery({
     queryKey: ['stay-location', currentDate, tripId],
     queryFn: async () => {
-      if (!supabase) {
-        throw new Error('Supabase client not initialized')
+      if (!supabase || !currentDate || !tripMeta?.start_date) {
+        return null
       }
 
-      let query = supabase
+      // Calculate day number from trip start date
+      const tripStart = new Date(tripMeta.start_date)
+      const mealDate = new Date(currentDate)
+      const diffInMs = mealDate.getTime() - tripStart.getTime()
+      const dayNumber = Math.floor(diffInMs / (1000 * 60 * 60 * 24)) + 1
+
+      // Find the stay that covers this day number
+      const { data, error } = await supabase
         .from('locations')
         .select('*')
+        .eq('trip_id', tripId)
         .eq('category', 'stay')
-        .lte('check_in_date', currentDate)
-        .gte('check_out_date', currentDate)
-
-      if (tripId) {
-        query = query.eq('trip_id', tripId)
-      }
-
-      const { data, error } = await query.maybeSingle()
+        .lte('start_day_number', dayNumber)
+        .gte('end_day_number', dayNumber)
+        .maybeSingle()
 
       if (error) throw error
       return data
     },
-    enabled: isAtHome && !!currentDate
+    enabled: isAtHome && !!currentDate && !!tripMeta
   })
 
-  // Auto-fill location when toggle is ON and location is found
+  // Set location ID when toggle is ON and location is found
   useEffect(() => {
     if (isAtHome && stayLocation) {
-      onLocationAutoFill({
-        title: stayLocation.title,
-        address: stayLocation.address,
-        coordinates: stayLocation.coordinates,
-        placeId: stayLocation.place_id || undefined,
-        category: 'meal'
-      })
+      onLocationIdChange(stayLocation.id)
     } else if (!isAtHome) {
-      // Clear auto-fill when toggled off
-      onLocationAutoFill(null)
+      // Clear location ID when toggled off
+      onLocationIdChange(null)
     }
-  }, [isAtHome, stayLocation, onLocationAutoFill])
+  }, [isAtHome, stayLocation, onLocationIdChange])
 
   // Warning if no stay location found
   const showWarning = isAtHome && !isLoading && !stayLocation && currentDate
