@@ -36,7 +36,6 @@ interface TripContextValue {
 
   // Expenses (from useExpenseCalculations)
   familyBurdens: Record<string, number>
-  updateExpense: (expenseId: string, updates: Partial<any>) => void
   getTotalExpenses: () => number
 
   // Common mutations
@@ -75,14 +74,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
     )
   }
 
-  // No-op function for hooks that still require onUpdateDoc
-  const noopUpdateDoc = useCallback(() => {
-    console.warn('updateDoc is deprecated - use React Query mutation hooks')
-  }, [])
-
   const selection = useTripSelection(doc, currentPage)
   const timeline = useTimelineSimulation(doc)
-  const expenses = useExpenseCalculations(doc, noopUpdateDoc)
+  const expenses = useExpenseCalculations(doc)
 
   const updatePageNote = useCallback(
     (_page: PageType, _note: string) => {
