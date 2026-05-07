@@ -4,6 +4,8 @@ import { AppShell } from '@/components/ui'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { TripSetupPage } from '@/components/pages'
 import { useActiveTripId } from '@/hooks'
+import { supabase } from '@/lib/supabase'
+import { SupabaseRequired } from '@/components/SupabaseRequired'
 
 const ItineraryPage = lazy(() =>
   import('@/components/pages/ItineraryPage').then((mod) => ({
@@ -58,6 +60,11 @@ function AppContent() {
 }
 
 function App() {
+  // Check Supabase configuration first
+  if (!supabase) {
+    return <SupabaseRequired />
+  }
+
   const { data: activeTripId, isLoading } = useActiveTripId()
 
   if (isLoading) {
