@@ -1,8 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { getTripRepository } from '@/repositories'
-import { SupabaseTripRepository } from '@/repositories/SupabaseTripRepository'
 import { supabase } from '@/lib/supabase'
-import type { Meal, Activity } from '@/types/trip'
 import { useActiveTripId } from './useActiveTripId'
 
 const tripRepository = getTripRepository()
@@ -74,25 +72,11 @@ export function useActivities(tripId?: string) {
 }
 
 export function useMealsForConflictCheck(tripId: string) {
-  return useQuery<Meal[]>({
-    queryKey: ['trips', tripId, 'meals-conflict-check'],
-    queryFn: async () => {
-      const repo = new SupabaseTripRepository()
-      const doc = await repo.getTrip(tripId)
-      return doc.meals
-    },
-  })
+  return useMeals(tripId)
 }
 
 export function useActivitiesForConflictCheck(tripId: string) {
-  return useQuery<Activity[]>({
-    queryKey: ['trips', tripId, 'activities-conflict-check'],
-    queryFn: async () => {
-      const repo = new SupabaseTripRepository()
-      const doc = await repo.getTrip(tripId)
-      return doc.activities
-    },
-  })
+  return useActivities(tripId)
 }
 
 /**

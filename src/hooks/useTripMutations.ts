@@ -25,7 +25,6 @@ export function useAddFamily() {
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['families', variables.tripId] })
-      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId] })
       toast.success('Family added successfully')
     },
 
