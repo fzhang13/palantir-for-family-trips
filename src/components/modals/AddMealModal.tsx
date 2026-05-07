@@ -1,12 +1,15 @@
 // src/components/modals/AddMealModal.tsx
 import { useState, useEffect } from 'react'
 import { BaseModal } from './BaseModal'
-import { AddressAutocomplete, FamilySelector } from '@/components/forms'
-import { useAddMeal, useFamilies } from '@/hooks'
+import {
+  AddressAutocomplete,
+  FamilySelector,
+  TripDaySelector,
+  AtHomeToggle
+} from '@/components/forms'
+import { useAddMeal, useFamilies, useActiveTripId } from '@/hooks'
 import { useMealsForConflictCheck } from '@/hooks/useTripQueries'
 import { checkMealConflicts } from '@/lib/conflictDetection'
-import { getDayName } from '@/lib/dateUtils'
-import { DEFAULT_TRIP_ID } from '@/lib/constants'
 import type { CreateMealInput, CreateLocationInput } from '@/types/inputs'
 
 interface AddMealModalProps {
@@ -15,17 +18,19 @@ interface AddMealModalProps {
 }
 
 export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
+  const { data: activeTripId } = useActiveTripId()
   const [title, setTitle] = useState('')
   const [mealDate, setMealDate] = useState('')
   const [mealType, setMealType] = useState<'breakfast' | 'brunch' | 'lunch' | 'dinner'>('dinner')
   const [status, setStatus] = useState<'Assigned' | 'Pending' | 'Confirmed'>('Pending')
   const [selectedFamilyIds, setSelectedFamilyIds] = useState<string[]>([])
   const [requiresReservation, setRequiresReservation] = useState(false)
+  const [isAtHome, setIsAtHome] = useState(false)
   const [locationData, setLocationData] = useState<CreateLocationInput | null>(null)
   const [note, setNote] = useState('')
 
   const { data: families = [] } = useFamilies()
-  const { data: existingMeals = [] } = useMealsForConflictCheck(DEFAULT_TRIP_ID)
+  const { data: existingMeals = [] } = useMealsForConflictCheck(activeTripId || '')
   const addMeal = useAddMeal()
 
   // Conflict detection
@@ -52,6 +57,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!activeTripId) return
     if (!title.trim() || !mealDate) {
       alert('Title and date are required')
       return
@@ -71,7 +77,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
     }
 
     try {
-      await addMeal.mutateAsync({ tripId: DEFAULT_TRIP_ID, input })
+      await addMeal.mutateAsync({ tripId: activeTripId, input })
       handleClose()
     } catch (error) {
       alert('Failed to add meal. Please try again.')
@@ -86,6 +92,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
     setStatus('Pending')
     setSelectedFamilyIds([])
     setRequiresReservation(false)
+    setIsAtHome(false)
     setLocationData(null)
     setNote('')
     setConflict({ hasConflict: false, message: '' })
@@ -110,24 +117,15 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
           />
         </div>
 
-        {/* Date */}
-        <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Date <span className="text-[#F85149]">*</span>
-          </label>
-          <input
-            type="date"
-            value={mealDate}
-            onChange={(e) => setMealDate(e.target.value)}
-            className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
-            required
-          />
-          {mealDate && (
-            <p className="mt-1 text-xs text-[#8B949E]">
-              {getDayName(new Date(mealDate + 'T00:00:00'))}
-            </p>
-          )}
-        </div>
+        {/* Trip Day Selector (replaces date picker) */}
+        <TripDaySelector
+          value={mealDate}
+          onChange={(date, tripId, dayNumber) => {
+            setMealDate(date)
+            // Could store tripId if needed for validation
+          }}
+          error={!mealDate ? 'Please select a day' : undefined}
+        />
 
         {/* Meal Type */}
         <div>
@@ -200,33 +198,50 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
           </button>
         </div>
 
-        {/* Location (Google Places) */}
-        <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Location
-          </label>
-          <AddressAutocomplete
-            value={locationData?.address || ''}
-            onChange={(address, place) => {
-              if (!address) return
+        {/* At Home Toggle */}
+        <AtHomeToggle
+          isAtHome={isAtHome}
+          onToggle={setIsAtHome}
+          currentDate={mealDate}
+          onLocationAutoFill={(location) => {
+            if (location) {
+              setLocationData(location)
+            } else {
+              setLocationData(null)
+            }
+          }}
+          tripId={activeTripId || ''}
+        />
 
-              const lat = place?.location?.lat() ?? 0
-              const lng = place?.location?.lng() ?? 0
+        {/* Location (Google Places) - Hidden when at home */}
+        {!isAtHome && (
+          <div>
+            <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
+              Location
+            </label>
+            <AddressAutocomplete
+              value={locationData?.address || ''}
+              onChange={(address, place) => {
+                if (!address) return
 
-              setLocationData({
-                title: place?.displayName || address.split(',')[0],
-                address,
-                coordinates: { lat, lng },
-                placeId: place?.place_id,
-                category: 'meal',
-              })
-            }}
-            onCoordinatesChange={(lat, lng) => {
-              setLocationData(prev => prev ? { ...prev, coordinates: { lat, lng } } : null)
-            }}
-            placeholder="Search for restaurant or venue..."
-          />
-        </div>
+                const lat = place?.location?.lat() ?? 0
+                const lng = place?.location?.lng() ?? 0
+
+                setLocationData({
+                  title: place?.displayName || address.split(',')[0],
+                  address,
+                  coordinates: { lat, lng },
+                  placeId: place?.place_id,
+                  category: 'meal',
+                })
+              }}
+              onCoordinatesChange={(lat, lng) => {
+                setLocationData(prev => prev ? { ...prev, coordinates: { lat, lng } } : null)
+              }}
+              placeholder="Search for restaurant or venue..."
+            />
+          </div>
+        )}
 
         {/* Notes */}
         <div>

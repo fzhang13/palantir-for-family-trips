@@ -43,3 +43,30 @@ export function formatDateISO(date: Date): string {
 export function parseDateISO(dateStr: string): Date {
   return new Date(dateStr + 'T00:00:00')
 }
+
+/**
+ * Generate an array of dates between start and end (inclusive)
+ */
+export function generateDaysInRange(start: Date, end: Date): Date[] {
+  const days: Date[] = []
+  const current = new Date(start)
+
+  while (current <= end) {
+    days.push(new Date(current))
+    current.setDate(current.getDate() + 1)
+  }
+
+  return days
+}
+
+/**
+ * Format date as "Thursday, May 8, 2026"
+ */
+export function formatFullDate(date: Date): string {
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}

@@ -4,7 +4,7 @@ import { BaseModal } from './BaseModal'
 import { AddressAutocomplete } from '@/components/forms'
 import { createFamilySchema, type CreateFamilyFormData } from '@/schemas'
 import { useAddFamily } from '@/hooks/useTripMutations'
-import { DEFAULT_TRIP_ID } from '@/lib/constants'
+import { useActiveTripId } from '@/hooks'
 import type { CreateFamilyInput } from '@/types/inputs'
 
 interface AddFamilyModalProps {
@@ -13,6 +13,7 @@ interface AddFamilyModalProps {
 }
 
 export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
+  const { data: activeTripId } = useActiveTripId()
   const addFamily = useAddFamily()
 
   const {
@@ -35,9 +36,10 @@ export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
   })
 
   const onSubmit = (data: CreateFamilyFormData) => {
+    if (!activeTripId) return
     addFamily.mutate(
       {
-        tripId: DEFAULT_TRIP_ID,
+        tripId: activeTripId,
         family: data as CreateFamilyInput,
       },
       {

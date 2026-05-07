@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { Plus, Edit2, Trash2, MapPin, Calendar } from 'lucide-react'
 import { MapContainer } from '@/components/map'
 import { AddRouteModal, EditRouteModal } from '@/components/modals'
-import { useRoutes, useFamilies, useLocations, useDeleteRoute } from '@/hooks'
+import { useRoutes, useFamilies, useLocations, useDeleteRoute, useActiveTripId } from '@/hooks'
 import type { Route } from '@/types'
 
 export function ItineraryPage() {
+  const { data: activeTripId } = useActiveTripId()
   const { data: routes = [], isLoading } = useRoutes()
   const { data: families = [] } = useFamilies()
   const { data: locations = [] } = useLocations()
@@ -16,11 +17,12 @@ export function ItineraryPage() {
   const [selectedRouteId, setSelectedRouteId] = useState<string>()
 
   const handleDelete = (routeId: string) => {
+    if (!activeTripId) return
     const confirmed = window.confirm('Are you sure you want to delete this route?')
     if (!confirmed) return
 
     // Use mutate instead of mutateAsync - hook handles toasts via onSuccess/onError
-    deleteRoute.mutate({ routeId })
+    deleteRoute.mutate({ tripId: activeTripId, routeId })
   }
 
   const getFamilyName = (familyId: string) => {

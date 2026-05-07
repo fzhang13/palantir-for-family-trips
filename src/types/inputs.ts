@@ -39,40 +39,32 @@ export type CreateRouteInput = z.infer<typeof createRouteSchema>
 
 export interface CreateMealInput {
   title: string
-  dayId: string
-  startSlot?: number
-  timeLabel?: string
-  status?: 'Assigned' | 'Pending' | 'Confirmed'
-  owner?: string
-  reservationType?: string
-  locationId?: string
-  note?: string
-  createLocation?: CreateLocationInput
-  // New fields
-  mealDate?: string  // ISO date string
-  mealType?: 'breakfast' | 'brunch' | 'lunch' | 'dinner'
+  mealDate: string // ISO date from TripDaySelector
+  mealType: 'breakfast' | 'brunch' | 'lunch' | 'dinner'
+  time?: string // Optional time label like "7:00 PM"
+  status: 'Assigned' | 'Pending' | 'Confirmed'
+  familyIds?: string[] // Array of family IDs
   requiresReservation?: boolean
-  familyIds?: string[]  // Array of family UUIDs
+  createLocation?: CreateLocationInput
+  note?: string
+  // Deprecated fields (kept for backward compat, auto-derived by repository)
+  dayId?: string
 }
 
 export interface CreateActivityInput {
   title: string
-  dayId: string
-  window?: string
-  status?: 'Go' | 'Watch'
+  activityDate: string // ISO date from TripDaySelector
+  timePeriod: 'morning' | 'afternoon' | 'evening' | 'all_day' | 'flexible'
+  startTime?: string // HH:MM format
+  endTime?: string // HH:MM format
+  status: 'Go' | 'Watch'
   riskLevel?: string
   weatherSensitivity?: string
-  locationId?: string
+  familyIds?: string[] // Array of family IDs
+  createLocation?: CreateLocationInput
   description?: string
   backup?: string
   note?: string
-  createLocation?: CreateLocationInput
-  // New fields
-  activityDate?: string  // ISO date string
-  timePeriod?: 'morning' | 'afternoon' | 'evening' | 'all_day' | 'flexible'
-  startTime?: string  // HH:MM format
-  endTime?: string    // HH:MM format
-  backupLocationId?: string
   createBackupLocation?: CreateLocationInput
   weatherData?: {
     date: string
@@ -81,4 +73,14 @@ export interface CreateActivityInput {
     precipitation: number
     fetchedAt: string
   }
+  // Deprecated fields (kept for backward compat, auto-derived by repository)
+  dayId?: string
+  window?: string
+}
+
+export interface CreateTripInput {
+  title: string
+  start_date: string    // ISO 8601 date
+  end_date: string      // ISO 8601 date
+  timezone: string
 }

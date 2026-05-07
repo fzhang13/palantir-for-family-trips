@@ -1,8 +1,14 @@
 import { useState, useEffect } from 'react'
 import { BaseModal } from './BaseModal'
-import { useUpdateMeal, useLocations } from '@/hooks'
-import { DEFAULT_TRIP_ID } from '@/lib/constants'
+import {
+  AddressAutocomplete,
+  FamilySelector,
+  TripDaySelector,
+  AtHomeToggle
+} from '@/components/forms'
+import { useUpdateMeal, useFamilies, useActiveTripId, useLocations } from '@/hooks'
 import type { Meal } from '@/types'
+import type { CreateMealInput, CreateLocationInput } from '@/types/inputs'
 
 interface EditMealModalProps {
   isOpen: boolean
@@ -11,56 +17,83 @@ interface EditMealModalProps {
 }
 
 export function EditMealModal({ isOpen, onClose, meal }: EditMealModalProps) {
+  const { data: activeTripId } = useActiveTripId()
+
+  // Pre-populate from existing meal
   const [title, setTitle] = useState(meal.title)
-  const [dayId, setDayId] = useState(meal.dayId)
-  const [timeLabel, setTimeLabel] = useState(meal.timeLabel || '')
-  const [status, setStatus] = useState(meal.status)
-  const [owner, setOwner] = useState(meal.owner || '')
-  const [reservationType, setReservationType] = useState(meal.reservationType || '')
-  const [locationId, setLocationId] = useState(meal.locationId || '')
+  const [mealDate, setMealDate] = useState(meal.mealDate || '')
+  const [mealType, setMealType] = useState<'breakfast' | 'brunch' | 'lunch' | 'dinner'>(
+    (meal.mealType || 'dinner') as any
+  )
+  const [time, setTime] = useState(meal.timeLabel || '')
+  const [status, setStatus] = useState<'Assigned' | 'Pending' | 'Confirmed'>(meal.status)
+  const [selectedFamilyIds, setSelectedFamilyIds] = useState<string[]>(
+    meal.familyIds || []
+  )
+  const [requiresReservation, setRequiresReservation] = useState(
+    meal.requiresReservation || false
+  )
+  const [isAtHome, setIsAtHome] = useState(false)
+  const [locationData, setLocationData] = useState<CreateLocationInput | null>(null)
   const [note, setNote] = useState(meal.note || '')
 
-  const { data: locations = [] } = useLocations()
+  const { data: families = [] } = useFamilies()
+  const { data: locations = [] } = useLocations(activeTripId || undefined)
   const updateMeal = useUpdateMeal()
-
-  const mealLocations = locations.filter(loc => loc.category === 'meal')
 
   // Update form when meal prop changes
   useEffect(() => {
     setTitle(meal.title)
-    setDayId(meal.dayId)
-    setTimeLabel(meal.timeLabel || '')
+    setMealDate(meal.mealDate || '')
+    setMealType((meal.mealType || 'dinner') as any)
+    setTime(meal.timeLabel || '')
     setStatus(meal.status)
-    setOwner(meal.owner || '')
-    setReservationType(meal.reservationType || '')
-    setLocationId(meal.locationId || '')
+    setSelectedFamilyIds(meal.familyIds || [])
+    setRequiresReservation(meal.requiresReservation || false)
     setNote(meal.note || '')
-  }, [meal])
+
+    // Pre-populate location if exists
+    const mealLocation = meal.locationId
+      ? locations.find(loc => loc.id === meal.locationId)
+      : undefined
+
+    if (mealLocation) {
+      setLocationData({
+        title: mealLocation.title,
+        address: mealLocation.address,
+        coordinates: mealLocation.coordinates,
+        placeId: mealLocation.placeId || undefined,
+        category: 'meal'
+      })
+    }
+  }, [meal, locations])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!title.trim()) {
-      alert('Title is required')
+    if (!activeTripId) return
+    if (!title.trim() || !mealDate) {
+      alert('Title and date are required')
       return
     }
 
-    const updates: Partial<Meal> = {
+    const input: Partial<CreateMealInput> = {
       title: title.trim(),
-      dayId,
-      timeLabel: timeLabel.trim() || '',
+      mealDate,
+      mealType,
+      time: time.trim() || undefined,
       status,
-      owner: owner.trim() || '',
-      reservationType: reservationType.trim() || '',
-      locationId: locationId || undefined,
-      note: note.trim() || '',
+      familyIds: selectedFamilyIds,
+      requiresReservation,
+      createLocation: locationData || undefined,
+      note: note.trim() || undefined,
     }
 
     try {
       await updateMeal.mutateAsync({
-        tripId: DEFAULT_TRIP_ID,
+        tripId: activeTripId,
         mealId: meal.id,
-        updates
+        updates: input
       })
       onClose()
     } catch (error) {
@@ -82,39 +115,43 @@ export function EditMealModal({ isOpen, onClose, meal }: EditMealModalProps) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
+            placeholder="e.g., Dinner at The Grill"
             required
           />
         </div>
 
-        {/* Day */}
+        {/* Trip Day Selector */}
+        <TripDaySelector
+          value={mealDate}
+          onChange={(date) => setMealDate(date)}
+        />
+
+        {/* Meal Type */}
         <div>
           <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Day <span className="text-[#F85149]">*</span>
+            Meal Type <span className="text-[#F85149]">*</span>
           </label>
           <select
-            value={dayId}
-            onChange={(e) => setDayId(e.target.value)}
+            value={mealType}
+            onChange={(e) => setMealType(e.target.value as any)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
-            <option value="thu">Thursday</option>
-            <option value="fri">Friday</option>
-            <option value="sat">Saturday</option>
-            <option value="sun">Sunday</option>
-            <option value="mon">Monday</option>
-            <option value="tue">Tuesday</option>
-            <option value="wed">Wednesday</option>
+            <option value="breakfast">Breakfast</option>
+            <option value="brunch">Brunch</option>
+            <option value="lunch">Lunch</option>
+            <option value="dinner">Dinner</option>
           </select>
         </div>
 
-        {/* Time Label */}
+        {/* Time (optional) */}
         <div>
           <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Time
+            Time (optional)
           </label>
           <input
             type="text"
-            value={timeLabel}
-            onChange={(e) => setTimeLabel(e.target.value)}
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
             placeholder="e.g., 7:00 PM"
           />
@@ -127,7 +164,7 @@ export function EditMealModal({ isOpen, onClose, meal }: EditMealModalProps) {
           </label>
           <select
             value={status}
-            onChange={(e) => setStatus(e.target.value as 'Assigned' | 'Pending' | 'Confirmed')}
+            onChange={(e) => setStatus(e.target.value as any)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
             <option value="Pending">Pending</option>
@@ -136,50 +173,80 @@ export function EditMealModal({ isOpen, onClose, meal }: EditMealModalProps) {
           </select>
         </div>
 
-        {/* Owner */}
+        {/* Families (multi-select) */}
         <div>
           <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Owner
+            Families
           </label>
-          <input
-            type="text"
-            value={owner}
-            onChange={(e) => setOwner(e.target.value)}
-            className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
+          <FamilySelector
+            selectedFamilyIds={selectedFamilyIds}
+            onChange={setSelectedFamilyIds}
+            families={families}
           />
         </div>
 
-        {/* Reservation Type */}
-        <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Reservation Type
-          </label>
-          <input
-            type="text"
-            value={reservationType}
-            onChange={(e) => setReservationType(e.target.value)}
-            className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
-          />
-        </div>
-
-        {/* Location */}
-        <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Location
-          </label>
-          <select
-            value={locationId}
-            onChange={(e) => setLocationId(e.target.value)}
-            className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
+        {/* Requires Reservation Toggle */}
+        <div className="flex items-center justify-between p-3 bg-[#161B22] border border-[#30363D] rounded">
+          <span className="text-sm text-[#C9D1D9]">Requires Reservation</span>
+          <button
+            type="button"
+            onClick={() => setRequiresReservation(!requiresReservation)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              requiresReservation ? 'bg-[#238636]' : 'bg-[#30363D]'
+            }`}
           >
-            <option value="">None</option>
-            {mealLocations.map(loc => (
-              <option key={loc.id} value={loc.id}>
-                {loc.title}
-              </option>
-            ))}
-          </select>
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                requiresReservation ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
         </div>
+
+        {/* At Home Toggle */}
+        <AtHomeToggle
+          isAtHome={isAtHome}
+          onToggle={setIsAtHome}
+          currentDate={mealDate}
+          onLocationAutoFill={(location) => {
+            if (location) {
+              setLocationData(location)
+            } else {
+              setLocationData(null)
+            }
+          }}
+          tripId={activeTripId || ''}
+        />
+
+        {/* Location (Google Places) - Hidden when at home */}
+        {!isAtHome && (
+          <div>
+            <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
+              Location
+            </label>
+            <AddressAutocomplete
+              value={locationData?.address || ''}
+              onChange={(address, place) => {
+                if (!address) return
+
+                const lat = place?.geometry?.location?.lat() ?? 0
+                const lng = place?.geometry?.location?.lng() ?? 0
+
+                setLocationData({
+                  title: place?.name || address.split(',')[0],
+                  address,
+                  coordinates: { lat, lng },
+                  placeId: place?.place_id,
+                  category: 'meal',
+                })
+              }}
+              onCoordinatesChange={(lat, lng) => {
+                setLocationData(prev => prev ? { ...prev, coordinates: { lat, lng } } : null)
+              }}
+              placeholder="Search for restaurant or venue..."
+            />
+          </div>
+        )}
 
         {/* Notes */}
         <div>
@@ -191,6 +258,7 @@ export function EditMealModal({ isOpen, onClose, meal }: EditMealModalProps) {
             onChange={(e) => setNote(e.target.value)}
             rows={3}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
+            placeholder="Additional notes..."
           />
         </div>
 

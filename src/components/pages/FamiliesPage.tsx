@@ -1,18 +1,20 @@
 import { useState } from 'react'
 import { Plus, Edit2, Trash2, Users, MapPin, Calendar, Car } from 'lucide-react'
-import { useFamilies, useDeleteFamily } from '@/hooks'
+import { useFamilies, useDeleteFamily, useActiveTripId } from '@/hooks'
 import { AddFamilyModal, EditFamilyModal } from '@/components/modals'
 import type { Family } from '@/types'
 
 export function FamiliesPage() {
+  const { data: activeTripId } = useActiveTripId()
   const { data: families = [], isLoading, isError } = useFamilies()
   const deleteFamily = useDeleteFamily()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [editingFamily, setEditingFamily] = useState<Family | null>(null)
 
   const handleDelete = (familyId: string) => {
+    if (!activeTripId) return
     if (window.confirm('Are you sure you want to delete this family?')) {
-      deleteFamily.mutate({ familyId })
+      deleteFamily.mutate({ tripId: activeTripId, familyId })
     }
   }
 

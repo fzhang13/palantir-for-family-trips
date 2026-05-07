@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { getTripRepository } from '@/repositories'
-import { DEFAULT_TRIP_ID } from '@/lib/constants'
 import type {
   CreateFamilyInput,
   CreateLocationInput,
@@ -17,16 +16,16 @@ export function useAddFamily() {
 
   return useMutation({
     mutationFn: ({
-      tripId = DEFAULT_TRIP_ID,
+      tripId,
       family,
     }: {
-      tripId?: string
+      tripId: string
       family: CreateFamilyInput
     }) => tripRepository.addFamily(tripId, family),
 
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['families', variables.tripId || DEFAULT_TRIP_ID] })
-      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId || DEFAULT_TRIP_ID] })
+      queryClient.invalidateQueries({ queryKey: ['families', variables.tripId] })
+      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId] })
       toast.success('Family added successfully')
     },
 
@@ -41,18 +40,18 @@ export function useUpdateFamily() {
 
   return useMutation({
     mutationFn: ({
-      tripId = DEFAULT_TRIP_ID,
+      tripId,
       familyId,
       updates,
     }: {
-      tripId?: string
+      tripId: string
       familyId: string
       updates: Partial<Family>
     }) => tripRepository.updateFamily(tripId, familyId, updates),
 
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['families', variables.tripId || DEFAULT_TRIP_ID] })
-      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId || DEFAULT_TRIP_ID] })
+      queryClient.invalidateQueries({ queryKey: ['families', variables.tripId] })
+      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId] })
       toast.success('Family updated successfully')
     },
 
@@ -67,16 +66,16 @@ export function useDeleteFamily() {
 
   return useMutation({
     mutationFn: ({
-      tripId = DEFAULT_TRIP_ID,
+      tripId,
       familyId,
     }: {
-      tripId?: string
+      tripId: string
       familyId: string
     }) => tripRepository.deleteFamily(tripId, familyId),
 
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['families', variables.tripId || DEFAULT_TRIP_ID] })
-      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId || DEFAULT_TRIP_ID] })
+      queryClient.invalidateQueries({ queryKey: ['families', variables.tripId] })
+      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId] })
       toast.success('Family deleted successfully')
     },
 
@@ -92,16 +91,16 @@ export function useAddLocation() {
 
   return useMutation({
     mutationFn: ({
-      tripId = DEFAULT_TRIP_ID,
+      tripId,
       location,
     }: {
-      tripId?: string
+      tripId: string
       location: CreateLocationInput
     }) => tripRepository.addLocation(tripId, location),
 
     onSuccess: (data, variables) => {
       const { location } = data
-      const tripId = variables.tripId || DEFAULT_TRIP_ID
+      const tripId = variables.tripId
 
       // Invalidate locations query
       queryClient.invalidateQueries({ queryKey: ['locations', tripId] })
@@ -134,18 +133,18 @@ export function useUpdateLocation() {
 
   return useMutation({
     mutationFn: ({
-      tripId = DEFAULT_TRIP_ID,
+      tripId,
       locationId,
       updates,
     }: {
-      tripId?: string
+      tripId: string
       locationId: string
       updates: Partial<Location>
     }) => tripRepository.updateLocation(tripId, locationId, updates),
 
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['locations', variables.tripId || DEFAULT_TRIP_ID] })
-      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId || DEFAULT_TRIP_ID] })
+      queryClient.invalidateQueries({ queryKey: ['locations', variables.tripId] })
+      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId] })
       toast.success('Location updated successfully')
     },
 
@@ -160,16 +159,16 @@ export function useDeleteLocation() {
 
   return useMutation({
     mutationFn: ({
-      tripId = DEFAULT_TRIP_ID,
+      tripId,
       locationId,
     }: {
-      tripId?: string
+      tripId: string
       locationId: string
     }) => tripRepository.deleteLocation(tripId, locationId),
 
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['locations', variables.tripId || DEFAULT_TRIP_ID] })
-      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId || DEFAULT_TRIP_ID] })
+      queryClient.invalidateQueries({ queryKey: ['locations', variables.tripId] })
+      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId] })
       toast.success('Location deleted successfully')
     },
 
@@ -185,16 +184,16 @@ export function useAddRoute() {
 
   return useMutation({
     mutationFn: ({
-      tripId = DEFAULT_TRIP_ID,
+      tripId,
       route,
     }: {
-      tripId?: string
+      tripId: string
       route: CreateRouteInput
     }) => tripRepository.addRoute(tripId, route),
 
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['routes', variables.tripId || DEFAULT_TRIP_ID] })
-      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId || DEFAULT_TRIP_ID] })
+      queryClient.invalidateQueries({ queryKey: ['routes', variables.tripId] })
+      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId] })
       toast.success('Route added successfully')
     },
 
@@ -209,18 +208,18 @@ export function useUpdateRoute() {
 
   return useMutation({
     mutationFn: ({
-      tripId = DEFAULT_TRIP_ID,
+      tripId,
       routeId,
       updates,
     }: {
-      tripId?: string
+      tripId: string
       routeId: string
       updates: Partial<Route>
     }) => tripRepository.updateRoute(tripId, routeId, updates),
 
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['routes', variables.tripId || DEFAULT_TRIP_ID] })
-      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId || DEFAULT_TRIP_ID] })
+      queryClient.invalidateQueries({ queryKey: ['routes', variables.tripId] })
+      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId] })
       toast.success('Route updated successfully')
     },
 
@@ -235,21 +234,87 @@ export function useDeleteRoute() {
 
   return useMutation({
     mutationFn: ({
-      tripId = DEFAULT_TRIP_ID,
+      tripId,
       routeId,
     }: {
-      tripId?: string
+      tripId: string
       routeId: string
     }) => tripRepository.deleteRoute(tripId, routeId),
 
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['routes', variables.tripId || DEFAULT_TRIP_ID] })
-      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId || DEFAULT_TRIP_ID] })
+      queryClient.invalidateQueries({ queryKey: ['routes', variables.tripId] })
+      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId] })
       toast.success('Route deleted successfully')
     },
 
     onError: (error: Error) => {
       toast.error(`Failed to delete route: ${error.message}`)
+    },
+  })
+}
+
+// ─── Trip Metadata ─────────────────────────────────────────────────────────
+
+export function useUpdateTripMetadata() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      tripId,
+      metadata,
+    }: {
+      tripId: string
+      metadata: Partial<import('@/types').TripMeta>
+    }) => tripRepository.updateTripMetadata(tripId, metadata),
+
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['trips', 'active'] })
+      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId] })
+      toast.success('Trip settings updated successfully')
+    },
+
+    onError: (error: Error) => {
+      toast.error(`Failed to update trip settings: ${error.message}`)
+    },
+  })
+}
+
+// ─── Trip Archive ──────────────────────────────────────────────────────────
+
+export function useArchiveTrip() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ tripId }: { tripId: string }) =>
+      tripRepository.archiveTrip(tripId),
+
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['trips', 'active'] })
+      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId] })
+      toast.success('Trip archived successfully')
+    },
+
+    onError: (error: Error) => {
+      toast.error(`Failed to archive trip: ${error.message}`)
+    },
+  })
+}
+
+export function useUnarchiveTrip() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ tripId }: { tripId: string }) =>
+      tripRepository.unarchiveTrip(tripId),
+
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['trips', 'active'] })
+      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId] })
+      toast.success('Trip restored successfully')
+    },
+
+    onError: (error: Error) => {
+      toast.error(`Failed to restore trip: ${error.message}`)
     },
   })
 }

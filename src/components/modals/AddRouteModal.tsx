@@ -4,8 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import toast from 'react-hot-toast'
 import { BaseModal } from './BaseModal'
 import { createRouteSchema } from '@/schemas'
-import { useFamilies, useLocations, useAddRoute } from '@/hooks'
-import { DEFAULT_TRIP_ID } from '@/lib/constants'
+import { useFamilies, useLocations, useAddRoute, useActiveTripId } from '@/hooks'
 import type { CreateRouteInput } from '@/types'
 
 interface AddRouteModalProps {
@@ -14,6 +13,7 @@ interface AddRouteModalProps {
 }
 
 export function AddRouteModal({ isOpen, onClose }: AddRouteModalProps) {
+  const { data: activeTripId } = useActiveTripId()
   const { data: families = [] } = useFamilies()
   const { data: locations = [] } = useLocations()
   const addRoute = useAddRoute()
@@ -32,6 +32,7 @@ export function AddRouteModal({ isOpen, onClose }: AddRouteModalProps) {
   const selectedFamilyId = watch('familyId')
 
   const onSubmit = async (data: CreateRouteInput) => {
+    if (!activeTripId) return
     // Get origin coordinates
     const family = families.find((f) => f.id === data.familyId)
     if (!family) {
@@ -96,7 +97,7 @@ export function AddRouteModal({ isOpen, onClose }: AddRouteModalProps) {
       // Submit route with path
       addRoute.mutate(
         {
-          tripId: DEFAULT_TRIP_ID,
+          tripId: activeTripId,
           route: {
             ...data,
             path,

@@ -1,65 +1,81 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Plus, MapPin } from 'lucide-react'
-import { useActivities, useDeleteActivity } from '@/hooks'
+import { useActivities, useDeleteActivity, useActiveTripId, useFamilies, useLocations } from '@/hooks'
 import { TimelineGroup } from '@/components/ui/TimelineGroup'
 import { DetailSidePanel } from '@/components/ui/DetailSidePanel'
 import { AddActivityModal, EditActivityModal } from '@/components/modals'
+import { formatFullDate } from '@/lib/dateUtils'
 import type { Activity } from '@/types'
-import { DEFAULT_TRIP_ID } from '@/lib/constants'
-
-const DAY_OPTIONS = [
-  { id: 'all', label: 'All Days' },
-  { id: 'thu', label: 'Thursday' },
-  { id: 'fri', label: 'Friday' },
-  { id: 'sat', label: 'Saturday' },
-  { id: 'sun', label: 'Sunday' },
-  { id: 'mon', label: 'Monday' },
-  { id: 'tue', label: 'Tuesday' },
-  { id: 'wed', label: 'Wednesday' },
-]
-
-const DAY_LABELS: Record<string, string> = {
-  thu: 'THURSDAY',
-  fri: 'FRIDAY',
-  sat: 'SATURDAY',
-  sun: 'SUNDAY',
-  mon: 'MONDAY',
-  tue: 'TUESDAY',
-  wed: 'WEDNESDAY',
-}
 
 export function ActivitiesPage() {
+  const { data: activeTripId } = useActiveTripId()
   const { data: allActivities = [], isLoading, isError } = useActivities()
+  const { data: families = [] } = useFamilies()
+  const { data: locations = [] } = useLocations(activeTripId || undefined)
   const deleteActivity = useDeleteActivity()
 
-  const [selectedDay, setSelectedDay] = useState('all')
+  const [selectedDate, setSelectedDate] = useState('all')
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null)
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
-  // Filter activities by selected day
-  const filteredActivities = selectedDay === 'all'
+  // Generate unique dates from activities for filter buttons
+  const availableDates = useMemo(() => {
+    const dates = new Set<string>()
+    allActivities.forEach(activity => {
+      const date = activity.activityDate
+      if (date) dates.add(date)
+    })
+    return Array.from(dates).sort()
+  }, [allActivities])
+
+  const dateOptions = useMemo(() => {
+    return [
+      { id: 'all', label: 'All Days' },
+      ...availableDates.map(date => ({
+        id: date,
+        label: new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric'
+        })
+      }))
+    ]
+  }, [availableDates])
+
+  // Filter activities by selected date
+  const filteredActivities = selectedDate === 'all'
     ? allActivities
-    : allActivities.filter(activity => activity.dayId === selectedDay)
+    : allActivities.filter(activity => {
+        const activityDate = activity.activityDate
+        return activityDate === selectedDate
+      })
 
-  // Group activities by day
-  const groupedActivities = filteredActivities.reduce((groups, activity) => {
-    if (!groups[activity.dayId]) {
-      groups[activity.dayId] = []
-    }
-    groups[activity.dayId].push(activity)
-    return groups
-  }, {} as Record<string, Activity[]>)
+  // Group activities by date
+  const groupedActivities = useMemo(() => {
+    return filteredActivities.reduce((groups, activity) => {
+      const date = activity.activityDate || 'unknown'
+      if (!groups[date]) {
+        groups[date] = []
+      }
+      groups[date].push(activity)
+      return groups
+    }, {} as Record<string, Activity[]>)
+  }, [filteredActivities])
 
-  // Sort days chronologically
-  const dayOrder = ['thu', 'fri', 'sat', 'sun', 'mon', 'tue', 'wed']
-  const sortedDays = Object.keys(groupedActivities).sort((a, b) =>
-    dayOrder.indexOf(a) - dayOrder.indexOf(b)
-  )
+  // Sort dates chronologically
+  const sortedDates = useMemo(() => {
+    return Object.keys(groupedActivities).sort((a, b) => {
+      if (a === 'unknown') return 1
+      if (b === 'unknown') return -1
+      return a.localeCompare(b)
+    })
+  }, [groupedActivities])
 
   const handleDelete = (activityId: string) => {
+    if (!activeTripId) return
     if (window.confirm('Are you sure you want to delete this activity?')) {
-      deleteActivity.mutate({ tripId: DEFAULT_TRIP_ID, activityId })
+      deleteActivity.mutate({ tripId: activeTripId, activityId })
       setSelectedActivity(null)
     }
   }
@@ -105,19 +121,19 @@ export function ActivitiesPage() {
         </button>
       </div>
 
-      {/* Day Filter */}
+      {/* Date Filter */}
       <div className="flex gap-2 mb-6 overflow-x-auto">
-        {DAY_OPTIONS.map(day => (
+        {dateOptions.map(option => (
           <button
-            key={day.id}
-            onClick={() => setSelectedDay(day.id)}
+            key={option.id}
+            onClick={() => setSelectedDate(option.id)}
             className={`px-3 py-1.5 rounded text-sm font-medium whitespace-nowrap transition-colors ${
-              selectedDay === day.id
+              selectedDate === option.id
                 ? 'bg-[#58A6FF] text-white'
                 : 'bg-[#21262D] text-[#8B949E] hover:bg-[#30363D]'
             }`}
           >
-            {day.label}
+            {option.label}
           </button>
         ))}
       </div>
@@ -139,22 +155,30 @@ export function ActivitiesPage() {
         </div>
       ) : filteredActivities.length === 0 ? (
         <div className="text-center text-[#8B949E] py-12">
-          No activities scheduled for {DAY_OPTIONS.find(d => d.id === selectedDay)?.label}
+          No activities scheduled for {dateOptions.find(d => d.id === selectedDate)?.label}
         </div>
       ) : (
         /* Timeline View */
         <div className="space-y-4">
-          {sortedDays.map(dayId => (
-            <TimelineGroup
-              key={dayId}
-              dayId={dayId}
-              dayLabel={DAY_LABELS[dayId] || dayId.toUpperCase()}
-              items={groupedActivities[dayId]}
-              onItemClick={(item) => setSelectedActivity(item as Activity)}
-              onEdit={(item) => handleEdit(item as Activity)}
-              onDelete={handleDelete}
-            />
-          ))}
+          {sortedDates.map(date => {
+            const dateLabel = date === 'unknown'
+              ? 'DATE UNKNOWN'
+              : formatFullDate(new Date(date + 'T00:00:00')).toUpperCase()
+
+            return (
+              <TimelineGroup
+                key={date}
+                dayId={date}
+                dayLabel={dateLabel}
+                items={groupedActivities[date]}
+                onItemClick={(item) => setSelectedActivity(item as Activity)}
+                onEdit={(item) => handleEdit(item as Activity)}
+                onDelete={handleDelete}
+                locations={locations}
+                families={families}
+              />
+            )
+          })}
         </div>
       )}
 

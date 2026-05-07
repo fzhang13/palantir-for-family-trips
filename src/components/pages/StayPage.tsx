@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Plus, Edit2, Trash2, MapPin, Home, Calendar, FileText } from 'lucide-react'
-import { useLocations, useDeleteLocation } from '@/hooks'
+import { useLocations, useDeleteLocation, useActiveTripId } from '@/hooks'
 import { AddLocationModal, EditLocationModal } from '@/components/modals'
 import type { Location } from '@/types'
 
 export function StayPage() {
+  const { data: activeTripId } = useActiveTripId()
   const { data: allLocations = [], isLoading, isError } = useLocations()
   const deleteLocation = useDeleteLocation()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -14,8 +15,9 @@ export function StayPage() {
   const stayLocations = allLocations.filter(location => location.category === 'stay')
 
   const handleDelete = (locationId: string) => {
+    if (!activeTripId) return
     if (window.confirm('Are you sure you want to delete this stay location?')) {
-      deleteLocation.mutate({ locationId })
+      deleteLocation.mutate({ tripId: activeTripId, locationId })
     }
   }
 
@@ -142,8 +144,21 @@ function StayCard({ location, onEdit, onDelete }: StayCardProps) {
 
       {/* Details */}
       <div className="space-y-2.5">
-        {/* Check-in/Check-out Dates */}
-        {(location.checkInDate || location.checkOutDate) && (
+        {/* Day Range or Check-in/Check-out Dates */}
+        {(location.startDayNumber && location.endDayNumber) ? (
+          <div className="pt-2 border-t border-[#30363D]">
+            <div className="flex items-center gap-2">
+              <Calendar size={14} className="text-[#8B949E]" />
+              <span className="text-sm text-[#C9D1D9] font-medium">
+                Day {location.startDayNumber}
+                {location.endDayNumber !== location.startDayNumber && ` - Day ${location.endDayNumber}`}
+              </span>
+              <span className="text-xs text-[#8B949E]">
+                ({location.endDayNumber - location.startDayNumber + 1} {location.endDayNumber === location.startDayNumber ? 'day' : 'days'})
+              </span>
+            </div>
+          </div>
+        ) : (location.checkInDate || location.checkOutDate) && (
           <div className="pt-2 border-t border-[#30363D]">
             <div className="grid grid-cols-2 gap-3 text-sm">
               {location.checkInDate && (
@@ -208,17 +223,4 @@ function StayCard({ location, onEdit, onDelete }: StayCardProps) {
       </div>
     </div>
   )
-}
-
-function getDayLabel(dayId: string): string {
-  const dayMap: Record<string, string> = {
-    thu: 'Thursday',
-    fri: 'Friday',
-    sat: 'Saturday',
-    sun: 'Sunday',
-    mon: 'Monday',
-    tue: 'Tuesday',
-    wed: 'Wednesday',
-  }
-  return dayMap[dayId.toLowerCase()] || dayId
 }

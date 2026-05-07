@@ -1,8 +1,14 @@
 import { useState, useEffect } from 'react'
 import { BaseModal } from './BaseModal'
-import { useUpdateActivity, useLocations } from '@/hooks'
-import { DEFAULT_TRIP_ID } from '@/lib/constants'
+import {
+  AddressAutocomplete,
+  TripDaySelector,
+  TimePeriodPicker
+} from '@/components/forms'
+import { useUpdateActivity, useActiveTripId } from '@/hooks'
+import { fetchWeather, type WeatherForecast } from '@/lib/weatherService'
 import type { Activity } from '@/types'
+import type { CreateActivityInput, CreateLocationInput } from '@/types/inputs'
 
 interface EditActivityModalProps {
   isOpen: boolean
@@ -11,62 +17,126 @@ interface EditActivityModalProps {
 }
 
 export function EditActivityModal({ isOpen, onClose, activity }: EditActivityModalProps) {
+  const { data: activeTripId } = useActiveTripId()
+
+  // Pre-populate from existing activity
   const [title, setTitle] = useState(activity.title)
-  const [dayId, setDayId] = useState(activity.dayId)
-  const [window, setWindow] = useState(activity.window || '')
-  const [status, setStatus] = useState(activity.status)
-  const [riskLevel, setRiskLevel] = useState(activity.riskLevel || '')
+  const [activityDate, setActivityDate] = useState(activity.activityDate || '')
+  const [timePeriod, setTimePeriod] = useState<'morning' | 'afternoon' | 'evening' | 'all_day' | 'flexible'>(
+    (activity.timePeriod || 'all_day') as any
+  )
+  const [startTime, setStartTime] = useState<string | undefined>(activity.startTime || undefined)
+  const [endTime, setEndTime] = useState<string | undefined>(activity.endTime || undefined)
+  const [status, setStatus] = useState<'Go' | 'Watch'>(activity.status)
+  const [riskLevel, setRiskLevel] = useState(activity.riskLevel || 'low')
   const [weatherSensitivity, setWeatherSensitivity] = useState(activity.weatherSensitivity || '')
-  const [locationId, setLocationId] = useState(activity.locationId || '')
+  const [locationData, setLocationData] = useState<CreateLocationInput | null>(null)
+  const [hasBackup, setHasBackup] = useState(false)
+  const [backupLocationData, setBackupLocationData] = useState<CreateLocationInput | null>(null)
+  const [weather, setWeather] = useState<WeatherForecast | null>(null)
+  const [weatherLoading, setWeatherLoading] = useState(false)
   const [description, setDescription] = useState(activity.description || '')
-  const [backup, setBackup] = useState(activity.backup || '')
   const [note, setNote] = useState(activity.note || '')
 
-  const { data: locations = [] } = useLocations()
   const updateActivity = useUpdateActivity()
-
-  const activityLocations = locations.filter(loc => loc.category === 'park')
 
   // Update form when activity prop changes
   useEffect(() => {
     setTitle(activity.title)
-    setDayId(activity.dayId)
-    setWindow(activity.window || '')
+    setActivityDate(activity.activityDate || '')
+    setTimePeriod((activity.timePeriod || 'all_day') as any)
+    setStartTime(activity.startTime || undefined)
+    setEndTime(activity.endTime || undefined)
     setStatus(activity.status)
-    setRiskLevel(activity.riskLevel || '')
+    setRiskLevel(activity.riskLevel || 'low')
     setWeatherSensitivity(activity.weatherSensitivity || '')
-    setLocationId(activity.locationId || '')
     setDescription(activity.description || '')
-    setBackup(activity.backup || '')
     setNote(activity.note || '')
+
+    // Pre-populate location if exists
+    if (activity.location) {
+      setLocationData({
+        title: activity.location.title,
+        address: activity.location.address,
+        coordinates: activity.location.coordinates,
+        placeId: activity.location.placeId || activity.location.place_id,
+        category: 'activity'
+      })
+    }
+
+    // Pre-populate backup location if exists
+    if (activity.backupLocation) {
+      setHasBackup(true)
+      setBackupLocationData({
+        title: activity.backupLocation.title,
+        address: activity.backupLocation.address,
+        coordinates: activity.backupLocation.coordinates,
+        placeId: activity.backupLocation.placeId || activity.backupLocation.place_id,
+        category: 'activity'
+      })
+    }
+
+    // Pre-populate weather if exists
+    if (activity.weatherData) {
+      setWeather(activity.weatherData as WeatherForecast)
+    }
   }, [activity])
+
+  // Auto-fetch weather when location and date are set
+  useEffect(() => {
+    if (locationData?.coordinates && activityDate) {
+      handleFetchWeather()
+    }
+  }, [locationData?.coordinates, activityDate])
+
+  const handleFetchWeather = async () => {
+    if (!locationData?.coordinates || !activityDate) return
+
+    setWeatherLoading(true)
+
+    try {
+      const forecast = await fetchWeather(
+        locationData.coordinates,
+        new Date(activityDate + 'T00:00:00')
+      )
+      setWeather(forecast)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setWeatherLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!title.trim()) {
-      alert('Title is required')
+    if (!activeTripId) return
+    if (!title.trim() || !activityDate) {
+      alert('Title and date are required')
       return
     }
 
-    const updates: Partial<Activity> = {
+    const input: Partial<CreateActivityInput> = {
       title: title.trim(),
-      dayId,
-      window: window.trim() || '',
+      activityDate,
+      timePeriod,
+      startTime,
+      endTime,
       status,
-      riskLevel: riskLevel.trim() || '',
-      weatherSensitivity: weatherSensitivity.trim() || '',
-      locationId: locationId || undefined,
-      description: description.trim() || '',
-      backup: backup.trim() || '',
-      note: note.trim() || '',
+      riskLevel,
+      weatherSensitivity: weatherSensitivity || undefined,
+      createLocation: locationData || undefined,
+      createBackupLocation: hasBackup ? backupLocationData || undefined : undefined,
+      weatherData: weather || undefined,
+      description: description.trim() || undefined,
+      note: note.trim() || undefined,
     }
 
     try {
       await updateActivity.mutateAsync({
-        tripId: DEFAULT_TRIP_ID,
+        tripId: activeTripId,
         activityId: activity.id,
-        updates
+        updates: input
       })
       onClose()
     } catch (error) {
@@ -88,42 +158,28 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
+            placeholder="e.g., Hiking Trail"
             required
           />
         </div>
 
-        {/* Day */}
-        <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Day <span className="text-[#F85149]">*</span>
-          </label>
-          <select
-            value={dayId}
-            onChange={(e) => setDayId(e.target.value)}
-            className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
-          >
-            <option value="thu">Thursday</option>
-            <option value="fri">Friday</option>
-            <option value="sat">Saturday</option>
-            <option value="sun">Sunday</option>
-            <option value="mon">Monday</option>
-            <option value="tue">Tuesday</option>
-            <option value="wed">Wednesday</option>
-          </select>
-        </div>
+        {/* Trip Day Selector */}
+        <TripDaySelector
+          value={activityDate}
+          onChange={(date) => setActivityDate(date)}
+        />
 
-        {/* Window */}
-        <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Time Window
-          </label>
-          <input
-            type="text"
-            value={window}
-            onChange={(e) => setWindow(e.target.value)}
-            className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
-          />
-        </div>
+        {/* Time Period Picker */}
+        <TimePeriodPicker
+          timePeriod={timePeriod}
+          startTime={startTime}
+          endTime={endTime}
+          onChange={({ timePeriod: tp, startTime: st, endTime: et }) => {
+            setTimePeriod(tp)
+            setStartTime(st)
+            setEndTime(et)
+          }}
+        />
 
         {/* Status */}
         <div>
@@ -132,7 +188,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
           </label>
           <select
             value={status}
-            onChange={(e) => setStatus(e.target.value as 'Go' | 'Watch')}
+            onChange={(e) => setStatus(e.target.value as any)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
             <option value="Go">Go</option>
@@ -145,12 +201,15 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
           <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
             Risk Level
           </label>
-          <input
-            type="text"
+          <select
             value={riskLevel}
-            onChange={(e) => setRiskLevel(e.target.value)}
+            onChange={(e) => setRiskLevel(e.target.value as any)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
-          />
+          >
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
         </div>
 
         {/* Weather Sensitivity */}
@@ -163,26 +222,124 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
             value={weatherSensitivity}
             onChange={(e) => setWeatherSensitivity(e.target.value)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
+            placeholder="e.g., High, Moderate, Low"
           />
         </div>
 
         {/* Location */}
         <div>
           <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Location
+            Location <span className="text-[#F85149]">*</span>
           </label>
-          <select
-            value={locationId}
-            onChange={(e) => setLocationId(e.target.value)}
-            className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
-          >
-            <option value="">None</option>
-            {activityLocations.map(loc => (
-              <option key={loc.id} value={loc.id}>
-                {loc.title}
-              </option>
-            ))}
-          </select>
+          <AddressAutocomplete
+            value={locationData?.address || ''}
+            onChange={(address, place) => {
+              if (!address) return
+
+              const lat = place?.location?.lat() ?? 0
+              const lng = place?.location?.lng() ?? 0
+
+              setLocationData({
+                title: place?.displayName || address.split(',')[0],
+                address,
+                coordinates: { lat, lng },
+                placeId: place?.place_id,
+                category: 'activity',
+              })
+            }}
+            onCoordinatesChange={(lat, lng) => {
+              setLocationData(prev => prev ? { ...prev, coordinates: { lat, lng } } : null)
+            }}
+            placeholder="Search for activity location..."
+          />
+        </div>
+
+        {/* Weather Display */}
+        {locationData && activityDate && (
+          <div className="p-3 bg-[#161B22] border border-[#30363D] rounded">
+            {weatherLoading && (
+              <p className="text-sm text-[#8B949E]">Fetching weather...</p>
+            )}
+            {weather && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">
+                    {weather.condition === 'Clear' && '☀️'}
+                    {weather.condition === 'Partly Cloudy' && '⛅'}
+                    {weather.condition.includes('Rain') && '🌧️'}
+                    {weather.condition.includes('Cloud') && '☁️'}
+                    {weather.condition.includes('Storm') && '⛈️'}
+                  </span>
+                  <div>
+                    <p className="text-sm font-medium text-[#C9D1D9]">
+                      {weather.condition}, {weather.temperature}°F
+                    </p>
+                    {weather.condition.includes('Rain') && (
+                      <p className="text-xs text-[#F0883E]">
+                        ⚠️ Consider backup plan
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleFetchWeather}
+                  className="text-[#58A6FF] hover:text-[#79C0FF] text-sm"
+                >
+                  ↻
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Backup Plan Toggle */}
+        <div className="p-3 bg-[#161B22] border border-[#30363D] rounded">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm text-[#C9D1D9]">Has backup plan</span>
+            <button
+              type="button"
+              onClick={() => setHasBackup(!hasBackup)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                hasBackup ? 'bg-[#238636]' : 'bg-[#30363D]'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  hasBackup ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          {hasBackup && (
+            <div className="pt-3 border-t border-[#238636]">
+              <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
+                Backup Location
+              </label>
+              <AddressAutocomplete
+                value={backupLocationData?.address || ''}
+                onChange={(address, place) => {
+                  if (!address) return
+
+                  const lat = place?.location?.lat() ?? 0
+                  const lng = place?.location?.lng() ?? 0
+
+                  setBackupLocationData({
+                    title: place?.displayName || address.split(',')[0],
+                    address,
+                    coordinates: { lat, lng },
+                    placeId: place?.place_id,
+                    category: 'activity',
+                  })
+                }}
+                onCoordinatesChange={(lat, lng) => {
+                  setBackupLocationData(prev => prev ? { ...prev, coordinates: { lat, lng } } : null)
+                }}
+                placeholder="Alternative if primary doesn't work..."
+              />
+            </div>
+          )}
         </div>
 
         {/* Description */}
@@ -195,19 +352,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
-          />
-        </div>
-
-        {/* Backup Plan */}
-        <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Backup Plan
-          </label>
-          <textarea
-            value={backup}
-            onChange={(e) => setBackup(e.target.value)}
-            rows={2}
-            className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
+            placeholder="What is this activity about?"
           />
         </div>
 
@@ -221,6 +366,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
             onChange={(e) => setNote(e.target.value)}
             rows={2}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
+            placeholder="Additional notes..."
           />
         </div>
 

@@ -13,7 +13,19 @@ import type {
   CreateRouteInput,
   CreateMealInput,
   CreateActivityInput,
+  CreateTripInput,
 } from '@/types/inputs'
+
+export interface Trip {
+  id: string
+  title: string
+  start_date: string
+  end_date: string
+  timezone: string
+  status: string
+  created_at: string
+  updated_at: string
+}
 
 export interface TripRepository {
   // Trip-level operations
@@ -22,6 +34,12 @@ export interface TripRepository {
     tripId: string,
     metadata: Partial<TripMeta>
   ): Promise<void>
+  archiveTrip(tripId: string): Promise<void>
+  unarchiveTrip(tripId: string): Promise<void>
+
+  // Trip creation and active trip management
+  createTrip(input: CreateTripInput): Promise<Trip>
+  getActiveTripId(): Promise<string | null>
 
   // Family CRUD
   getFamilies(tripId: string): Promise<Family[]>

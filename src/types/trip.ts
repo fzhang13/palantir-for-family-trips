@@ -77,6 +77,9 @@ export interface Location extends BaseEntity {
   checkInDate?: string | null  // ISO date string
   checkOutDate?: string | null // ISO date string
   placeId?: string | null
+  // Day range within trip (1-based, only for category='stay')
+  startDayNumber?: number | null
+  endDayNumber?: number | null
 }
 
 // Activity entity - matches runtime structure from buildActivities in tripModel.js
@@ -201,6 +204,9 @@ export interface StayItem extends BaseEntity {
   linkedEntityKeys?: string[]
   taskIds?: string[]
   note?: string
+  // Day range within the trip (1-based)
+  startDayNumber?: number | null
+  endDayNumber?: number | null
 }
 
 // Task entity - matches runtime structure from buildTasks in tripModel.js

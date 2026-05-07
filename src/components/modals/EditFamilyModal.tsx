@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast'
 import { BaseModal } from './BaseModal'
 import { AddressAutocomplete } from '@/components/forms'
 import { createFamilySchema, type CreateFamilyFormData } from '@/schemas'
-import { useUpdateFamily } from '@/hooks'
+import { useUpdateFamily, useActiveTripId } from '@/hooks'
 import type { Family } from '@/types'
 
 interface EditFamilyModalProps {
@@ -14,6 +14,7 @@ interface EditFamilyModalProps {
 }
 
 export function EditFamilyModal({ isOpen, onClose, family }: EditFamilyModalProps) {
+  const { data: activeTripId } = useActiveTripId()
   const updateFamily = useUpdateFamily()
 
   const form = useForm<CreateFamilyFormData>({
@@ -46,8 +47,9 @@ export function EditFamilyModal({ isOpen, onClose, family }: EditFamilyModalProp
   const { isDirty } = useFormState({ control })
 
   const onSubmit = async (data: CreateFamilyFormData) => {
+    if (!activeTripId) return
     try {
-      await updateFamily.mutateAsync({ familyId: family.id, updates: data })
+      await updateFamily.mutateAsync({ tripId: activeTripId, familyId: family.id, updates: data })
       toast.success('Family updated successfully')
       onClose()
     } catch (error) {

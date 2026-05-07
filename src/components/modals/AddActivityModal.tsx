@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { BaseModal } from './BaseModal'
-import { AddressAutocomplete, TimePeriodPicker } from '@/components/forms'
-import { useAddActivity } from '@/hooks'
+import {
+  AddressAutocomplete,
+  TimePeriodPicker,
+  TripDaySelector
+} from '@/components/forms'
+import { useAddActivity, useActiveTripId } from '@/hooks'
 import { useActivitiesForConflictCheck } from '@/hooks/useTripQueries'
 import { checkActivityConflicts } from '@/lib/conflictDetection'
-import { getDayName } from '@/lib/dateUtils'
 import { fetchWeather, type WeatherForecast } from '@/lib/weatherService'
-import { DEFAULT_TRIP_ID } from '@/lib/constants'
 import type { CreateActivityInput, CreateLocationInput } from '@/types/inputs'
 
 interface AddActivityModalProps {
@@ -15,6 +17,7 @@ interface AddActivityModalProps {
 }
 
 export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
+  const { data: activeTripId } = useActiveTripId()
   const [title, setTitle] = useState('')
   const [activityDate, setActivityDate] = useState('')
   const [timePeriod, setTimePeriod] = useState<'morning' | 'afternoon' | 'evening' | 'all_day' | 'flexible'>('all_day')
@@ -31,7 +34,7 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
   const [description, setDescription] = useState('')
   const [note, setNote] = useState('')
 
-  const { data: existingActivities = [] } = useActivitiesForConflictCheck(DEFAULT_TRIP_ID)
+  const { data: existingActivities = [] } = useActivitiesForConflictCheck(activeTripId || '')
   const addActivity = useAddActivity()
 
   // Conflict detection
@@ -85,6 +88,7 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!activeTripId) return
     if (!title.trim() || !activityDate) {
       alert('Title and date are required')
       return
@@ -108,7 +112,7 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
     }
 
     try {
-      await addActivity.mutateAsync({ tripId: DEFAULT_TRIP_ID, input })
+      await addActivity.mutateAsync({ tripId: activeTripId, input })
       handleClose()
     } catch (error) {
       alert('Failed to add activity. Please try again.')
@@ -153,24 +157,15 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
           />
         </div>
 
-        {/* Date */}
-        <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Date <span className="text-[#F85149]">*</span>
-          </label>
-          <input
-            type="date"
-            value={activityDate}
-            onChange={(e) => setActivityDate(e.target.value)}
-            className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
-            required
-          />
-          {activityDate && (
-            <p className="mt-1 text-xs text-[#8B949E]">
-              {getDayName(new Date(activityDate + 'T00:00:00'))}
-            </p>
-          )}
-        </div>
+        {/* Trip Day Selector (replaces date picker) */}
+        <TripDaySelector
+          value={activityDate}
+          onChange={(date, tripId, dayNumber) => {
+            setActivityDate(date)
+            // Could store tripId if needed for validation
+          }}
+          error={!activityDate ? 'Please select a day' : undefined}
+        />
 
         {/* Time Period Picker */}
         <TimePeriodPicker

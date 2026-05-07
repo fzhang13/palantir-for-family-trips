@@ -5,8 +5,9 @@ import type {
   CreateRouteInput,
   CreateMealInput,
   CreateActivityInput,
+  CreateTripInput,
 } from '@/types/inputs'
-import type { TripRepository } from './TripRepository'
+import type { TripRepository, Trip } from './TripRepository'
 import { supabase } from '@/lib/supabase'
 
 /**
@@ -26,12 +27,22 @@ export class SupabaseTripRepository implements TripRepository {
   async ensureTrip(tripId: string): Promise<void> {
     const { data } = await this.client.from('trips').select('id').eq('id', tripId).maybeSingle()
     if (!data) {
+      // Set default trip dates: today + 7 days
+      const today = new Date()
+      const startDate = new Date(today)
+      startDate.setDate(today.getDate() + 7)
+      const endDate = new Date(startDate)
+      endDate.setDate(startDate.getDate() + 4) // 5-day trip by default
+
       await this.client.from('trips').insert({
         id: tripId,
         title: 'My Family Trip',
         subtitle: '',
+        start_date: startDate.toISOString().split('T')[0],
+        end_date: endDate.toISOString().split('T')[0],
         timezone: 'America/Los_Angeles',
         metadata: {},
+        status: 'active',
       })
     }
   }
@@ -94,10 +105,64 @@ export class SupabaseTripRepository implements TripRepository {
   }
 
   async updateTripMetadata(tripId: string, metadata: Partial<TripMeta>): Promise<void> {
-    await this.client.from('trips').update({
-      title: metadata.tripName,
-      metadata: { timezone: metadata.timezone },
-    }).eq('id', tripId)
+    const updates: Record<string, any> = {}
+
+    if (metadata.tripName !== undefined) updates.title = metadata.tripName
+    if (metadata.startDate !== undefined) updates.start_date = metadata.startDate
+    if (metadata.endDate !== undefined) updates.end_date = metadata.endDate
+    if (metadata.timezone !== undefined) {
+      updates.metadata = { timezone: metadata.timezone }
+    }
+
+    await this.client.from('trips').update(updates).eq('id', tripId)
+  }
+
+  async archiveTrip(tripId: string): Promise<void> {
+    const { error } = await this.client
+      .from('trips')
+      .update({ status: 'archived' })
+      .eq('id', tripId)
+
+    if (error) throw new Error(error.message)
+  }
+
+  async unarchiveTrip(tripId: string): Promise<void> {
+    const { error } = await this.client
+      .from('trips')
+      .update({ status: 'active' })
+      .eq('id', tripId)
+
+    if (error) throw new Error(error.message)
+  }
+
+  async createTrip(input: CreateTripInput): Promise<Trip> {
+    const { data, error } = await this.client
+      .from('trips')
+      .insert({
+        title: input.title,
+        start_date: input.start_date,
+        end_date: input.end_date,
+        timezone: input.timezone,
+        status: 'active',
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  }
+
+  async getActiveTripId(): Promise<string | null> {
+    const { data, error } = await this.client
+      .from('trips')
+      .select('id')
+      .eq('status', 'active')
+      .order('start_date', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (error) throw error
+    return data?.id || null
   }
 
   // ─── Families ──────────────────────────────────────────────────────────────
@@ -210,7 +275,7 @@ export class SupabaseTripRepository implements TripRepository {
     await this.ensureTrip(tripId)
 
     // Insert location record
-    const row = {
+    const row: any = {
       trip_id: tripId,
       title: input.title,
       category: input.category,
@@ -229,6 +294,10 @@ export class SupabaseTripRepository implements TripRepository {
       place_id: input.placeId || null,
       photos: [],
     }
+
+    // Add day range fields for stay locations
+    if ('startDayNumber' in input) row.start_day_number = input.startDayNumber
+    if ('endDayNumber' in input) row.end_day_number = input.endDayNumber
 
     const { data: locationData, error: locErr } = await this.client
       .from('locations')
@@ -295,7 +364,7 @@ export class SupabaseTripRepository implements TripRepository {
       }
 
       case 'stay': {
-        const stayRow = {
+        const stayRow: Record<string, unknown> = {
           trip_id: tripId,
           location_id: location.id,
           title: input.title,
@@ -304,6 +373,10 @@ export class SupabaseTripRepository implements TripRepository {
           summary: input.summary || '',
           note: '',
         }
+        // Copy day range from location to stay_item
+        if ('startDayNumber' in input) stayRow.start_day_number = input.startDayNumber
+        if ('endDayNumber' in input) stayRow.end_day_number = input.endDayNumber
+        
         const { data: stayData, error: stayErr } = await this.client
           .from('stay_items')
           .insert(stayRow)
@@ -328,6 +401,22 @@ export class SupabaseTripRepository implements TripRepository {
       .select()
       .single()
     if (error) throw new Error(error.message)
+    
+    // If this is a stay location and day numbers changed, sync to stay_items
+    if (data.category === 'stay' && ('start_day_number' in row || 'end_day_number' in row)) {
+      const stayUpdates: Record<string, unknown> = {}
+      if ('start_day_number' in row) stayUpdates.start_day_number = row.start_day_number
+      if ('end_day_number' in row) stayUpdates.end_day_number = row.end_day_number
+      
+      if (Object.keys(stayUpdates).length > 0) {
+        await this.client
+          .from('stay_items')
+          .update(stayUpdates)
+          .eq('location_id', locationId)
+          .eq('trip_id', tripId)
+      }
+    }
+    
     return this.mapLocationFromDb(data)
   }
 
@@ -380,9 +469,8 @@ export class SupabaseTripRepository implements TripRepository {
   async addMeal(tripId: string, input: CreateMealInput): Promise<Meal> {
     await this.ensureTrip(tripId)
 
-    let locationId = input.locationId
-
-    // Create location if requested
+    // Step 1: Create location if provided
+    let locationId: string | null = null
     if (input.createLocation) {
       const { location } = await this.addLocation(
         tripId,
@@ -395,43 +483,67 @@ export class SupabaseTripRepository implements TripRepository {
       locationId = location.id
     }
 
-    const row = {
+    // Step 2: Build new field values from input
+    const newFields = {
       trip_id: tripId,
       title: input.title,
-      day_id: input.dayId,
-      start_slot: input.startSlot || 0,
-      status: input.status || 'Pending',
-      owner: input.owner || '',
-      reservation_type: input.reservationType || '',
-      time_label: input.timeLabel || '',
-      location_id: locationId,
+      meal_date: input.mealDate,
+      meal_type: input.mealType,
+      requires_reservation: input.requiresReservation || false,
+      status: input.status,
+      time_label: input.time || '',
       note: input.note || '',
-      meal_date: input.mealDate || null,
-      meal_type: input.mealType || null,
-      requires_reservation: input.requiresReservation ?? null,
+      location_id: locationId,
     }
 
+    // Step 3: Derive old fields for backward compatibility
+    const oldFields = {
+      day_id: deriveDayId(input.mealDate),
+      start_slot: deriveStartSlot(input.mealType),
+      owner: '', // Will be populated after family insert
+      reservation_type: input.requiresReservation ? 'Required' : '',
+    }
+
+    // Step 4: Insert meal with both new and old fields
     const { data, error } = await this.client
       .from('meals')
-      .insert(row)
+      .insert({
+        ...newFields,
+        ...oldFields,
+      })
       .select()
       .single()
     if (error) throw new Error(error.message)
 
     const meal = this.mapMealFromDb(data)
 
-    // Handle meal_families junction table
+    // Step 5: Insert family associations if provided
     if (input.familyIds && input.familyIds.length > 0) {
-      const junctionRows = input.familyIds.map(familyId => ({
+      const familyInserts = input.familyIds.map(familyId => ({
         meal_id: meal.id,
         family_id: familyId,
       }))
 
-      const { error: junctionError } = await this.client
+      const { error: familyError } = await this.client
         .from('meal_families')
-        .insert(junctionRows)
+        .insert(familyInserts)
 
-      if (junctionError) throw new Error(`Failed to link families to meal: ${junctionError.message}`)
+      if (familyError) throw new Error(`Failed to link families to meal: ${familyError.message}`)
+
+      // Step 6: Update owner field with family names (backward compat)
+      const { data: families } = await this.client
+        .from('families')
+        .select('name')
+        .in('id', input.familyIds)
+
+      if (families) {
+        const ownerText = families.map(f => f.name).join(', ')
+
+        await this.client
+          .from('meals')
+          .update({ owner: ownerText })
+          .eq('id', meal.id)
+      }
     }
 
     // Fetch the meal again to get the familyIds from the junction table
@@ -467,39 +579,93 @@ export class SupabaseTripRepository implements TripRepository {
     return meal
   }
 
-  async updateMeal(tripId: string, mealId: string, updates: Partial<Meal>): Promise<Meal> {
-    const row = this.mapMealToDb(updates)
+  async updateMeal(
+    tripId: string,
+    mealId: string,
+    updates: Partial<CreateMealInput>
+  ): Promise<Meal> {
+    // Build new fields from updates
+    const newFields: any = {}
+    const oldFields: any = {}
+
+    if (updates.title !== undefined) newFields.title = updates.title
+    if (updates.mealDate !== undefined) {
+      newFields.meal_date = updates.mealDate
+      oldFields.day_id = deriveDayId(updates.mealDate)
+    }
+    if (updates.mealType !== undefined) {
+      newFields.meal_type = updates.mealType
+      oldFields.start_slot = deriveStartSlot(updates.mealType)
+    }
+    if (updates.status !== undefined) newFields.status = updates.status
+    if (updates.time !== undefined) newFields.time_label = updates.time
+    if (updates.note !== undefined) newFields.note = updates.note
+    if (updates.requiresReservation !== undefined) {
+      newFields.requires_reservation = updates.requiresReservation
+      oldFields.reservation_type = updates.requiresReservation ? 'Required' : ''
+    }
+
+    // Handle location update
+    if (updates.createLocation) {
+      const { location } = await this.addLocation(
+        tripId,
+        {
+          ...updates.createLocation,
+          category: 'meal',
+        },
+        true
+      )
+      newFields.location_id = location.id
+    }
+
+    // Update meal with both new and old fields
     const { data, error } = await this.client
       .from('meals')
-      .update(row)
+      .update({ ...newFields, ...oldFields })
       .eq('id', mealId)
       .eq('trip_id', tripId)
       .select()
       .single()
     if (error) throw new Error(error.message)
 
-    // Handle familyIds update if provided
+    // Update family associations if provided
     if (updates.familyIds !== undefined) {
-      // Delete existing junction records
-      const { error: deleteError } = await this.client
+      // Delete existing associations
+      await this.client
         .from('meal_families')
         .delete()
         .eq('meal_id', mealId)
 
-      if (deleteError) throw new Error(`Failed to clear meal families: ${deleteError.message}`)
-
-      // Insert new junction records
+      // Insert new associations
       if (updates.familyIds.length > 0) {
-        const junctionRows = updates.familyIds.map(familyId => ({
+        const familyInserts = updates.familyIds.map(familyId => ({
           meal_id: mealId,
           family_id: familyId,
         }))
 
-        const { error: insertError } = await this.client
+        await this.client
           .from('meal_families')
-          .insert(junctionRows)
+          .insert(familyInserts)
 
-        if (insertError) throw new Error(`Failed to update meal families: ${insertError.message}`)
+        // Update owner field (backward compat)
+        const { data: families } = await this.client
+          .from('families')
+          .select('name')
+          .in('id', updates.familyIds)
+
+        if (families) {
+          const ownerText = families.map(f => f.name).join(', ')
+          await this.client
+            .from('meals')
+            .update({ owner: ownerText })
+            .eq('id', mealId)
+        }
+      } else {
+        // Clear owner if no families
+        await this.client
+          .from('meals')
+          .update({ owner: '' })
+          .eq('id', mealId)
       }
     }
 
@@ -549,10 +715,10 @@ export class SupabaseTripRepository implements TripRepository {
   async addActivity(tripId: string, input: CreateActivityInput): Promise<Activity> {
     await this.ensureTrip(tripId)
 
-    let locationId = input.locationId
-    let backupLocationId = input.backupLocationId
+    // Step 1: Create locations if provided
+    let locationId: string | null = null
+    let backupLocationId: string | null = null
 
-    // Create location if requested
     if (input.createLocation) {
       const { location } = await this.addLocation(
         tripId,
@@ -565,7 +731,6 @@ export class SupabaseTripRepository implements TripRepository {
       locationId = location.id
     }
 
-    // Create backup location if requested
     if (input.createBackupLocation) {
       const { location: backupLocation } = await this.addLocation(
         tripId,
@@ -573,50 +738,168 @@ export class SupabaseTripRepository implements TripRepository {
           ...input.createBackupLocation,
           category: 'activity',
         },
-        true // Skip entity creation
+        true
       )
       backupLocationId = backupLocation.id
     }
 
-    const row = {
+    // Step 2: Build new field values from input
+    const newFields = {
       trip_id: tripId,
       title: input.title,
-      day_id: input.dayId,
-      window: input.window || '',
-      status: input.status || 'Go',
+      activity_date: input.activityDate,
+      time_period: input.timePeriod,
+      start_time: input.startTime || null,
+      end_time: input.endTime || null,
+      status: input.status,
       risk_level: input.riskLevel || '',
       weather_sensitivity: input.weatherSensitivity || '',
       location_id: locationId,
+      backup_location_id: backupLocationId,
       description: input.description || '',
       backup: input.backup || '',
       note: input.note || '',
-      activity_date: input.activityDate || null,
-      time_period: input.timePeriod || null,
-      start_time: input.startTime || null,
-      end_time: input.endTime || null,
-      backup_location_id: backupLocationId || null,
       weather_data: input.weatherData || null,
     }
 
+    // Step 3: Derive old fields for backward compatibility
+    const oldFields = {
+      day_id: deriveDayId(input.activityDate),
+      window: deriveWindow(input.timePeriod, input.startTime, input.endTime),
+    }
+
+    // Step 4: Derive weather sensitivity from weather data if not provided
+    if (!input.weatherSensitivity && input.weatherData) {
+      newFields.weather_sensitivity = deriveWeatherSensitivity(input.weatherData)
+    }
+
+    // Step 5: Insert activity with both new and old fields
     const { data, error } = await this.client
       .from('activities')
-      .insert(row)
+      .insert({
+        ...newFields,
+        ...oldFields,
+      })
       .select()
       .single()
     if (error) throw new Error(error.message)
-    return this.mapActivityFromDb(data)
+
+    const activity = this.mapActivityFromDb(data)
+
+    // Step 6: Insert family associations if provided
+    if (input.familyIds && input.familyIds.length > 0) {
+      const familyInserts = input.familyIds.map(familyId => ({
+        activity_id: activity.id,
+        family_id: familyId,
+      }))
+
+      const { error: familyError } = await this.client
+        .from('activity_families')
+        .insert(familyInserts)
+
+      if (familyError) throw new Error(`Failed to link families to activity: ${familyError.message}`)
+    }
+
+    return activity
   }
 
-  async updateActivity(tripId: string, activityId: string, updates: Partial<Activity>): Promise<Activity> {
-    const row = this.mapActivityToDb(updates)
+  async updateActivity(
+    tripId: string,
+    activityId: string,
+    updates: Partial<CreateActivityInput>
+  ): Promise<Activity> {
+    // Build new fields from updates
+    const newFields: any = {}
+    const oldFields: any = {}
+
+    if (updates.title !== undefined) newFields.title = updates.title
+    if (updates.activityDate !== undefined) {
+      newFields.activity_date = updates.activityDate
+      oldFields.day_id = deriveDayId(updates.activityDate)
+    }
+    if (updates.timePeriod !== undefined) {
+      newFields.time_period = updates.timePeriod
+      // Update window if time period or times change
+      oldFields.window = deriveWindow(
+        updates.timePeriod,
+        updates.startTime,
+        updates.endTime
+      )
+    }
+    if (updates.startTime !== undefined) newFields.start_time = updates.startTime
+    if (updates.endTime !== undefined) newFields.end_time = updates.endTime
+    if (updates.status !== undefined) newFields.status = updates.status
+    if (updates.riskLevel !== undefined) newFields.risk_level = updates.riskLevel
+    if (updates.weatherSensitivity !== undefined) {
+      newFields.weather_sensitivity = updates.weatherSensitivity
+    }
+    if (updates.description !== undefined) newFields.description = updates.description
+    if (updates.backup !== undefined) newFields.backup = updates.backup
+    if (updates.note !== undefined) newFields.note = updates.note
+    if (updates.weatherData !== undefined) {
+      newFields.weather_data = updates.weatherData
+      // Auto-derive sensitivity from weather data if not explicitly set
+      if (!updates.weatherSensitivity) {
+        newFields.weather_sensitivity = deriveWeatherSensitivity(updates.weatherData)
+      }
+    }
+
+    // Handle location updates
+    if (updates.createLocation) {
+      const { location } = await this.addLocation(
+        tripId,
+        {
+          ...updates.createLocation,
+          category: 'activity',
+        },
+        true
+      )
+      newFields.location_id = location.id
+    }
+
+    if (updates.createBackupLocation) {
+      const { location: backupLocation } = await this.addLocation(
+        tripId,
+        {
+          ...updates.createBackupLocation,
+          category: 'activity',
+        },
+        true
+      )
+      newFields.backup_location_id = backupLocation.id
+    }
+
+    // Update activity with both new and old fields
     const { data, error } = await this.client
       .from('activities')
-      .update(row)
+      .update({ ...newFields, ...oldFields })
       .eq('id', activityId)
       .eq('trip_id', tripId)
       .select()
       .single()
     if (error) throw new Error(error.message)
+
+    // Update family associations if provided
+    if (updates.familyIds !== undefined) {
+      // Delete existing associations
+      await this.client
+        .from('activity_families')
+        .delete()
+        .eq('activity_id', activityId)
+
+      // Insert new associations
+      if (updates.familyIds.length > 0) {
+        const familyInserts = updates.familyIds.map(familyId => ({
+          activity_id: activityId,
+          family_id: familyId,
+        }))
+
+        await this.client
+          .from('activity_families')
+          .insert(familyInserts)
+      }
+    }
+
     return this.mapActivityFromDb(data)
   }
 
@@ -791,6 +1074,8 @@ export class SupabaseTripRepository implements TripRepository {
     checkInDate: row.check_in_date as string | null,
     checkOutDate: row.check_out_date as string | null,
     placeId: row.place_id as string | null,
+    startDayNumber: row.start_day_number as number | null | undefined,
+    endDayNumber: row.end_day_number as number | null | undefined,
     linkedEntityKeys: [],
   })
 
@@ -885,6 +1170,8 @@ export class SupabaseTripRepository implements TripRepository {
     linkedEntityKeys: [],
     taskIds: [],
     note: row.note as string | undefined,
+    startDayNumber: row.start_day_number as number | null | undefined,
+    endDayNumber: row.end_day_number as number | null | undefined,
   })
 
   private mapExpenseFromDb = (row: Record<string, unknown>): import('@/types').Expense => ({
@@ -967,6 +1254,8 @@ export class SupabaseTripRepository implements TripRepository {
     if (updates.checkInDate !== undefined) row.check_in_date = updates.checkInDate
     if (updates.checkOutDate !== undefined) row.check_out_date = updates.checkOutDate
     if (updates.placeId !== undefined) row.place_id = updates.placeId
+    if (updates.startDayNumber !== undefined) row.start_day_number = updates.startDayNumber
+    if (updates.endDayNumber !== undefined) row.end_day_number = updates.endDayNumber
     return row
   }
 
@@ -1033,6 +1322,62 @@ export class SupabaseTripRepository implements TripRepository {
     if (words.length === 1) return words[0].substring(0, 2).toUpperCase()
     return words.slice(0, 2).map((w) => w[0]).join('').toUpperCase()
   }
+}
+
+// ─── Helper Functions for Dual-Write Logic ────────────────────────────────
+
+// Helper: Derive day_id from ISO date string
+function deriveDayId(isoDate: string): string {
+  const date = new Date(isoDate + 'T00:00:00')
+  const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+  return days[date.getDay()]
+}
+
+// Helper: Derive start_slot from meal type (for timeline positioning)
+function deriveStartSlot(mealType: string): number {
+  const slots: Record<string, number> = {
+    breakfast: 8,
+    brunch: 10,
+    lunch: 12,
+    dinner: 18
+  }
+  return slots[mealType] || 12
+}
+
+// Helper: Derive window display string from time period and times
+function deriveWindow(
+  timePeriod: string,
+  startTime?: string,
+  endTime?: string
+): string {
+  // If specific times provided, use them
+  if (startTime && endTime) {
+    return `${startTime} - ${endTime}`
+  }
+
+  // Otherwise, use time period label
+  const labels: Record<string, string> = {
+    morning: 'Morning',
+    afternoon: 'Afternoon',
+    evening: 'Evening',
+    all_day: 'All Day',
+    flexible: 'Flexible'
+  }
+  return labels[timePeriod] || 'Window TBD'
+}
+
+// Helper: Derive weather sensitivity from weather data
+function deriveWeatherSensitivity(weatherData: any): string {
+  if (!weatherData) return ''
+
+  const { condition, precipitation } = weatherData
+
+  if (condition?.includes('Rain') || precipitation > 50) {
+    return 'High'
+  } else if (condition?.includes('Cloud') || precipitation > 20) {
+    return 'Moderate'
+  }
+  return 'Low'
 }
 
 export const supabaseTripRepository = new SupabaseTripRepository()

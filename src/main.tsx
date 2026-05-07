@@ -6,12 +6,15 @@ import { Toaster } from 'react-hot-toast'
 import App from './App'
 import { queryClient } from './lib/queryClient'
 import { DESIGN_COLORS, TONE_COLORS } from './lib/constants'
+import { ActiveTripProvider } from '@/context'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <App />
+      <ActiveTripProvider>
+        <App />
+      </ActiveTripProvider>
       <Toaster
         position="top-right"
         toastOptions={{

@@ -1,65 +1,81 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Plus, UtensilsCrossed } from 'lucide-react'
-import { useMeals, useDeleteMeal } from '@/hooks'
+import { useMeals, useDeleteMeal, useActiveTripId, useFamilies, useLocations } from '@/hooks'
 import { TimelineGroup } from '@/components/ui/TimelineGroup'
 import { DetailSidePanel } from '@/components/ui/DetailSidePanel'
 import { AddMealModal, EditMealModal } from '@/components/modals'
+import { formatFullDate } from '@/lib/dateUtils'
 import type { Meal } from '@/types'
-import { DEFAULT_TRIP_ID } from '@/lib/constants'
-
-const DAY_OPTIONS = [
-  { id: 'all', label: 'All Days' },
-  { id: 'thu', label: 'Thursday' },
-  { id: 'fri', label: 'Friday' },
-  { id: 'sat', label: 'Saturday' },
-  { id: 'sun', label: 'Sunday' },
-  { id: 'mon', label: 'Monday' },
-  { id: 'tue', label: 'Tuesday' },
-  { id: 'wed', label: 'Wednesday' },
-]
-
-const DAY_LABELS: Record<string, string> = {
-  thu: 'THURSDAY',
-  fri: 'FRIDAY',
-  sat: 'SATURDAY',
-  sun: 'SUNDAY',
-  mon: 'MONDAY',
-  tue: 'TUESDAY',
-  wed: 'WEDNESDAY',
-}
 
 export function MealsPage() {
+  const { data: activeTripId } = useActiveTripId()
   const { data: allMeals = [], isLoading, isError } = useMeals()
+  const { data: families = [] } = useFamilies()
+  const { data: locations = [] } = useLocations(activeTripId || undefined)
   const deleteMeal = useDeleteMeal()
 
-  const [selectedDay, setSelectedDay] = useState('all')
+  const [selectedDate, setSelectedDate] = useState('all')
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null)
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
-  // Filter meals by selected day
-  const filteredMeals = selectedDay === 'all'
+  // Generate unique dates from meals for filter buttons
+  const availableDates = useMemo(() => {
+    const dates = new Set<string>()
+    allMeals.forEach(meal => {
+      const date = meal.mealDate
+      if (date) dates.add(date)
+    })
+    return Array.from(dates).sort()
+  }, [allMeals])
+
+  const dateOptions = useMemo(() => {
+    return [
+      { id: 'all', label: 'All Days' },
+      ...availableDates.map(date => ({
+        id: date,
+        label: new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric'
+        })
+      }))
+    ]
+  }, [availableDates])
+
+  // Filter meals by selected date
+  const filteredMeals = selectedDate === 'all'
     ? allMeals
-    : allMeals.filter(meal => meal.dayId === selectedDay)
+    : allMeals.filter(meal => {
+        const mealDate = meal.mealDate
+        return mealDate === selectedDate
+      })
 
-  // Group meals by day
-  const groupedMeals = filteredMeals.reduce((groups, meal) => {
-    if (!groups[meal.dayId]) {
-      groups[meal.dayId] = []
-    }
-    groups[meal.dayId].push(meal)
-    return groups
-  }, {} as Record<string, Meal[]>)
+  // Group meals by date
+  const groupedMeals = useMemo(() => {
+    return filteredMeals.reduce((groups, meal) => {
+      const date = meal.mealDate || 'unknown'
+      if (!groups[date]) {
+        groups[date] = []
+      }
+      groups[date].push(meal)
+      return groups
+    }, {} as Record<string, Meal[]>)
+  }, [filteredMeals])
 
-  // Sort days chronologically
-  const dayOrder = ['thu', 'fri', 'sat', 'sun', 'mon', 'tue', 'wed']
-  const sortedDays = Object.keys(groupedMeals).sort((a, b) =>
-    dayOrder.indexOf(a) - dayOrder.indexOf(b)
-  )
+  // Sort dates chronologically
+  const sortedDates = useMemo(() => {
+    return Object.keys(groupedMeals).sort((a, b) => {
+      if (a === 'unknown') return 1
+      if (b === 'unknown') return -1
+      return a.localeCompare(b)
+    })
+  }, [groupedMeals])
 
   const handleDelete = (mealId: string) => {
+    if (!activeTripId) return
     if (window.confirm('Are you sure you want to delete this meal?')) {
-      deleteMeal.mutate({ tripId: DEFAULT_TRIP_ID, mealId })
+      deleteMeal.mutate({ tripId: activeTripId, mealId })
       setSelectedMeal(null)
     }
   }
@@ -105,19 +121,19 @@ export function MealsPage() {
         </button>
       </div>
 
-      {/* Day Filter */}
+      {/* Date Filter */}
       <div className="flex gap-2 mb-6 overflow-x-auto">
-        {DAY_OPTIONS.map(day => (
+        {dateOptions.map(option => (
           <button
-            key={day.id}
-            onClick={() => setSelectedDay(day.id)}
+            key={option.id}
+            onClick={() => setSelectedDate(option.id)}
             className={`px-3 py-1.5 rounded text-sm font-medium whitespace-nowrap transition-colors ${
-              selectedDay === day.id
+              selectedDate === option.id
                 ? 'bg-[#58A6FF] text-white'
                 : 'bg-[#21262D] text-[#8B949E] hover:bg-[#30363D]'
             }`}
           >
-            {day.label}
+            {option.label}
           </button>
         ))}
       </div>
@@ -139,22 +155,30 @@ export function MealsPage() {
         </div>
       ) : filteredMeals.length === 0 ? (
         <div className="text-center text-[#8B949E] py-12">
-          No meals scheduled for {DAY_OPTIONS.find(d => d.id === selectedDay)?.label}
+          No meals scheduled for {dateOptions.find(d => d.id === selectedDate)?.label}
         </div>
       ) : (
         /* Timeline View */
         <div className="space-y-4">
-          {sortedDays.map(dayId => (
-            <TimelineGroup
-              key={dayId}
-              dayId={dayId}
-              dayLabel={DAY_LABELS[dayId] || dayId.toUpperCase()}
-              items={groupedMeals[dayId]}
-              onItemClick={(item) => setSelectedMeal(item as Meal)}
-              onEdit={(item) => handleEdit(item as Meal)}
-              onDelete={handleDelete}
-            />
-          ))}
+          {sortedDates.map(date => {
+            const dateLabel = date === 'unknown'
+              ? 'DATE UNKNOWN'
+              : formatFullDate(new Date(date + 'T00:00:00')).toUpperCase()
+
+            return (
+              <TimelineGroup
+                key={date}
+                dayId={date}
+                dayLabel={dateLabel}
+                items={groupedMeals[date]}
+                onItemClick={(item) => setSelectedMeal(item as Meal)}
+                onEdit={(item) => handleEdit(item as Meal)}
+                onDelete={handleDelete}
+                locations={locations}
+                families={families}
+              />
+            )
+          })}
         </div>
       )}
 

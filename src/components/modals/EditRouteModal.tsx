@@ -2,8 +2,7 @@ import { useForm, useFormState } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { BaseModal } from './BaseModal'
 import { createRouteSchema } from '@/schemas'
-import { useFamilies, useLocations, useUpdateRoute } from '@/hooks'
-import { DEFAULT_TRIP_ID } from '@/lib/constants'
+import { useFamilies, useLocations, useUpdateRoute, useActiveTripId } from '@/hooks'
 import type { Route, CreateRouteInput } from '@/types'
 
 interface EditRouteModalProps {
@@ -13,6 +12,7 @@ interface EditRouteModalProps {
 }
 
 export function EditRouteModal({ isOpen, onClose, route }: EditRouteModalProps) {
+  const { data: activeTripId } = useActiveTripId()
   const { data: families = [] } = useFamilies()
   const { data: locations = [] } = useLocations()
   const updateRoute = useUpdateRoute()
@@ -42,9 +42,10 @@ export function EditRouteModal({ isOpen, onClose, route }: EditRouteModalProps) 
   const selectedFamilyId = watch('familyId')
 
   const onSubmit = (data: CreateRouteInput) => {
+    if (!activeTripId) return
     updateRoute.mutate(
       {
-        tripId: DEFAULT_TRIP_ID,
+        tripId: activeTripId,
         routeId: route.id,
         updates: data as any
       },

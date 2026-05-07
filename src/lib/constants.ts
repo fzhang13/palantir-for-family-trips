@@ -11,9 +11,6 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 
-/** The UUID of the trip in Supabase */
-export const DEFAULT_TRIP_ID = 'c1cdfe77-f427-4b7c-a72f-5727f826a66d'
-
 export const PAGE_ICONS: Record<string, LucideIcon> = {
   itinerary: LayoutGrid,
   stay: Home,
