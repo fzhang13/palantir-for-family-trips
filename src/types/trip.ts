@@ -40,7 +40,7 @@ export interface Route extends BaseEntity {
 export interface Location extends BaseEntity {
   type: 'location'
   title: string
-  category: 'stay' | 'meal' | 'logistics' | 'park'
+  category: 'stay' | 'meal' | 'activity'
   dayId: string
   address: string
   coordinates: {
@@ -73,6 +73,10 @@ export interface Location extends BaseEntity {
   stopType?: string
   placesQuery?: string
   reservationNote?: string
+  // New fields
+  checkInDate?: string | null  // ISO date string
+  checkOutDate?: string | null // ISO date string
+  placeId?: string | null
 }
 
 // Activity entity - matches runtime structure from buildActivities in tripModel.js
@@ -80,7 +84,7 @@ export interface Activity extends BaseEntity {
   type: 'activity'
   title: string
   dayId: string
-  window: string
+  window?: string
   status: 'Go' | 'Watch'
   riskLevel: string
   weatherSensitivity: string
@@ -90,6 +94,19 @@ export interface Activity extends BaseEntity {
   description?: string
   backup?: string
   note?: string
+  // New fields
+  activityDate?: string | null  // ISO date string
+  timePeriod?: 'morning' | 'afternoon' | 'evening' | 'all_day' | 'flexible' | null
+  startTime?: string | null  // HH:MM format
+  endTime?: string | null    // HH:MM format
+  backupLocationId?: string | null
+  weatherData?: {
+    date: string
+    condition: string
+    temperature: number
+    precipitation: number
+    fetchedAt: string
+  } | null
 }
 
 // Meal entity - matches runtime structure from buildMeals in tripModel.js
@@ -99,13 +116,18 @@ export interface Meal extends BaseEntity {
   dayId: string
   startSlot: number
   status: 'Assigned' | 'Pending' | 'Confirmed'
-  owner: string
-  reservationType: string
-  timeLabel: string
+  owner?: string
+  reservationType?: string
+  timeLabel?: string
   locationId?: string
   linkedEntityKeys?: string[]
   taskIds?: string[]
   note?: string
+  // New fields
+  mealDate?: string | null  // ISO date string
+  mealType?: 'breakfast' | 'brunch' | 'lunch' | 'dinner' | null
+  requiresReservation?: boolean | null
+  familyIds?: string[]  // Array of family IDs (from junction table)
 }
 
 // Expense entity - matches runtime structure from buildExpenses in tripModel.js

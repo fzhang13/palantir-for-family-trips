@@ -142,44 +142,55 @@ function StayCard({ location, onEdit, onDelete }: StayCardProps) {
 
       {/* Details */}
       <div className="space-y-2.5">
-        {/* Day */}
-        {location.dayId && (
-          <div className="flex items-center gap-2 text-sm">
-            <Calendar size={14} className="text-[#8B949E]" />
-            <span className="text-[#8B949E]">Day:</span>
-            <span className="text-[#C9D1D9] font-mono">
-              {getDayLabel(location.dayId)}
-            </span>
+        {/* Check-in/Check-out Dates */}
+        {(location.checkInDate || location.checkOutDate) && (
+          <div className="pt-2 border-t border-[#30363D]">
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              {location.checkInDate && (
+                <div>
+                  <span className="text-[#8B949E] text-xs">Check-in</span>
+                  <p className="text-[#C9D1D9] font-medium mt-0.5">
+                    {new Date(location.checkInDate + 'T00:00:00').toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </p>
+                  <p className="text-[#8B949E] text-xs mt-0.5">
+                    {new Date(location.checkInDate + 'T00:00:00').toLocaleDateString('en-US', {
+                      weekday: 'short',
+                    })}
+                  </p>
+                </div>
+              )}
+              {location.checkOutDate && (
+                <div>
+                  <span className="text-[#8B949E] text-xs">Check-out</span>
+                  <p className="text-[#C9D1D9] font-medium mt-0.5">
+                    {new Date(location.checkOutDate + 'T00:00:00').toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </p>
+                  <p className="text-[#8B949E] text-xs mt-0.5">
+                    {new Date(location.checkOutDate + 'T00:00:00').toLocaleDateString('en-US', {
+                      weekday: 'short',
+                    })}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {/* Summary */}
         {location.summary && (
-          <div className="flex items-start gap-2 text-sm">
+          <div className="flex items-start gap-2 text-sm pt-2 border-t border-[#30363D]">
             <FileText size={14} className="text-[#8B949E] mt-0.5 flex-shrink-0" />
             <div className="flex-1">
               <span className="text-[#8B949E]">Summary:</span>
               <p className="text-[#C9D1D9] mt-1 line-clamp-3">{location.summary}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Check-in/Check-out */}
-        {(location.checkIn || location.checkOut) && (
-          <div className="pt-2 border-t border-[#30363D]">
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              {location.checkIn && (
-                <div>
-                  <span className="text-[#8B949E]">Check-in:</span>
-                  <p className="text-[#C9D1D9] font-mono">{location.checkIn}</p>
-                </div>
-              )}
-              {location.checkOut && (
-                <div>
-                  <span className="text-[#8B949E]">Check-out:</span>
-                  <p className="text-[#C9D1D9] font-mono">{location.checkOut}</p>
-                </div>
-              )}
             </div>
           </div>
         )}

@@ -65,14 +65,24 @@ export function AddressAutocomplete({
             if (!placePrediction) return
 
             const place = placePrediction.toPlace()
-            await place.fetchFields({ fields: ['formattedAddress', 'location', 'displayName'] })
+            await place.fetchFields({ fields: ['formattedAddress', 'location', 'displayName', 'id'] })
 
             const address = place.formattedAddress || place.displayName || ''
             const lat = place.location?.lat()
             const lng = place.location?.lng()
 
+            // Create a compatible PlaceResult object
+            const placeResult: google.maps.places.PlaceResult = {
+              place_id: place.id || undefined,
+              formatted_address: place.formattedAddress ?? undefined,
+              geometry: lat !== undefined && lng !== undefined ? {
+                location: place.location!
+              } as google.maps.places.PlaceGeometry : undefined,
+              name: place.displayName ?? undefined,
+            }
+
             if (address) {
-              onChangeRef.current(address)
+              onChangeRef.current(address, placeResult)
             }
 
             if (lat !== undefined && lng !== undefined && onCoordinatesChangeRef.current) {

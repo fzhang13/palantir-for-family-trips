@@ -1,8 +1,10 @@
-import type { TripDocument, Family, Location, Route, TripMeta } from '@/types'
+import type { TripDocument, Family, Location, Route, TripMeta, Meal, Activity } from '@/types'
 import type {
   CreateFamilyInput,
   CreateLocationInput,
   CreateRouteInput,
+  CreateMealInput,
+  CreateActivityInput,
 } from '@/types/inputs'
 import type { TripRepository } from './TripRepository'
 import { supabase } from '@/lib/supabase'
@@ -197,8 +199,17 @@ export class SupabaseTripRepository implements TripRepository {
     return this.mapLocationFromDb(data)
   }
 
-  async addLocation(tripId: string, input: CreateLocationInput): Promise<Location> {
+  async addLocation(
+    tripId: string,
+    input: CreateLocationInput,
+    skipEntityCreation = false
+  ): Promise<{
+    location: Location
+    entityId?: string
+  }> {
     await this.ensureTrip(tripId)
+
+    // Insert location record
     const row = {
       trip_id: tripId,
       title: input.title,
@@ -213,16 +224,98 @@ export class SupabaseTripRepository implements TripRepository {
       parking_note: input.parkingNote,
       access_note: input.accessNote,
       directions_note: input.directionsNote,
+      check_in_date: input.checkInDate || null,
+      check_out_date: input.checkOutDate || null,
+      place_id: input.placeId || null,
       photos: [],
     }
 
-    const { data, error } = await this.client
+    const { data: locationData, error: locErr } = await this.client
       .from('locations')
       .insert(row)
       .select()
       .single()
-    if (error) throw new Error(error.message)
-    return this.mapLocationFromDb(data)
+    if (locErr) throw new Error(locErr.message)
+
+    const location = this.mapLocationFromDb(locationData)
+    let entityId: string | undefined
+
+    // Skip entity creation if requested (e.g., when addActivity/addMeal will create it)
+    if (skipEntityCreation) {
+      return { location }
+    }
+
+    // Create corresponding entity based on category
+    switch (input.category) {
+      case 'meal': {
+        const mealRow = {
+          trip_id: tripId,
+          location_id: location.id,
+          title: input.title,
+          day_id: input.dayId || 'all',
+          start_slot: 0,
+          status: 'Pending' as const,
+          owner: '',
+          reservation_type: '',
+          time_label: '',
+          note: '',
+        }
+        const { data: mealData, error: mealErr } = await this.client
+          .from('meals')
+          .insert(mealRow)
+          .select('id')
+          .single()
+        if (mealErr) throw new Error(`Failed to create meal: ${mealErr.message}`)
+        entityId = mealData.id
+        break
+      }
+
+      case 'activity': {
+        const activityRow = {
+          trip_id: tripId,
+          location_id: location.id,
+          title: input.title,
+          day_id: input.dayId || 'all',
+          window: '',
+          status: 'Go' as const,
+          risk_level: '',
+          weather_sensitivity: '',
+          description: '',
+          backup: '',
+          note: '',
+        }
+        const { data: activityData, error: actErr } = await this.client
+          .from('activities')
+          .insert(activityRow)
+          .select('id')
+          .single()
+        if (actErr) throw new Error(`Failed to create activity: ${actErr.message}`)
+        entityId = activityData.id
+        break
+      }
+
+      case 'stay': {
+        const stayRow = {
+          trip_id: tripId,
+          location_id: location.id,
+          title: input.title,
+          day_id: input.dayId || 'all',
+          category: '',
+          summary: input.summary || '',
+          note: '',
+        }
+        const { data: stayData, error: stayErr } = await this.client
+          .from('stay_items')
+          .insert(stayRow)
+          .select('id')
+          .single()
+        if (stayErr) throw new Error(`Failed to create stay item: ${stayErr.message}`)
+        entityId = stayData.id
+        break
+      }
+    }
+
+    return { location, entityId }
   }
 
   async updateLocation(tripId: string, locationId: string, updates: Partial<Location>): Promise<Location> {
@@ -243,6 +336,295 @@ export class SupabaseTripRepository implements TripRepository {
       .from('locations')
       .delete()
       .eq('id', locationId)
+      .eq('trip_id', tripId)
+    if (error) throw new Error(error.message)
+  }
+
+  // ─── Meals ─────────────────────────────────────────────────────────────────
+
+  async getMeals(tripId: string): Promise<Meal[]> {
+    const { data, error } = await this.client
+      .from('meals')
+      .select('*')
+      .eq('trip_id', tripId)
+    if (error) throw new Error(error.message)
+
+    // Fetch all junction table entries for this trip's meals
+    const mealIds = (data || []).map(row => row.id)
+    const { data: junctionData } = await this.client
+      .from('meal_families')
+      .select('meal_id, family_id')
+      .in('meal_id', mealIds)
+
+    // Group family IDs by meal ID
+    const familyIdsByMeal: Record<string, string[]> = {}
+    for (const row of junctionData || []) {
+      if (!familyIdsByMeal[row.meal_id]) {
+        familyIdsByMeal[row.meal_id] = []
+      }
+      familyIdsByMeal[row.meal_id].push(row.family_id)
+    }
+
+    // Map meals and attach family IDs
+    return (data || []).map(row => {
+      const meal = this.mapMealFromDb(row)
+      meal.familyIds = familyIdsByMeal[meal.id] || []
+      return meal
+    })
+  }
+
+  async getMeal(tripId: string, mealId: string): Promise<Meal> {
+    return this.getMealById(tripId, mealId)
+  }
+
+  async addMeal(tripId: string, input: CreateMealInput): Promise<Meal> {
+    await this.ensureTrip(tripId)
+
+    let locationId = input.locationId
+
+    // Create location if requested
+    if (input.createLocation) {
+      const { location } = await this.addLocation(
+        tripId,
+        {
+          ...input.createLocation,
+          category: 'meal',
+        },
+        true // Skip entity creation - we'll create the meal below
+      )
+      locationId = location.id
+    }
+
+    const row = {
+      trip_id: tripId,
+      title: input.title,
+      day_id: input.dayId,
+      start_slot: input.startSlot || 0,
+      status: input.status || 'Pending',
+      owner: input.owner || '',
+      reservation_type: input.reservationType || '',
+      time_label: input.timeLabel || '',
+      location_id: locationId,
+      note: input.note || '',
+      meal_date: input.mealDate || null,
+      meal_type: input.mealType || null,
+      requires_reservation: input.requiresReservation ?? null,
+    }
+
+    const { data, error } = await this.client
+      .from('meals')
+      .insert(row)
+      .select()
+      .single()
+    if (error) throw new Error(error.message)
+
+    const meal = this.mapMealFromDb(data)
+
+    // Handle meal_families junction table
+    if (input.familyIds && input.familyIds.length > 0) {
+      const junctionRows = input.familyIds.map(familyId => ({
+        meal_id: meal.id,
+        family_id: familyId,
+      }))
+
+      const { error: junctionError } = await this.client
+        .from('meal_families')
+        .insert(junctionRows)
+
+      if (junctionError) throw new Error(`Failed to link families to meal: ${junctionError.message}`)
+    }
+
+    // Fetch the meal again to get the familyIds from the junction table
+    return this.getMealById(tripId, meal.id)
+  }
+
+  /**
+   * Helper method to get meal by ID with familyIds populated from junction table
+   */
+  private async getMealById(tripId: string, mealId: string): Promise<Meal> {
+    const { data: mealData, error: mealError } = await this.client
+      .from('meals')
+      .select('*')
+      .eq('trip_id', tripId)
+      .eq('id', mealId)
+      .single()
+
+    if (mealError) throw new Error(mealError.message)
+
+    // Fetch family IDs from junction table
+    const { data: junctionData, error: junctionError } = await this.client
+      .from('meal_families')
+      .select('family_id')
+      .eq('meal_id', mealId)
+
+    if (junctionError) throw new Error(junctionError.message)
+
+    const familyIds = (junctionData || []).map(row => row.family_id)
+
+    const meal = this.mapMealFromDb(mealData)
+    meal.familyIds = familyIds
+
+    return meal
+  }
+
+  async updateMeal(tripId: string, mealId: string, updates: Partial<Meal>): Promise<Meal> {
+    const row = this.mapMealToDb(updates)
+    const { data, error } = await this.client
+      .from('meals')
+      .update(row)
+      .eq('id', mealId)
+      .eq('trip_id', tripId)
+      .select()
+      .single()
+    if (error) throw new Error(error.message)
+
+    // Handle familyIds update if provided
+    if (updates.familyIds !== undefined) {
+      // Delete existing junction records
+      const { error: deleteError } = await this.client
+        .from('meal_families')
+        .delete()
+        .eq('meal_id', mealId)
+
+      if (deleteError) throw new Error(`Failed to clear meal families: ${deleteError.message}`)
+
+      // Insert new junction records
+      if (updates.familyIds.length > 0) {
+        const junctionRows = updates.familyIds.map(familyId => ({
+          meal_id: mealId,
+          family_id: familyId,
+        }))
+
+        const { error: insertError } = await this.client
+          .from('meal_families')
+          .insert(junctionRows)
+
+        if (insertError) throw new Error(`Failed to update meal families: ${insertError.message}`)
+      }
+    }
+
+    return this.getMealById(tripId, mealId)
+  }
+
+  async deleteMeal(tripId: string, mealId: string): Promise<void> {
+    // Delete junction table records first (foreign key constraint)
+    const { error: junctionError } = await this.client
+      .from('meal_families')
+      .delete()
+      .eq('meal_id', mealId)
+
+    if (junctionError) throw new Error(`Failed to delete meal families: ${junctionError.message}`)
+
+    // Delete the meal record
+    const { error } = await this.client
+      .from('meals')
+      .delete()
+      .eq('id', mealId)
+      .eq('trip_id', tripId)
+    if (error) throw new Error(error.message)
+  }
+
+  // ─── Activities ────────────────────────────────────────────────────────────
+
+  async getActivities(tripId: string): Promise<Activity[]> {
+    const { data, error } = await this.client
+      .from('activities')
+      .select('*')
+      .eq('trip_id', tripId)
+    if (error) throw new Error(error.message)
+    return (data || []).map(this.mapActivityFromDb)
+  }
+
+  async getActivity(tripId: string, activityId: string): Promise<Activity> {
+    const { data, error } = await this.client
+      .from('activities')
+      .select('*')
+      .eq('trip_id', tripId)
+      .eq('id', activityId)
+      .single()
+    if (error) throw new Error(error.message)
+    return this.mapActivityFromDb(data)
+  }
+
+  async addActivity(tripId: string, input: CreateActivityInput): Promise<Activity> {
+    await this.ensureTrip(tripId)
+
+    let locationId = input.locationId
+    let backupLocationId = input.backupLocationId
+
+    // Create location if requested
+    if (input.createLocation) {
+      const { location } = await this.addLocation(
+        tripId,
+        {
+          ...input.createLocation,
+          category: 'activity',
+        },
+        true // Skip entity creation - we'll create the activity below
+      )
+      locationId = location.id
+    }
+
+    // Create backup location if requested
+    if (input.createBackupLocation) {
+      const { location: backupLocation } = await this.addLocation(
+        tripId,
+        {
+          ...input.createBackupLocation,
+          category: 'activity',
+        },
+        true // Skip entity creation
+      )
+      backupLocationId = backupLocation.id
+    }
+
+    const row = {
+      trip_id: tripId,
+      title: input.title,
+      day_id: input.dayId,
+      window: input.window || '',
+      status: input.status || 'Go',
+      risk_level: input.riskLevel || '',
+      weather_sensitivity: input.weatherSensitivity || '',
+      location_id: locationId,
+      description: input.description || '',
+      backup: input.backup || '',
+      note: input.note || '',
+      activity_date: input.activityDate || null,
+      time_period: input.timePeriod || null,
+      start_time: input.startTime || null,
+      end_time: input.endTime || null,
+      backup_location_id: backupLocationId || null,
+      weather_data: input.weatherData || null,
+    }
+
+    const { data, error } = await this.client
+      .from('activities')
+      .insert(row)
+      .select()
+      .single()
+    if (error) throw new Error(error.message)
+    return this.mapActivityFromDb(data)
+  }
+
+  async updateActivity(tripId: string, activityId: string, updates: Partial<Activity>): Promise<Activity> {
+    const row = this.mapActivityToDb(updates)
+    const { data, error } = await this.client
+      .from('activities')
+      .update(row)
+      .eq('id', activityId)
+      .eq('trip_id', tripId)
+      .select()
+      .single()
+    if (error) throw new Error(error.message)
+    return this.mapActivityFromDb(data)
+  }
+
+  async deleteActivity(tripId: string, activityId: string): Promise<void> {
+    const { error } = await this.client
+      .from('activities')
+      .delete()
+      .eq('id', activityId)
       .eq('trip_id', tripId)
     if (error) throw new Error(error.message)
   }
@@ -406,6 +788,9 @@ export class SupabaseTripRepository implements TripRepository {
     stopType: row.stop_type as string | undefined,
     placesQuery: row.places_query as string | undefined,
     reservationNote: row.reservation_note as string | undefined,
+    checkInDate: row.check_in_date as string | null,
+    checkOutDate: row.check_out_date as string | null,
+    placeId: row.place_id as string | null,
     linkedEntityKeys: [],
   })
 
@@ -460,6 +845,10 @@ export class SupabaseTripRepository implements TripRepository {
     linkedEntityKeys: [],
     taskIds: [],
     note: row.note as string | undefined,
+    mealDate: row.meal_date as string | null,
+    mealType: row.meal_type as 'breakfast' | 'brunch' | 'lunch' | 'dinner' | null,
+    requiresReservation: row.requires_reservation as boolean | null,
+    familyIds: [],  // Will be populated by caller when fetching from junction table
   })
 
   private mapActivityFromDb = (row: Record<string, unknown>): import('@/types').Activity => ({
@@ -475,6 +864,12 @@ export class SupabaseTripRepository implements TripRepository {
     description: row.description as string | undefined,
     backup: row.backup as string | undefined,
     note: row.note as string | undefined,
+    activityDate: row.activity_date as string | null,
+    timePeriod: row.time_period as 'morning' | 'afternoon' | 'evening' | 'all_day' | 'flexible' | null,
+    startTime: row.start_time as string | null,
+    endTime: row.end_time as string | null,
+    backupLocationId: row.backup_location_id as string | null,
+    weatherData: row.weather_data as Activity['weatherData'] | null,
     linkedEntityKeys: [],
     taskIds: [],
   })
@@ -569,6 +964,9 @@ export class SupabaseTripRepository implements TripRepository {
     if (updates.stopType !== undefined) row.stop_type = updates.stopType
     if (updates.placesQuery !== undefined) row.places_query = updates.placesQuery
     if (updates.reservationNote !== undefined) row.reservation_note = updates.reservationNote
+    if (updates.checkInDate !== undefined) row.check_in_date = updates.checkInDate
+    if (updates.checkOutDate !== undefined) row.check_out_date = updates.checkOutDate
+    if (updates.placeId !== undefined) row.place_id = updates.placeId
     return row
   }
 
@@ -587,6 +985,44 @@ export class SupabaseTripRepository implements TripRepository {
     if (updates.simulationMilestones !== undefined) row.simulation_milestones = updates.simulationMilestones
     if (updates.path !== undefined) row.path = updates.path
     if (updates.dashed !== undefined) row.dashed = updates.dashed
+    return row
+  }
+
+  private mapMealToDb(updates: Partial<import('@/types').Meal>): Record<string, unknown> {
+    const row: Record<string, unknown> = {}
+    if (updates.title !== undefined) row.title = updates.title
+    if (updates.dayId !== undefined) row.day_id = updates.dayId
+    if (updates.startSlot !== undefined) row.start_slot = updates.startSlot
+    if (updates.status !== undefined) row.status = updates.status
+    if (updates.owner !== undefined) row.owner = updates.owner
+    if (updates.reservationType !== undefined) row.reservation_type = updates.reservationType
+    if (updates.timeLabel !== undefined) row.time_label = updates.timeLabel
+    if (updates.locationId !== undefined) row.location_id = updates.locationId
+    if (updates.note !== undefined) row.note = updates.note
+    if (updates.mealDate !== undefined) row.meal_date = updates.mealDate
+    if (updates.mealType !== undefined) row.meal_type = updates.mealType
+    if (updates.requiresReservation !== undefined) row.requires_reservation = updates.requiresReservation
+    return row
+  }
+
+  private mapActivityToDb(updates: Partial<import('@/types').Activity>): Record<string, unknown> {
+    const row: Record<string, unknown> = {}
+    if (updates.title !== undefined) row.title = updates.title
+    if (updates.dayId !== undefined) row.day_id = updates.dayId
+    if (updates.window !== undefined) row.window = updates.window
+    if (updates.status !== undefined) row.status = updates.status
+    if (updates.riskLevel !== undefined) row.risk_level = updates.riskLevel
+    if (updates.weatherSensitivity !== undefined) row.weather_sensitivity = updates.weatherSensitivity
+    if (updates.locationId !== undefined) row.location_id = updates.locationId
+    if (updates.description !== undefined) row.description = updates.description
+    if (updates.backup !== undefined) row.backup = updates.backup
+    if (updates.note !== undefined) row.note = updates.note
+    if (updates.activityDate !== undefined) row.activity_date = updates.activityDate
+    if (updates.timePeriod !== undefined) row.time_period = updates.timePeriod
+    if (updates.startTime !== undefined) row.start_time = updates.startTime
+    if (updates.endTime !== undefined) row.end_time = updates.endTime
+    if (updates.backupLocationId !== undefined) row.backup_location_id = updates.backupLocationId
+    if (updates.weatherData !== undefined) row.weather_data = updates.weatherData
     return row
   }
 

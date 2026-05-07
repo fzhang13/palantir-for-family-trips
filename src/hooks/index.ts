@@ -7,7 +7,7 @@ export { useGoogleMaps } from './useGoogleMaps'
 export { useDirections } from './useDirections'
 
 // React Query hooks
-export { useFamilies, useLocations, useRoutes, useTrip } from './useTripQueries'
+export { useFamilies, useLocations, useRoutes, useTrip, useMeals, useActivities } from './useTripQueries'
 export {
   useAddFamily,
   useUpdateFamily,
@@ -18,4 +18,10 @@ export {
   useAddRoute,
   useUpdateRoute,
   useDeleteRoute,
+  useAddMeal,
+  useUpdateMeal,
+  useDeleteMeal,
+  useAddActivity,
+  useUpdateActivity,
+  useDeleteActivity,
 } from './useTripMutations'

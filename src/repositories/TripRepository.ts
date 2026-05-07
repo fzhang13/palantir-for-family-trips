@@ -4,11 +4,15 @@ import type {
   Family,
   Location,
   Route,
+  Meal,
+  Activity,
 } from '@/types'
 import type {
   CreateFamilyInput,
   CreateLocationInput,
   CreateRouteInput,
+  CreateMealInput,
+  CreateActivityInput,
 } from '@/types/inputs'
 
 export interface TripRepository {
@@ -35,8 +39,9 @@ export interface TripRepository {
   getLocation(tripId: string, locationId: string): Promise<Location>
   addLocation(
     tripId: string,
-    location: CreateLocationInput
-  ): Promise<Location>
+    location: CreateLocationInput,
+    skipEntityCreation?: boolean
+  ): Promise<{ location: Location; entityId?: string }>
   updateLocation(
     tripId: string,
     locationId: string,
@@ -54,4 +59,24 @@ export interface TripRepository {
     updates: Partial<Route>
   ): Promise<Route>
   deleteRoute(tripId: string, routeId: string): Promise<void>
+
+  // Meal CRUD
+  getMeals(tripId: string): Promise<Meal[]>
+  addMeal(tripId: string, input: CreateMealInput): Promise<Meal>
+  updateMeal(
+    tripId: string,
+    mealId: string,
+    updates: Partial<Meal>
+  ): Promise<Meal>
+  deleteMeal(tripId: string, mealId: string): Promise<void>
+
+  // Activity CRUD
+  getActivities(tripId: string): Promise<Activity[]>
+  addActivity(tripId: string, input: CreateActivityInput): Promise<Activity>
+  updateActivity(
+    tripId: string,
+    activityId: string,
+    updates: Partial<Activity>
+  ): Promise<Activity>
+  deleteActivity(tripId: string, activityId: string): Promise<void>
 }

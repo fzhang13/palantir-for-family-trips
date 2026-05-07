@@ -1,10 +1,13 @@
+import { useState, useEffect } from 'react'
 import { useForm, useFormState } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'react-hot-toast'
 import { BaseModal } from './BaseModal'
 import { AddressAutocomplete } from '@/components/forms'
+import { DayBadge } from '@/components/ui/DayBadge'
 import { createLocationSchema, type CreateLocationFormData } from '@/schemas'
 import { useUpdateLocation } from '@/hooks'
+import { getDayName, calculateNights } from '@/lib/dateUtils'
 import type { Location } from '@/types'
 
 interface EditLocationModalProps {
@@ -21,9 +24,12 @@ export function EditLocationModal({ isOpen, onClose, location }: EditLocationMod
     defaultValues: {
       title: location.title,
       address: location.address,
-      category: location.category as 'stay' | 'meal' | 'logistics',
-      coordinates: location.coordinates,
+      category: location.category as 'stay' | 'meal' | 'activity',
+      coordinates: location.coordinates || { lat: 0, lng: 0 },
+      placeId: location.placeId || undefined,
       summary: location.summary || '',
+      checkInDate: location.checkInDate || undefined,
+      checkOutDate: location.checkOutDate || undefined,
     },
   })
 
@@ -37,6 +43,34 @@ export function EditLocationModal({ isOpen, onClose, location }: EditLocationMod
   } = form
 
   const { isDirty } = useFormState({ control })
+
+  const checkInDate = watch('checkInDate')
+  const checkOutDate = watch('checkOutDate')
+
+  // Calculate night count and generate day list
+  const [nights, setNights] = useState(0)
+  const [dayList, setDayList] = useState<string[]>([])
+
+  useEffect(() => {
+    if (checkInDate && checkOutDate) {
+      const checkIn = new Date(checkInDate + 'T00:00:00')
+      const checkOut = new Date(checkOutDate + 'T00:00:00')
+      const nightCount = calculateNights(checkIn, checkOut)
+      setNights(nightCount)
+
+      // Generate list of dates for badges
+      const dates: string[] = []
+      for (let i = 0; i <= nightCount; i++) {
+        const date = new Date(checkIn)
+        date.setDate(date.getDate() + i)
+        dates.push(date.toISOString().split('T')[0])
+      }
+      setDayList(dates)
+    } else {
+      setNights(0)
+      setDayList([])
+    }
+  }, [checkInDate, checkOutDate])
 
   const onSubmit = async (data: CreateLocationFormData) => {
     try {
@@ -116,6 +150,74 @@ export function EditLocationModal({ isOpen, onClose, location }: EditLocationMod
             <p className="mt-1 text-sm text-[#F85149]">{errors.category.message}</p>
           )}
         </div>
+
+        {/* Check-in/Check-out Dates (only for stays) */}
+        {watch('category') === 'stay' && (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
+                  Check-in *
+                </label>
+                <input
+                  {...register('checkInDate')}
+                  type="date"
+                  className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
+                />
+                {checkInDate && (
+                  <p className="mt-1 text-xs text-[#8B949E]">
+                    {getDayName(new Date(checkInDate + 'T00:00:00'))}
+                  </p>
+                )}
+                {errors.checkInDate && (
+                  <p className="mt-1 text-sm text-[#F85149]">
+                    {errors.checkInDate.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
+                  Check-out *
+                </label>
+                <input
+                  {...register('checkOutDate')}
+                  type="date"
+                  className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
+                />
+                {checkOutDate && (
+                  <p className="mt-1 text-xs text-[#8B949E]">
+                    {getDayName(new Date(checkOutDate + 'T00:00:00'))}
+                    {nights > 0 && ` (${nights} ${nights === 1 ? 'night' : 'nights'})`}
+                  </p>
+                )}
+                {errors.checkOutDate && (
+                  <p className="mt-1 text-sm text-[#F85149]">
+                    {errors.checkOutDate.message}
+                  </p>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Visual Day Summary */}
+        {watch('category') === 'stay' && dayList.length > 0 && (
+          <div className="p-3 bg-[#161B22] border border-[#30363D] rounded">
+            <p className="text-xs text-[#8B949E] uppercase tracking-wider mb-2">
+              Staying {nights} {nights === 1 ? 'night' : 'nights'}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {dayList.map((date, index) => (
+                <DayBadge
+                  key={date}
+                  date={date}
+                  isCheckout={index === dayList.length - 1}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Summary */}
         <div>

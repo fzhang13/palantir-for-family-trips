@@ -18,7 +18,7 @@ export interface CreateFamilyInput {
 
 export interface CreateLocationInput {
   title: string
-  category: 'stay' | 'meal' | 'logistics'
+  category: 'stay' | 'meal' | 'activity'
   address: string
   coordinates: { lat: number; lng: number }
   stopType?: string
@@ -29,6 +29,10 @@ export interface CreateLocationInput {
   parkingNote?: string
   accessNote?: string
   directionsNote?: string
+  // New fields for stays
+  checkInDate?: string  // ISO date string
+  checkOutDate?: string // ISO date string
+  placeId?: string
 }
 
 export type CreateRouteInput = z.infer<typeof createRouteSchema>
@@ -36,6 +40,7 @@ export type CreateRouteInput = z.infer<typeof createRouteSchema>
 export interface CreateMealInput {
   title: string
   dayId: string
+  startSlot?: number
   timeLabel?: string
   status?: 'Assigned' | 'Pending' | 'Confirmed'
   owner?: string
@@ -43,6 +48,11 @@ export interface CreateMealInput {
   locationId?: string
   note?: string
   createLocation?: CreateLocationInput
+  // New fields
+  mealDate?: string  // ISO date string
+  mealType?: 'breakfast' | 'brunch' | 'lunch' | 'dinner'
+  requiresReservation?: boolean
+  familyIds?: string[]  // Array of family UUIDs
 }
 
 export interface CreateActivityInput {
@@ -57,4 +67,18 @@ export interface CreateActivityInput {
   backup?: string
   note?: string
   createLocation?: CreateLocationInput
+  // New fields
+  activityDate?: string  // ISO date string
+  timePeriod?: 'morning' | 'afternoon' | 'evening' | 'all_day' | 'flexible'
+  startTime?: string  // HH:MM format
+  endTime?: string    // HH:MM format
+  backupLocationId?: string
+  createBackupLocation?: CreateLocationInput
+  weatherData?: {
+    date: string
+    condition: string
+    temperature: number
+    precipitation: number
+    fetchedAt: string
+  }
 }

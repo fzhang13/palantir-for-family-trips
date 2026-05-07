@@ -1,5 +1,12 @@
+-- Migration: initial_schema
+-- Generated: 2026-05-06T18:58:51.307Z
+
+-- =============================================================================
+-- INITIAL_SCHEMA
+-- =============================================================================
+
 -- Supabase Migration: Initial Schema for Trip Command Center
--- Created: 2026-05-05
+-- Created: 2026-05-06
 
 -- =============================================================================
 -- UTILITY: updated_at trigger function
@@ -88,7 +95,7 @@ create table locations (
   id uuid primary key default gen_random_uuid(),
   trip_id uuid not null references trips(id) on delete cascade,
   title text not null,
-  category text check (category in ('stay', 'meal', 'logistics', 'park')),
+  category text check (category in ('stay', 'meal', 'activity')),
   day_id text,
   address text,
   coordinates jsonb, -- {lat, lng}
@@ -100,6 +107,8 @@ create table locations (
   lock_note text,
   check_in text,
   check_out text,
+  check_in_date date,
+  check_out_date date,
   wifi_network text,
   wifi_password text,
   host_name text,
@@ -112,12 +121,15 @@ create table locations (
   stop_type text,
   places_query text,
   reservation_note text,
+  place_id text,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
 
 create index idx_locations_trip on locations(trip_id);
 create index idx_locations_category on locations(trip_id, category);
+create index idx_locations_date_range on locations(check_in_date, check_out_date);
+create index idx_locations_place_id on locations(place_id);
 
 create trigger locations_updated_at
   before update on locations
@@ -190,6 +202,9 @@ create table meals (
   title text,
   day_id text,
   start_slot int,
+  meal_date date,
+  meal_type text check (meal_type in ('breakfast', 'brunch', 'lunch', 'dinner')),
+  requires_reservation boolean default false,
   status text check (status in ('Assigned', 'Pending', 'Confirmed')),
   owner text,
   reservation_type text,
@@ -201,6 +216,8 @@ create table meals (
 );
 
 create index idx_meals_trip on meals(trip_id);
+create index idx_meals_meal_date on meals(meal_date);
+create index idx_meals_meal_type on meals(meal_type);
 
 create trigger meals_updated_at
   before update on meals
@@ -215,10 +232,16 @@ create table activities (
   title text,
   day_id text,
   "window" text,
+  activity_date date,
+  time_period text check (time_period in ('morning', 'afternoon', 'evening', 'all_day', 'flexible')),
+  start_time time,
+  end_time time,
   status text check (status in ('Go', 'Watch')),
-  risk_level text,
+  risk_level text check (risk_level is null or risk_level in ('low', 'medium', 'high')),
   weather_sensitivity text,
   location_id uuid references locations(id) on delete set null,
+  backup_location_id uuid references locations(id) on delete set null,
+  weather_data jsonb,
   description text,
   backup text,
   note text,
@@ -227,6 +250,8 @@ create table activities (
 );
 
 create index idx_activities_trip on activities(trip_id);
+create index idx_activities_activity_date on activities(activity_date);
+create index idx_activities_time_range on activities(activity_date, start_time, end_time);
 
 create trigger activities_updated_at
   before update on activities
@@ -343,6 +368,18 @@ create table entity_tasks (
 );
 
 -- =============================================================================
+-- TABLE: meal_families (many-to-many relationship between meals and families)
+-- =============================================================================
+create table meal_families (
+  meal_id uuid not null references meals(id) on delete cascade,
+  family_id uuid not null references families(id) on delete cascade,
+  primary key (meal_id, family_id)
+);
+
+create index idx_meal_families_meal on meal_families(meal_id);
+create index idx_meal_families_family on meal_families(family_id);
+
+-- =============================================================================
 -- ROW LEVEL SECURITY: Permissive policies (no auth for now)
 -- =============================================================================
 alter table trips enable row level security;
@@ -359,6 +396,7 @@ alter table tasks enable row level security;
 alter table page_notes enable row level security;
 alter table entity_links enable row level security;
 alter table entity_tasks enable row level security;
+alter table meal_families enable row level security;
 
 -- Allow all operations (no auth enforcement yet)
 create policy "Allow all" on trips for all using (true) with check (true);
@@ -375,6 +413,7 @@ create policy "Allow all" on tasks for all using (true) with check (true);
 create policy "Allow all" on page_notes for all using (true) with check (true);
 create policy "Allow all" on entity_links for all using (true) with check (true);
 create policy "Allow all" on entity_tasks for all using (true) with check (true);
+create policy "Allow all" on meal_families for all using (true) with check (true);
 
 -- =============================================================================
 -- REALTIME: Enable for all entity tables
@@ -389,3 +428,4 @@ alter publication supabase_realtime add table stay_items;
 alter publication supabase_realtime add table expenses;
 alter publication supabase_realtime add table tasks;
 alter publication supabase_realtime add table page_notes;
+alter publication supabase_realtime add table meal_families;

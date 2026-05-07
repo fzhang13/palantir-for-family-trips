@@ -99,9 +99,27 @@ export function useAddLocation() {
       location: CreateLocationInput
     }) => tripRepository.addLocation(tripId, location),
 
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['locations', variables.tripId || DEFAULT_TRIP_ID] })
-      queryClient.invalidateQueries({ queryKey: ['trip', variables.tripId || DEFAULT_TRIP_ID] })
+    onSuccess: (data, variables) => {
+      const { location } = data
+      const tripId = variables.tripId || DEFAULT_TRIP_ID
+
+      // Invalidate locations query
+      queryClient.invalidateQueries({ queryKey: ['locations', tripId] })
+      queryClient.invalidateQueries({ queryKey: ['trip', tripId] })
+
+      // Invalidate entity-specific query based on category
+      switch (location.category) {
+        case 'meal':
+          queryClient.invalidateQueries({ queryKey: ['meals', tripId] })
+          break
+        case 'activity':
+          queryClient.invalidateQueries({ queryKey: ['activities', tripId] })
+          break
+        case 'stay':
+          queryClient.invalidateQueries({ queryKey: ['stay_items', tripId] })
+          break
+      }
+
       toast.success('Location added successfully')
     },
 
@@ -232,6 +250,82 @@ export function useDeleteRoute() {
 
     onError: (error: Error) => {
       toast.error(`Failed to delete route: ${error.message}`)
+    },
+  })
+}
+
+// ─── Meals ─────────────────────────────────────────────────────────────────
+
+export function useAddMeal() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ tripId, input }: { tripId: string; input: import('@/types/inputs').CreateMealInput }) =>
+      tripRepository.addMeal(tripId, input),
+    onSuccess: (_, { tripId, input }) => {
+      queryClient.invalidateQueries({ queryKey: ['meals', tripId] })
+      if (input.createLocation) {
+        queryClient.invalidateQueries({ queryKey: ['locations', tripId] })
+      }
+    },
+  })
+}
+
+export function useUpdateMeal() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ tripId, mealId, updates }: { tripId: string; mealId: string; updates: Partial<import('@/types').Meal> }) =>
+      tripRepository.updateMeal(tripId, mealId, updates),
+    onSuccess: (_, { tripId }) => {
+      queryClient.invalidateQueries({ queryKey: ['meals', tripId] })
+    },
+  })
+}
+
+export function useDeleteMeal() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ tripId, mealId }: { tripId: string; mealId: string }) =>
+      tripRepository.deleteMeal(tripId, mealId),
+    onSuccess: (_, { tripId }) => {
+      queryClient.invalidateQueries({ queryKey: ['meals', tripId] })
+    },
+  })
+}
+
+// ─── Activities ────────────────────────────────────────────────────────────
+
+export function useAddActivity() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ tripId, input }: { tripId: string; input: import('@/types/inputs').CreateActivityInput }) =>
+      tripRepository.addActivity(tripId, input),
+    onSuccess: (_, { tripId, input }) => {
+      queryClient.invalidateQueries({ queryKey: ['activities', tripId] })
+      if (input.createLocation) {
+        queryClient.invalidateQueries({ queryKey: ['locations', tripId] })
+      }
+    },
+  })
+}
+
+export function useUpdateActivity() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ tripId, activityId, updates }: { tripId: string; activityId: string; updates: Partial<import('@/types').Activity> }) =>
+      tripRepository.updateActivity(tripId, activityId, updates),
+    onSuccess: (_, { tripId }) => {
+      queryClient.invalidateQueries({ queryKey: ['activities', tripId] })
+    },
+  })
+}
+
+export function useDeleteActivity() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ tripId, activityId }: { tripId: string; activityId: string }) =>
+      tripRepository.deleteActivity(tripId, activityId),
+    onSuccess: (_, { tripId }) => {
+      queryClient.invalidateQueries({ queryKey: ['activities', tripId] })
     },
   })
 }
