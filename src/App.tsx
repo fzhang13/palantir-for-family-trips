@@ -59,12 +59,7 @@ function AppContent() {
   )
 }
 
-function App() {
-  // Check Supabase configuration first
-  if (!supabase) {
-    return <SupabaseRequired />
-  }
-
+function AppWithSupabase() {
   const { data: activeTripId, isLoading } = useActiveTripId()
 
   if (isLoading) {
@@ -90,6 +85,15 @@ function App() {
       </TripProvider>
     </ErrorBoundary>
   )
+}
+
+function App() {
+  // Check Supabase configuration first
+  if (!supabase) {
+    return <SupabaseRequired />
+  }
+
+  return <AppWithSupabase />
 }
 
 export default App

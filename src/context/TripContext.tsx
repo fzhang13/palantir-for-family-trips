@@ -47,7 +47,6 @@ const TripContext = createContext<TripContextValue | null>(null)
 export function TripProvider({ children }: { children: ReactNode }) {
   const { data: activeTripId } = useActiveTripId()
   const { data: doc, isLoading, error } = useTrip(activeTripId ?? undefined)
-  const [currentPage, setCurrentPage] = useState<PageType>('itinerary')
 
   // Show loading state while fetching trip
   if (isLoading) {
@@ -73,6 +72,12 @@ export function TripProvider({ children }: { children: ReactNode }) {
       </div>
     )
   }
+
+  return <TripProviderInner doc={doc}>{children}</TripProviderInner>
+}
+
+function TripProviderInner({ doc, children }: { doc: TripDocument; children: ReactNode }) {
+  const [currentPage, setCurrentPage] = useState<PageType>('itinerary')
 
   const selection = useTripSelection(doc, currentPage)
   const timeline = useTimelineSimulation(doc)
