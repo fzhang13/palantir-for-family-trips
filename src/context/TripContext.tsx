@@ -1,11 +1,12 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 import type { TripDocument, PageType, EntitySelection, Entity } from '@/types'
 import {
-  usePersistedTripState,
   useTripSelection,
   useTimelineSimulation,
   useExpenseCalculations,
+  useActiveTripId,
 } from '@/hooks'
+import { useTrip } from '@/hooks/useTripQueries'
 
 interface TripContextValue {
   // Core state
@@ -45,26 +46,58 @@ interface TripContextValue {
 const TripContext = createContext<TripContextValue | null>(null)
 
 export function TripProvider({ children }: { children: ReactNode }) {
-  const [doc, updateDoc] = usePersistedTripState()
+  const { data: activeTripId } = useActiveTripId()
+  const { data: doc, isLoading, error } = useTrip(activeTripId ?? undefined)
   const [currentPage, setCurrentPage] = useState<PageType>('itinerary')
 
-  const selection = useTripSelection(doc, currentPage, updateDoc)
-  const timeline = useTimelineSimulation(doc, updateDoc)
-  const expenses = useExpenseCalculations(doc, updateDoc)
+  // Show loading state while fetching trip
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#0A0C10]">
+        <div className="w-12 h-12 border-4 border-[#30363D] border-t-[#58A6FF] rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  // Show error state if trip fetch failed
+  if (error || !doc) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#0A0C10]">
+        <div className="max-w-md p-8 border border-[#30363D] bg-[#0D1117] rounded text-center">
+          <h1 className="text-xl font-semibold text-[#E6EDF3] mb-4">
+            Failed to Load Trip
+          </h1>
+          <p className="text-[#8B949E]">
+            {error?.message || 'Unable to load trip data'}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // No-op function for hooks that still require onUpdateDoc
+  const noopUpdateDoc = useCallback(() => {
+    console.warn('updateDoc is deprecated - use React Query mutation hooks')
+  }, [])
+
+  const selection = useTripSelection(doc, currentPage, noopUpdateDoc)
+  const timeline = useTimelineSimulation(doc, noopUpdateDoc)
+  const expenses = useExpenseCalculations(doc, noopUpdateDoc)
 
   const updatePageNote = useCallback(
-    (page: PageType, note: string) => {
-      updateDoc((doc) => ({
-        ...doc,
-        pageNotes: { ...doc.pageNotes, [page]: note },
-      }))
+    (_page: PageType, _note: string) => {
+      // Page notes are no longer persisted - could add Supabase mutation here if needed
+      console.warn('Page notes are not persisted after LocalStorage removal')
     },
-    [updateDoc]
+    []
   )
 
   const value: TripContextValue = {
     doc,
-    updateDoc,
+    updateDoc: () => {
+      // No-op - mutations happen through React Query hooks
+      console.warn('updateDoc is deprecated - use React Query mutation hooks')
+    },
     currentPage,
     setCurrentPage,
     ...selection,
