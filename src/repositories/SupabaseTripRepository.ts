@@ -286,6 +286,12 @@ export class SupabaseTripRepository implements TripRepository {
       check_in_date: input.checkInDate || null,
       check_out_date: input.checkOutDate || null,
       place_id: input.placeId || null,
+      wifi_network: input.wifiNetwork || null,
+      wifi_password: input.wifiPassword || null,
+      host_name: input.hostName || null,
+      lock_note: input.lockNote || null,
+      check_in: input.checkIn || null,
+      check_out: input.checkOut || null,
       photos: [],
     }
 
