@@ -12,7 +12,11 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "generate:migration": "node scripts/generate-migration.mjs"
+    "generate:migration": "node scripts/generate-migration.mjs",
+    "validate": "npm run type-check && npm run test:run",
+    "prebuild": "npm run type-check",
+    "deploy:preview": "vercel",
+    "deploy:prod": "vercel --prod"
   },
   "keywords": [
     "react",
