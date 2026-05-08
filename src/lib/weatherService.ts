@@ -39,7 +39,10 @@ export async function fetchWeather(
     url.searchParams.append('start_date', dateStr)
     url.searchParams.append('end_date', dateStr)
     url.searchParams.append('temperature_unit', 'fahrenheit')
-    url.searchParams.append('daily', 'temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode')
+    url.searchParams.append(
+      'daily',
+      'temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode'
+    )
 
     const response = await fetch(url.toString())
 

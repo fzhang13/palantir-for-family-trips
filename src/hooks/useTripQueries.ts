@@ -89,7 +89,9 @@ export function useActiveTrips() {
     queryKey: ['trips', 'active'],
     queryFn: async () => {
       if (!supabase) {
-        throw new Error('Supabase client not initialized. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
+        throw new Error(
+          'Supabase client not initialized. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.'
+        )
       }
 
       const { data, error } = await supabase
@@ -100,7 +102,7 @@ export function useActiveTrips() {
 
       if (error) throw error
       return data || []
-    }
+    },
   })
 }
 
@@ -115,7 +117,9 @@ export function useTripMetadata(tripId?: string) {
     queryKey: ['trip-metadata', resolvedTripId],
     queryFn: async () => {
       if (!supabase) {
-        throw new Error('Supabase client not initialized. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
+        throw new Error(
+          'Supabase client not initialized. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.'
+        )
       }
 
       const { data, error } = await supabase

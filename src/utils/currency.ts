@@ -1,4 +1,3 @@
-
 /**
  * Format amount as USD currency
  */
@@ -36,7 +35,7 @@ export function buildEqualExpenseAllocations(
   const allocations: Record<string, number> = {}
 
   // Initial rounding
-  familyIds.forEach((id) => {
+  familyIds.forEach(id => {
     allocations[id] = Math.round(perFamily * 100) / 100
   })
 
@@ -75,7 +74,7 @@ export function validateAllocations(
   }
 
   // Check for negative allocations
-  const hasNegative = Object.values(allocations).some((val) => val < 0)
+  const hasNegative = Object.values(allocations).some(val => val < 0)
   if (hasNegative) {
     return { valid: false, error: 'Allocation amounts cannot be negative' }
   }

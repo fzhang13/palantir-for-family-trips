@@ -10,7 +10,14 @@ interface TimelineItemProps {
   families?: Family[]
 }
 
-export function TimelineItem({ item, onClick, onEdit, onDelete, locations = [], families = [] }: TimelineItemProps) {
+export function TimelineItem({
+  item,
+  onClick,
+  onEdit,
+  onDelete,
+  locations = [],
+  families = [],
+}: TimelineItemProps) {
   const isMeal = item.type === 'meal'
 
   // Get time/window display with enhanced formatting
@@ -29,7 +36,7 @@ export function TimelineItem({ item, onClick, onEdit, onDelete, locations = [], 
           breakfast: 'Breakfast',
           brunch: 'Brunch',
           lunch: 'Lunch',
-          dinner: 'Dinner'
+          dinner: 'Dinner',
         }
         return typeLabels[mealType] || 'Time TBD'
       })()
@@ -49,15 +56,13 @@ export function TimelineItem({ item, onClick, onEdit, onDelete, locations = [], 
           afternoon: 'Afternoon',
           evening: 'Evening',
           all_day: 'All Day',
-          flexible: 'Flexible'
+          flexible: 'Flexible',
         }
         return periodLabels[timePeriod] || activity.window || 'Window TBD'
       })()
 
   // Get location name
-  const location = item.locationId
-    ? locations.find(loc => loc.id === item.locationId)
-    : undefined
+  const location = item.locationId ? locations.find(loc => loc.id === item.locationId) : undefined
   const locationName = location?.title || (item.locationId ? 'Location linked' : null)
 
   // Get family names
@@ -108,9 +113,7 @@ export function TimelineItem({ item, onClick, onEdit, onDelete, locations = [], 
 
         {/* Center: Title and metadata */}
         <div className="flex-1 min-w-0">
-          <div className="text-[#C9D1D9] font-semibold mb-1">
-            {item.title}
-          </div>
+          <div className="text-[#C9D1D9] font-semibold mb-1">{item.title}</div>
 
           <div className="space-y-1">
             {/* Location */}
@@ -141,7 +144,8 @@ export function TimelineItem({ item, onClick, onEdit, onDelete, locations = [], 
               <div className="flex items-center gap-1 text-xs text-[#8B949E]">
                 <Thermometer size={12} />
                 <span>
-                  {(item as Activity).weatherData?.temperature}°F • {(item as Activity).weatherData?.condition}
+                  {(item as Activity).weatherData?.temperature}°F •{' '}
+                  {(item as Activity).weatherData?.condition}
                 </span>
               </div>
             )}
@@ -150,14 +154,12 @@ export function TimelineItem({ item, onClick, onEdit, onDelete, locations = [], 
 
         {/* Right: Status and Actions */}
         <div className="flex items-center gap-2">
-          <span className={`px-2 py-1 rounded text-xs font-medium ${statusColor}`}>
-            {status}
-          </span>
+          <span className={`px-2 py-1 rounded text-xs font-medium ${statusColor}`}>{status}</span>
 
           {/* Action buttons - show on hover */}
           <div className="hidden group-hover:flex items-center gap-1">
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation()
                 onEdit()
               }}
@@ -167,7 +169,7 @@ export function TimelineItem({ item, onClick, onEdit, onDelete, locations = [], 
               <Edit2 size={14} />
             </button>
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation()
                 onDelete()
               }}

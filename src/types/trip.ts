@@ -74,7 +74,7 @@ export interface Location extends BaseEntity {
   placesQuery?: string
   reservationNote?: string
   // New fields
-  checkInDate?: string | null  // ISO date string
+  checkInDate?: string | null // ISO date string
   checkOutDate?: string | null // ISO date string
   placeId?: string | null
   // Day range within trip (1-based, only for category='stay')
@@ -98,10 +98,10 @@ export interface Activity extends BaseEntity {
   backup?: string
   note?: string
   // New fields
-  activityDate?: string | null  // ISO date string
+  activityDate?: string | null // ISO date string
   timePeriod?: 'morning' | 'afternoon' | 'evening' | 'all_day' | 'flexible' | null
-  startTime?: string | null  // HH:MM format
-  endTime?: string | null    // HH:MM format
+  startTime?: string | null // HH:MM format
+  endTime?: string | null // HH:MM format
   backupLocationId?: string | null
   weatherData?: {
     date: string
@@ -127,10 +127,10 @@ export interface Meal extends BaseEntity {
   taskIds?: string[]
   note?: string
   // New fields
-  mealDate?: string | null  // ISO date string
+  mealDate?: string | null // ISO date string
   mealType?: 'breakfast' | 'brunch' | 'lunch' | 'dinner' | null
   requiresReservation?: boolean | null
-  familyIds?: string[]  // Array of family IDs (from junction table)
+  familyIds?: string[] // Array of family IDs (from junction table)
 }
 
 // Expense entity

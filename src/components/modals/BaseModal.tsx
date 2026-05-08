@@ -34,11 +34,24 @@ export function BaseModal({ isOpen, onClose, title, children, size = 'md' }: Bas
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-      <div className={`relative bg-[#161B22] border border-[#30363D] rounded-lg shadow-2xl ${sizeClasses[size]} w-full mx-4 max-h-[90vh] overflow-y-auto`}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div
+        className={`relative bg-[#161B22] border border-[#30363D] rounded-lg shadow-2xl ${sizeClasses[size]} w-full mx-4 max-h-[90vh] overflow-y-auto`}
+      >
         <div className="flex items-center justify-between p-6 border-b border-[#30363D]">
-          <h2 id="modal-title" className="text-xl font-semibold text-[#C9D1D9]">{title}</h2>
+          <h2 id="modal-title" className="text-xl font-semibold text-[#C9D1D9]">
+            {title}
+          </h2>
           <button
             onClick={onClose}
             className="text-[#8B949E] hover:text-[#C9D1D9] transition-colors"

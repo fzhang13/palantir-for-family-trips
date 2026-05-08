@@ -8,28 +8,28 @@ import { supabase } from '@/lib/supabase'
 import { SupabaseRequired } from '@/components/SupabaseRequired'
 
 const ItineraryPage = lazy(() =>
-  import('@/components/pages/ItineraryPage').then((mod) => ({
+  import('@/components/pages/ItineraryPage').then(mod => ({
     default: mod.ItineraryPage,
   }))
 )
 const StayPage = lazy(() =>
-  import('@/components/pages/StayPage').then((mod) => ({ default: mod.StayPage }))
+  import('@/components/pages/StayPage').then(mod => ({ default: mod.StayPage }))
 )
 const MealsPage = lazy(() =>
-  import('@/components/pages/MealsPage').then((mod) => ({ default: mod.MealsPage }))
+  import('@/components/pages/MealsPage').then(mod => ({ default: mod.MealsPage }))
 )
 const ActivitiesPage = lazy(() =>
-  import('@/components/pages/ActivitiesPage').then((mod) => ({
+  import('@/components/pages/ActivitiesPage').then(mod => ({
     default: mod.ActivitiesPage,
   }))
 )
 const ExpensesPage = lazy(() =>
-  import('@/components/pages/ExpensesPage').then((mod) => ({
+  import('@/components/pages/ExpensesPage').then(mod => ({
     default: mod.ExpensesPage,
   }))
 )
 const FamiliesPage = lazy(() =>
-  import('@/components/pages/FamiliesPage').then((mod) => ({
+  import('@/components/pages/FamiliesPage').then(mod => ({
     default: mod.FamiliesPage,
   }))
 )

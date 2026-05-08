@@ -49,7 +49,8 @@ export const TRIP_META: TripMetadata = {
     checkOut: 'Check-out before 11:00 AM',
     gateNote: 'Community access details are intentionally withheld in the sanitized demo.',
     parkingNote: 'Parking guidance is intentionally simplified in the sanitized demo.',
-    directionsNote: 'Use the Pine Mountain Lake waypoint for planning. Exact arrival instructions are intentionally withheld.',
+    directionsNote:
+      'Use the Pine Mountain Lake waypoint for planning. Exact arrival instructions are intentionally withheld.',
     lockNote: null,
     wifiNetwork: null,
     wifiPassword: null,
@@ -127,10 +128,7 @@ export const MAP_ROUTES = [
     focusDay: 'friday',
     tone: 'violet',
     dashed: true,
-    path: [
-      { lat: 39.5296, lng: -119.8138 },
-      PUBLIC_BASECAMP_COORDINATES,
-    ],
+    path: [{ lat: 39.5296, lng: -119.8138 }, PUBLIC_BASECAMP_COORDINATES],
   },
   {
     id: 'route-la-north-star',
@@ -298,9 +296,30 @@ export const ITINERARY_ROWS = [
     id: 'travel',
     label: 'Transit',
     segments: [
-      { id: 'north-star-drive', familyId: 'north-star', start: 1.75, span: 0.92, color: 'warning', label: 'Parkers drive' },
-      { id: 'silver-peak-drive', familyId: 'silver-peak', start: 2.09, span: 0.58, color: 'critical', label: 'Jiangs drive' },
-      { id: 'desert-bloom-drive', familyId: 'desert-bloom', start: 5.33, span: 0.83, color: 'violet', label: 'Riveras drive' },
+      {
+        id: 'north-star-drive',
+        familyId: 'north-star',
+        start: 1.75,
+        span: 0.92,
+        color: 'warning',
+        label: 'Parkers drive',
+      },
+      {
+        id: 'silver-peak-drive',
+        familyId: 'silver-peak',
+        start: 2.09,
+        span: 0.58,
+        color: 'critical',
+        label: 'Jiangs drive',
+      },
+      {
+        id: 'desert-bloom-drive',
+        familyId: 'desert-bloom',
+        start: 5.33,
+        span: 0.83,
+        color: 'violet',
+        label: 'Riveras drive',
+      },
     ],
   },
   {
@@ -325,20 +344,97 @@ export const ITINERARY_ROWS = [
 ]
 
 export const INITIAL_MEALS = [
-  { id: 'thu-dinner', day: 'Thursday', meal: 'Two Guys Pizza Pies', owner: 'Walk-in', status: 'Assigned', note: 'Simple first-night pizza dinner plan around 6:00 PM with a one-hour stop before heading back to basecamp' },
-  { id: 'fri-breakfast', day: 'Friday', meal: 'Basecamp breakfast', owner: 'Shared', status: 'Assigned', note: 'Keep breakfast easy at basecamp before the local Friday reset day' },
-  { id: 'fri-lunch', day: 'Friday', meal: 'The Grill at Pine Mountain Lake', owner: 'Shared', status: 'Assigned', note: 'Local lunch outing without creating a Friday evening convoy' },
-  { id: 'fri-dinner', day: 'Friday', meal: 'Basecamp dinner', owner: 'Shared', status: 'Assigned', note: 'Dinner at basecamp keeps Friday evening drive-free' },
-  { id: 'sat-lunch', day: 'Saturday', meal: 'Packed Yosemite lunch', owner: 'Shared', status: 'Assigned', note: 'Portable lunch to keep the Yosemite day flexible' },
-  { id: 'sat-dinner', day: 'Saturday', meal: 'Around The Horn Brewing Company', owner: 'Walk-in', status: 'Assigned', note: 'Return-drive dinner stop in Groveland after Yosemite' },
-  { id: 'sun-breakfast', day: 'Sunday', meal: 'Basecamp brunch before departure', owner: 'Shared', status: 'Assigned', note: 'Cook brunch at basecamp before checkout and the drive home' },
+  {
+    id: 'thu-dinner',
+    day: 'Thursday',
+    meal: 'Two Guys Pizza Pies',
+    owner: 'Walk-in',
+    status: 'Assigned',
+    note: 'Simple first-night pizza dinner plan around 6:00 PM with a one-hour stop before heading back to basecamp',
+  },
+  {
+    id: 'fri-breakfast',
+    day: 'Friday',
+    meal: 'Basecamp breakfast',
+    owner: 'Shared',
+    status: 'Assigned',
+    note: 'Keep breakfast easy at basecamp before the local Friday reset day',
+  },
+  {
+    id: 'fri-lunch',
+    day: 'Friday',
+    meal: 'The Grill at Pine Mountain Lake',
+    owner: 'Shared',
+    status: 'Assigned',
+    note: 'Local lunch outing without creating a Friday evening convoy',
+  },
+  {
+    id: 'fri-dinner',
+    day: 'Friday',
+    meal: 'Basecamp dinner',
+    owner: 'Shared',
+    status: 'Assigned',
+    note: 'Dinner at basecamp keeps Friday evening drive-free',
+  },
+  {
+    id: 'sat-lunch',
+    day: 'Saturday',
+    meal: 'Packed Yosemite lunch',
+    owner: 'Shared',
+    status: 'Assigned',
+    note: 'Portable lunch to keep the Yosemite day flexible',
+  },
+  {
+    id: 'sat-dinner',
+    day: 'Saturday',
+    meal: 'Around The Horn Brewing Company',
+    owner: 'Walk-in',
+    status: 'Assigned',
+    note: 'Return-drive dinner stop in Groveland after Yosemite',
+  },
+  {
+    id: 'sun-breakfast',
+    day: 'Sunday',
+    meal: 'Basecamp brunch before departure',
+    owner: 'Shared',
+    status: 'Assigned',
+    note: 'Cook brunch at basecamp before checkout and the drive home',
+  },
 ]
 
 export const INITIAL_EXPENSES = [
-  { id: 'airbnb', label: 'Basecamp booking', payer: 'Parkers', amount: 1280, split: '3 families', settled: false },
-  { id: 'groceries', label: 'Groceries', payer: 'Jiangs', amount: 210, split: 'shared food', settled: false },
-  { id: 'gas', label: 'Gas + driving', payer: 'Each family', amount: 0, split: 'individual', settled: true },
-  { id: 'parking', label: 'Activity / gate / parking extras', payer: 'Unassigned', amount: 60, split: 'shared', settled: false },
+  {
+    id: 'airbnb',
+    label: 'Basecamp booking',
+    payer: 'Parkers',
+    amount: 1280,
+    split: '3 families',
+    settled: false,
+  },
+  {
+    id: 'groceries',
+    label: 'Groceries',
+    payer: 'Jiangs',
+    amount: 210,
+    split: 'shared food',
+    settled: false,
+  },
+  {
+    id: 'gas',
+    label: 'Gas + driving',
+    payer: 'Each family',
+    amount: 0,
+    split: 'individual',
+    settled: true,
+  },
+  {
+    id: 'parking',
+    label: 'Activity / gate / parking extras',
+    payer: 'Unassigned',
+    amount: 60,
+    split: 'shared',
+    settled: false,
+  },
 ]
 
 export const ACTIVITIES = [
@@ -347,7 +443,8 @@ export const ACTIVITIES = [
     title: 'Transit + settle in',
     status: 'Go',
     window: 'Thu / all day',
-    description: 'Two families move on Thursday. First-night goal is arrival, check-in, kid decompression, and an easy dinner.',
+    description:
+      'Two families move on Thursday. First-night goal is arrival, check-in, kid decompression, and an easy dinner.',
     backup: 'If traffic spikes, switch to late arrival meal and minimum-viable setup.',
   },
   {
@@ -355,7 +452,8 @@ export const ACTIVITIES = [
     title: 'Pine Mountain Lake Day',
     status: 'Go',
     window: 'Fri / all day',
-    description: 'Local lake day close to basecamp. Lower logistics load, easier for kids, flexible for the Friday-arrival family.',
+    description:
+      'Local lake day close to basecamp. Lower logistics load, easier for kids, flexible for the Friday-arrival family.',
     backup: 'If weather or parking gets weird, shift to cabin hang + shorter local outing.',
   },
   {
@@ -363,7 +461,8 @@ export const ACTIVITIES = [
     title: 'Yosemite Day',
     status: 'Watch',
     window: 'Sat / early start',
-    description: 'Primary excursion day. Needs early departure, packed lunches, kid pacing, and weather-aware backup logic.',
+    description:
+      'Primary excursion day. Needs early departure, packed lunches, kid pacing, and weather-aware backup logic.',
     backup: 'If showers worsen, downgrade to scenic stops + flexible walking plan.',
   },
   {
@@ -395,8 +494,10 @@ export const STAY_DETAILS = {
 export const INITIAL_NOTES = {
   itinerary: 'Mission priority: reduce Friday arrival chaos and make Saturday easy on the kids.',
   stay: 'Need one clean arrival protocol so the first family is not doing all the setup work.',
-  meals: 'Restaurant anchors are set for Thursday and Friday, while the rest of the weekend leans into basecamp cook-in logistics.',
-  activities: 'Yosemite is the headline day, but Pine Mountain Lake should feel fully worth the trip on its own.',
+  meals:
+    'Restaurant anchors are set for Thursday and Friday, while the rest of the weekend leans into basecamp cook-in logistics.',
+  activities:
+    'Yosemite is the headline day, but Pine Mountain Lake should feel fully worth the trip on its own.',
   expenses: 'Keep this light. Shared visibility matters more than perfect accounting.',
   families: 'Each family should know its task package before Thursday morning.',
 }

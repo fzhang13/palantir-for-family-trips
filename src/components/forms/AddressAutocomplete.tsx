@@ -27,8 +27,12 @@ export function AddressAutocomplete({
   // Keep stable refs to callbacks so the effect never needs to re-run due to them
   const onChangeRef = useRef(onChange)
   const onCoordinatesChangeRef = useRef(onCoordinatesChange)
-  useEffect(() => { onChangeRef.current = onChange }, [onChange])
-  useEffect(() => { onCoordinatesChangeRef.current = onCoordinatesChange }, [onCoordinatesChange])
+  useEffect(() => {
+    onChangeRef.current = onChange
+  }, [onChange])
+  useEffect(() => {
+    onCoordinatesChangeRef.current = onCoordinatesChange
+  }, [onCoordinatesChange])
 
   useEffect(() => {
     setInputValue(value)
@@ -65,7 +69,9 @@ export function AddressAutocomplete({
             if (!placePrediction) return
 
             const place = placePrediction.toPlace()
-            await place.fetchFields({ fields: ['formattedAddress', 'location', 'displayName', 'id'] })
+            await place.fetchFields({
+              fields: ['formattedAddress', 'location', 'displayName', 'id'],
+            })
 
             const address = place.formattedAddress || place.displayName || ''
             const lat = place.location?.lat()
@@ -75,9 +81,12 @@ export function AddressAutocomplete({
             const placeResult: google.maps.places.PlaceResult = {
               place_id: place.id || undefined,
               formatted_address: place.formattedAddress ?? undefined,
-              geometry: lat !== undefined && lng !== undefined ? {
-                location: place.location!
-              } as google.maps.places.PlaceGeometry : undefined,
+              geometry:
+                lat !== undefined && lng !== undefined
+                  ? ({
+                      location: place.location!,
+                    } as google.maps.places.PlaceGeometry)
+                  : undefined,
               name: place.displayName ?? undefined,
             }
 
@@ -118,7 +127,7 @@ export function AddressAutocomplete({
           id={id}
           type="text"
           value={inputValue}
-          onChange={(e) => {
+          onChange={e => {
             setInputValue(e.target.value)
             onChange(e.target.value)
           }}

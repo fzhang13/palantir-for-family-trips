@@ -14,7 +14,7 @@ export const DAY_WEATHER_TARGET: Record<string, string> = {
 }
 
 function parseTripDate(dayId: string, year: number = new Date().getFullYear()): Date | null {
-  const day = DAYS.find((item) => item.id === dayId)
+  const day = DAYS.find(item => item.id === dayId)
   const match = day?.shortLabel?.match(/(\d{1,2})\/(\d{1,2})/)
   if (!match) return null
 
@@ -72,25 +72,38 @@ async function fetchLatestObservation(stationsUrl: string | null): Promise<any> 
   return fetchWeatherJson(`${stationUrl}/observations/latest`)
 }
 
-export async function fetchWeatherBundle({ label, coordinates }: { label: string; coordinates: { lat: number; lng: number } }): Promise<any> {
+export async function fetchWeatherBundle({
+  label,
+  coordinates,
+}: {
+  label: string
+  coordinates: { lat: number; lng: number }
+}): Promise<any> {
   if (!coordinates?.lat || !coordinates?.lng) return null
 
-  const points = await fetchWeatherJson(`${WEATHER_API_ROOT}/points/${coordinates.lat},${coordinates.lng}`)
+  const points = await fetchWeatherJson(
+    `${WEATHER_API_ROOT}/points/${coordinates.lat},${coordinates.lng}`
+  )
   const pointProps = points?.properties || {}
   const relativeLocation = pointProps.relativeLocation?.properties
 
   const [forecast, hourly, observation] = await Promise.all([
     pointProps.forecast ? fetchWeatherJson(pointProps.forecast) : Promise.resolve(null),
     pointProps.forecastHourly ? fetchWeatherJson(pointProps.forecastHourly) : Promise.resolve(null),
-    pointProps.observationStations ? fetchLatestObservation(pointProps.observationStations) : Promise.resolve(null),
+    pointProps.observationStations
+      ? fetchLatestObservation(pointProps.observationStations)
+      : Promise.resolve(null),
   ])
 
   const forecastPeriods = forecast?.properties?.periods || []
   const hourlyPeriods = hourly?.properties?.periods || []
-  const liveTemperature = formatObservationTemperature(observation) || (
-    hourlyPeriods[0]?.temperature != null ? `${hourlyPeriods[0].temperature} ${hourlyPeriods[0].temperatureUnit || 'F'}` : null
-  )
-  const liveSummary = observation?.properties?.textDescription || hourlyPeriods[0]?.shortForecast || ''
+  const liveTemperature =
+    formatObservationTemperature(observation) ||
+    (hourlyPeriods[0]?.temperature != null
+      ? `${hourlyPeriods[0].temperature} ${hourlyPeriods[0].temperatureUnit || 'F'}`
+      : null)
+  const liveSummary =
+    observation?.properties?.textDescription || hourlyPeriods[0]?.shortForecast || ''
 
   return {
     label,
@@ -123,10 +136,14 @@ export function getTripDayWeather(bundleMap: any, day: any): any {
   }
 
   const targetDate = toIsoDate(parseTripDate(day.id))
-  const forecastPeriod = bundle.forecastPeriods.find((period: any) => {
-    const periodDate = toIsoDate(new Date(period.startTime))
-    return periodDate === targetDate && period.isDaytime
-  }) || bundle.forecastPeriods.find((period: any) => toIsoDate(new Date(period.startTime)) === targetDate)
+  const forecastPeriod =
+    bundle.forecastPeriods.find((period: any) => {
+      const periodDate = toIsoDate(new Date(period.startTime))
+      return periodDate === targetDate && period.isDaytime
+    }) ||
+    bundle.forecastPeriods.find(
+      (period: any) => toIsoDate(new Date(period.startTime)) === targetDate
+    )
 
   if (!forecastPeriod) {
     return {
@@ -151,9 +168,10 @@ export function getMapWeather(bundleMap: any, focusDayId: string = 'all'): any {
   if (!bundle) return null
 
   return {
-    label: focusDayId !== 'all'
-      ? `${DAYS.find((day) => day.id === focusDayId)?.title || 'Focused day'} weather`
-      : 'Live weather',
+    label:
+      focusDayId !== 'all'
+        ? `${DAYS.find(day => day.id === focusDayId)?.title || 'Focused day'} weather`
+        : 'Live weather',
     placeLabel: bundle.placeLabel,
     summary: bundle.live.summary,
     temperature: bundle.live.temperature,
@@ -169,8 +187,8 @@ export function getMapWeatherTargets(bundleMap: any, focusDayId: string = 'all')
   ]
 
   return targets
-    .filter((target) => target.bundle)
-    .map((target) => ({
+    .filter(target => target.bundle)
+    .map(target => ({
       id: target.id,
       label: target.label,
       placeLabel: target.bundle.placeLabel,

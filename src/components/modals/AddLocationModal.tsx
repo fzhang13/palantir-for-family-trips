@@ -121,7 +121,7 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
           </label>
           <input
             value={title}
-            onChange={(e) => {
+            onChange={e => {
               setTitle(e.target.value)
               setErrors(prev => ({ ...prev, title: '' }))
             }}
@@ -129,9 +129,7 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none"
             placeholder="e.g., Grand Canyon Lodge"
           />
-          {errors.title && (
-            <p className="mt-1 text-sm text-[#F85149]">{errors.title}</p>
-          )}
+          {errors.title && <p className="mt-1 text-sm text-[#F85149]">{errors.title}</p>}
         </div>
 
         {/* Address */}
@@ -172,7 +170,7 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
             border: '1px solid #238636',
             borderRadius: '6px',
             padding: '16px',
-            marginBottom: '16px'
+            marginBottom: '16px',
           }}
         >
           <div
@@ -180,7 +178,7 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              marginBottom: '12px'
+              marginBottom: '12px',
             }}
           >
             <Wifi size={14} className="text-[#238636]" />
@@ -196,7 +194,7 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
             </label>
             <input
               value={wifiNetwork}
-              onChange={(e) => setWifiNetwork(e.target.value)}
+              onChange={e => setWifiNetwork(e.target.value)}
               type="text"
               className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none text-[13px]"
               placeholder="e.g., Parc Omega Guest"
@@ -205,13 +203,11 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
 
           {/* Password */}
           <div>
-            <label className="block text-[13px] font-medium text-[#C9D1D9] mb-1">
-              Password
-            </label>
+            <label className="block text-[13px] font-medium text-[#C9D1D9] mb-1">Password</label>
             <div style={{ position: 'relative' }}>
               <input
                 value={wifiPassword}
-                onChange={(e) => setWifiPassword(e.target.value)}
+                onChange={e => setWifiPassword(e.target.value)}
                 type={showWifiPassword ? 'text' : 'password'}
                 className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 pr-10 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none text-[13px]"
                 placeholder="WiFi password"
@@ -235,11 +231,14 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
               color: '#8B949E',
               display: 'flex',
               alignItems: 'start',
-              gap: '6px'
+              gap: '6px',
             }}
           >
             <span style={{ marginTop: '2px' }}>ℹ️</span>
-            <span>When both fields are filled, a QR code will appear on the stay card for easy mobile connection</span>
+            <span>
+              When both fields are filled, a QR code will appear on the stay card for easy mobile
+              connection
+            </span>
           </div>
         </div>
 
@@ -250,7 +249,7 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
             border: '1px solid #58A6FF',
             borderRadius: '6px',
             padding: '16px',
-            marginBottom: '16px'
+            marginBottom: '16px',
           }}
         >
           <div
@@ -258,7 +257,7 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              marginBottom: '12px'
+              marginBottom: '12px',
             }}
           >
             <Key size={14} className="text-[#58A6FF]" />
@@ -269,12 +268,10 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
 
           {/* Host Name */}
           <div style={{ marginBottom: '12px' }}>
-            <label className="block text-[13px] font-medium text-[#C9D1D9] mb-1">
-              Host Name
-            </label>
+            <label className="block text-[13px] font-medium text-[#C9D1D9] mb-1">Host Name</label>
             <input
               value={hostName}
-              onChange={(e) => setHostName(e.target.value)}
+              onChange={e => setHostName(e.target.value)}
               type="text"
               className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none text-[13px]"
               placeholder="e.g., John Smith"
@@ -288,7 +285,7 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
             </label>
             <input
               value={lockNote}
-              onChange={(e) => setLockNote(e.target.value)}
+              onChange={e => setLockNote(e.target.value)}
               type="text"
               className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none text-[13px] font-mono"
               placeholder="e.g., 1234# or lockbox code"
@@ -304,7 +301,7 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
                 </label>
                 <input
                   value={checkIn}
-                  onChange={(e) => setCheckIn(e.target.value)}
+                  onChange={e => setCheckIn(e.target.value)}
                   type="text"
                   className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none text-[13px]"
                   placeholder="e.g., 3:00 PM"
@@ -316,7 +313,7 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
                 </label>
                 <input
                   value={checkOut}
-                  onChange={(e) => setCheckOut(e.target.value)}
+                  onChange={e => setCheckOut(e.target.value)}
                   type="text"
                   className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none text-[13px]"
                   placeholder="e.g., 11:00 AM"
@@ -332,7 +329,7 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
             </label>
             <textarea
               value={accessNote}
-              onChange={(e) => setAccessNote(e.target.value)}
+              onChange={e => setAccessNote(e.target.value)}
               rows={3}
               className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none resize-none text-[13px]"
               placeholder="Enter through side gate, key in lockbox by door..."
@@ -342,12 +339,10 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
 
         {/* Summary (Optional) */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
-            Summary
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">Summary</label>
           <textarea
             value={summary}
-            onChange={(e) => setSummary(e.target.value)}
+            onChange={e => setSummary(e.target.value)}
             rows={3}
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none resize-none"
             placeholder="Additional information about this location..."

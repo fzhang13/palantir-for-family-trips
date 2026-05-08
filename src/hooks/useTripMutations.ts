@@ -1,11 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { getTripRepository } from '@/repositories'
-import type {
-  CreateFamilyInput,
-  CreateLocationInput,
-  CreateRouteInput,
-} from '@/types/inputs'
+import type { CreateFamilyInput, CreateLocationInput, CreateRouteInput } from '@/types/inputs'
 import type { Family, Location, Route } from '@/types'
 
 const tripRepository = getTripRepository()
@@ -15,13 +11,8 @@ export function useAddFamily() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({
-      tripId,
-      family,
-    }: {
-      tripId: string
-      family: CreateFamilyInput
-    }) => tripRepository.addFamily(tripId, family),
+    mutationFn: ({ tripId, family }: { tripId: string; family: CreateFamilyInput }) =>
+      tripRepository.addFamily(tripId, family),
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['families', variables.tripId] })
@@ -64,13 +55,8 @@ export function useDeleteFamily() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({
-      tripId,
-      familyId,
-    }: {
-      tripId: string
-      familyId: string
-    }) => tripRepository.deleteFamily(tripId, familyId),
+    mutationFn: ({ tripId, familyId }: { tripId: string; familyId: string }) =>
+      tripRepository.deleteFamily(tripId, familyId),
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['families', variables.tripId] })
@@ -89,13 +75,8 @@ export function useAddLocation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({
-      tripId,
-      location,
-    }: {
-      tripId: string
-      location: CreateLocationInput
-    }) => tripRepository.addLocation(tripId, location),
+    mutationFn: ({ tripId, location }: { tripId: string; location: CreateLocationInput }) =>
+      tripRepository.addLocation(tripId, location),
 
     onSuccess: (data, variables) => {
       const { location } = data
@@ -157,13 +138,8 @@ export function useDeleteLocation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({
-      tripId,
-      locationId,
-    }: {
-      tripId: string
-      locationId: string
-    }) => tripRepository.deleteLocation(tripId, locationId),
+    mutationFn: ({ tripId, locationId }: { tripId: string; locationId: string }) =>
+      tripRepository.deleteLocation(tripId, locationId),
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['locations', variables.tripId] })
@@ -182,13 +158,8 @@ export function useAddRoute() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({
-      tripId,
-      route,
-    }: {
-      tripId: string
-      route: CreateRouteInput
-    }) => tripRepository.addRoute(tripId, route),
+    mutationFn: ({ tripId, route }: { tripId: string; route: CreateRouteInput }) =>
+      tripRepository.addRoute(tripId, route),
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['routes', variables.tripId] })
@@ -232,13 +203,8 @@ export function useDeleteRoute() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({
-      tripId,
-      routeId,
-    }: {
-      tripId: string
-      routeId: string
-    }) => tripRepository.deleteRoute(tripId, routeId),
+    mutationFn: ({ tripId, routeId }: { tripId: string; routeId: string }) =>
+      tripRepository.deleteRoute(tripId, routeId),
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['routes', variables.tripId] })
@@ -284,8 +250,7 @@ export function useArchiveTrip() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ tripId }: { tripId: string }) =>
-      tripRepository.archiveTrip(tripId),
+    mutationFn: ({ tripId }: { tripId: string }) => tripRepository.archiveTrip(tripId),
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['trips', 'active'] })
@@ -303,8 +268,7 @@ export function useUnarchiveTrip() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ tripId }: { tripId: string }) =>
-      tripRepository.unarchiveTrip(tripId),
+    mutationFn: ({ tripId }: { tripId: string }) => tripRepository.unarchiveTrip(tripId),
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['trips', 'active'] })
@@ -323,8 +287,13 @@ export function useUnarchiveTrip() {
 export function useAddMeal() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ tripId, input }: { tripId: string; input: import('@/types/inputs').CreateMealInput }) =>
-      tripRepository.addMeal(tripId, input),
+    mutationFn: ({
+      tripId,
+      input,
+    }: {
+      tripId: string
+      input: import('@/types/inputs').CreateMealInput
+    }) => tripRepository.addMeal(tripId, input),
     onSuccess: (_, { tripId, input }) => {
       queryClient.invalidateQueries({ queryKey: ['meals', tripId] })
       if (input.createLocation) {
@@ -337,8 +306,15 @@ export function useAddMeal() {
 export function useUpdateMeal() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ tripId, mealId, updates }: { tripId: string; mealId: string; updates: Partial<import('@/types/inputs').CreateMealInput> }) =>
-      tripRepository.updateMeal(tripId, mealId, updates),
+    mutationFn: ({
+      tripId,
+      mealId,
+      updates,
+    }: {
+      tripId: string
+      mealId: string
+      updates: Partial<import('@/types/inputs').CreateMealInput>
+    }) => tripRepository.updateMeal(tripId, mealId, updates),
     onSuccess: (_, { tripId, updates }) => {
       queryClient.invalidateQueries({ queryKey: ['meals', tripId] })
       if (updates.createLocation) {
@@ -364,8 +340,13 @@ export function useDeleteMeal() {
 export function useAddActivity() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ tripId, input }: { tripId: string; input: import('@/types/inputs').CreateActivityInput }) =>
-      tripRepository.addActivity(tripId, input),
+    mutationFn: ({
+      tripId,
+      input,
+    }: {
+      tripId: string
+      input: import('@/types/inputs').CreateActivityInput
+    }) => tripRepository.addActivity(tripId, input),
     onSuccess: (_, { tripId, input }) => {
       queryClient.invalidateQueries({ queryKey: ['activities', tripId] })
       if (input.createLocation) {
@@ -378,8 +359,15 @@ export function useAddActivity() {
 export function useUpdateActivity() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ tripId, activityId, updates }: { tripId: string; activityId: string; updates: Partial<import('@/types/inputs').CreateActivityInput> }) =>
-      tripRepository.updateActivity(tripId, activityId, updates),
+    mutationFn: ({
+      tripId,
+      activityId,
+      updates,
+    }: {
+      tripId: string
+      activityId: string
+      updates: Partial<import('@/types/inputs').CreateActivityInput>
+    }) => tripRepository.updateActivity(tripId, activityId, updates),
     onSuccess: (_, { tripId, updates }) => {
       queryClient.invalidateQueries({ queryKey: ['activities', tripId] })
       if (updates.createLocation) {

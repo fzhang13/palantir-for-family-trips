@@ -21,10 +21,7 @@ export interface DebtPair {
  * netPosition > 0: family is owed money
  * netPosition < 0: family owes money
  */
-export function calculateFamilyBalances(
-  expenses: Expense[],
-  families: Family[]
-): FamilyBalance[] {
+export function calculateFamilyBalances(expenses: Expense[], families: Family[]): FamilyBalance[] {
   const balances: Record<string, FamilyBalance> = {}
 
   // Initialize all families

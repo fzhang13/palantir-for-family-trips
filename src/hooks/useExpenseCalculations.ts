@@ -7,9 +7,7 @@ interface UseExpenseCalculationsReturn {
   getTotalExpenses: () => number
 }
 
-export function useExpenseCalculations(
-  doc: TripDocument
-): UseExpenseCalculationsReturn {
+export function useExpenseCalculations(doc: TripDocument): UseExpenseCalculationsReturn {
   const familyBurdens = useMemo(() => {
     const balances = calculateFamilyBalances(doc.expenses, doc.families)
     const burdens: Record<string, number> = {}

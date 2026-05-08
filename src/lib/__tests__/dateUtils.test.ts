@@ -88,15 +88,15 @@ describe('dateUtils', () => {
 
   describe('formatFullDate', () => {
     it('formats date as "Thursday, May 8, 2026"', () => {
-      const date = new Date('2026-05-08')
+      const date = new Date(2026, 4, 8) // Month is 0-indexed: 4 = May
       const result = formatFullDate(date)
 
       expect(result).toBe('Friday, May 8, 2026')
     })
 
     it('formats different dates correctly', () => {
-      const date1 = new Date('2026-01-01')
-      const date2 = new Date('2026-12-25')
+      const date1 = new Date(2026, 0, 1) // January 1
+      const date2 = new Date(2026, 11, 25) // December 25
 
       expect(formatFullDate(date1)).toBe('Thursday, January 1, 2026')
       expect(formatFullDate(date2)).toBe('Friday, December 25, 2026')

@@ -19,11 +19,15 @@ const CATEGORY_OPTIONS = [
   { value: 'other', label: 'Other', icon: '📦' },
 ] as const
 
-export function ExpenseForm({ expense, families, onSave, onCancel, isLoading = false }: ExpenseFormProps) {
+export function ExpenseForm({
+  expense,
+  families,
+  onSave,
+  onCancel,
+  isLoading = false,
+}: ExpenseFormProps) {
   const [title, setTitle] = useState(expense?.title || '')
-  const [expenseDate, setExpenseDate] = useState(
-    expense?.expenseDate || new Date()
-  )
+  const [expenseDate, setExpenseDate] = useState(expense?.expenseDate || new Date())
   const [category, setCategory] = useState<ExpenseFormInputs['category']>(
     expense?.category || 'other'
   )
@@ -36,7 +40,10 @@ export function ExpenseForm({ expense, families, onSave, onCancel, isLoading = f
   )
   const [allocations, setAllocations] = useState<Record<string, number>>(
     expense?.allocations ||
-      buildEqualExpenseAllocations(0, families.map(f => f.id))
+      buildEqualExpenseAllocations(
+        0,
+        families.map(f => f.id)
+      )
   )
   const [note, setNote] = useState(expense?.note || '')
 
@@ -71,7 +78,10 @@ export function ExpenseForm({ expense, families, onSave, onCancel, isLoading = f
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Title */}
       <div>
-        <label htmlFor="expense-title" className="block text-xs font-semibold uppercase tracking-wide text-[#8B949E] mb-1.5">
+        <label
+          htmlFor="expense-title"
+          className="block text-xs font-semibold uppercase tracking-wide text-[#8B949E] mb-1.5"
+        >
           Title *
         </label>
         <input
@@ -88,7 +98,10 @@ export function ExpenseForm({ expense, families, onSave, onCancel, isLoading = f
       {/* Date & Category Row */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="expense-date" className="block text-xs font-semibold uppercase tracking-wide text-[#8B949E] mb-1.5">
+          <label
+            htmlFor="expense-date"
+            className="block text-xs font-semibold uppercase tracking-wide text-[#8B949E] mb-1.5"
+          >
             Date *
           </label>
           <input
@@ -102,7 +115,10 @@ export function ExpenseForm({ expense, families, onSave, onCancel, isLoading = f
         </div>
 
         <div>
-          <label htmlFor="expense-category" className="block text-xs font-semibold uppercase tracking-wide text-[#8B949E] mb-1.5">
+          <label
+            htmlFor="expense-category"
+            className="block text-xs font-semibold uppercase tracking-wide text-[#8B949E] mb-1.5"
+          >
             Category *
           </label>
           <select
@@ -124,7 +140,10 @@ export function ExpenseForm({ expense, families, onSave, onCancel, isLoading = f
       {/* Payer & Amount Row */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="expense-payer" className="block text-xs font-semibold uppercase tracking-wide text-[#8B949E] mb-1.5">
+          <label
+            htmlFor="expense-payer"
+            className="block text-xs font-semibold uppercase tracking-wide text-[#8B949E] mb-1.5"
+          >
             Paid By *
           </label>
           <select
@@ -143,7 +162,10 @@ export function ExpenseForm({ expense, families, onSave, onCancel, isLoading = f
         </div>
 
         <div>
-          <label htmlFor="expense-amount" className="block text-xs font-semibold uppercase tracking-wide text-[#8B949E] mb-1.5">
+          <label
+            htmlFor="expense-amount"
+            className="block text-xs font-semibold uppercase tracking-wide text-[#8B949E] mb-1.5"
+          >
             Amount *
           </label>
           <div className="relative">
@@ -182,7 +204,10 @@ export function ExpenseForm({ expense, families, onSave, onCancel, isLoading = f
 
       {/* Note */}
       <div>
-        <label htmlFor="expense-note" className="block text-xs font-semibold uppercase tracking-wide text-[#8B949E] mb-1.5">
+        <label
+          htmlFor="expense-note"
+          className="block text-xs font-semibold uppercase tracking-wide text-[#8B949E] mb-1.5"
+        >
           Note (Optional)
         </label>
         <textarea
@@ -210,7 +235,7 @@ export function ExpenseForm({ expense, families, onSave, onCancel, isLoading = f
           disabled={!canSubmit || isLoading}
           className="px-4 py-2 text-sm font-medium text-white bg-[#238636] rounded hover:bg-[#2EA043] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Adding...' : (expense ? 'Save Changes' : 'Add Expense')}
+          {isLoading ? 'Adding...' : expense ? 'Save Changes' : 'Add Expense'}
         </button>
       </div>
     </form>

@@ -1,5 +1,16 @@
 import { useState } from 'react'
-import { Plus, Edit2, Trash2, MapPin, Home, Calendar, FileText, Wifi, Key, Lock } from 'lucide-react'
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  MapPin,
+  Home,
+  Calendar,
+  FileText,
+  Wifi,
+  Key,
+  Lock,
+} from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { useLocations, useDeleteLocation, useActiveTripId } from '@/hooks'
 import { AddLocationModal, EditLocationModal } from '@/components/modals'
@@ -63,7 +74,9 @@ export function StayPage() {
         <div className="flex flex-col items-center justify-center h-96 border border-[#30363D] rounded bg-[#161B22]">
           <Home size={48} className="text-[#8B949E] mb-4" />
           <p className="text-[#8B949E] text-lg mb-2">No stay locations yet</p>
-          <p className="text-[#8B949E] text-sm mb-4">Get started by adding your first lodging location</p>
+          <p className="text-[#8B949E] text-sm mb-4">
+            Get started by adding your first lodging location
+          </p>
           <button
             onClick={() => setIsAddModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-[#238636] text-white text-sm font-medium rounded hover:bg-[#2EA043] transition-colors"
@@ -76,7 +89,7 @@ export function StayPage() {
       ) : (
         /* Stay Locations Grid */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {stayLocations.map((location) => (
+          {stayLocations.map(location => (
             <StayCard
               key={location.id}
               location={location}
@@ -88,10 +101,7 @@ export function StayPage() {
       )}
 
       {/* Add Location Modal */}
-      <AddLocationModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-      />
+      <AddLocationModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
 
       {/* Edit Location Modal */}
       {editingLocation && (
@@ -117,9 +127,7 @@ function StayCard({ location, onEdit, onDelete }: StayCardProps) {
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-[#C9D1D9] mb-1">
-            {location.title}
-          </h3>
+          <h3 className="text-lg font-semibold text-[#C9D1D9] mb-1">{location.title}</h3>
           <div className="flex items-center gap-2 text-sm text-[#8B949E]">
             <MapPin size={14} />
             <span>{location.address}</span>
@@ -146,58 +154,62 @@ function StayCard({ location, onEdit, onDelete }: StayCardProps) {
       {/* Details */}
       <div className="space-y-2.5">
         {/* Day Range or Check-in/Check-out Dates */}
-        {(location.startDayNumber && location.endDayNumber) ? (
+        {location.startDayNumber && location.endDayNumber ? (
           <div className="pt-2 border-t border-[#30363D]">
             <div className="flex items-center gap-2">
               <Calendar size={14} className="text-[#8B949E]" />
               <span className="text-sm text-[#C9D1D9] font-medium">
                 Day {location.startDayNumber}
-                {location.endDayNumber !== location.startDayNumber && ` - Day ${location.endDayNumber}`}
+                {location.endDayNumber !== location.startDayNumber &&
+                  ` - Day ${location.endDayNumber}`}
               </span>
               <span className="text-xs text-[#8B949E]">
-                ({location.endDayNumber - location.startDayNumber + 1} {location.endDayNumber === location.startDayNumber ? 'day' : 'days'})
+                ({location.endDayNumber - location.startDayNumber + 1}{' '}
+                {location.endDayNumber === location.startDayNumber ? 'day' : 'days'})
               </span>
             </div>
           </div>
-        ) : (location.checkInDate || location.checkOutDate) && (
-          <div className="pt-2 border-t border-[#30363D]">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              {location.checkInDate && (
-                <div>
-                  <span className="text-[#8B949E] text-xs">Check-in</span>
-                  <p className="text-[#C9D1D9] font-medium mt-0.5">
-                    {new Date(location.checkInDate + 'T00:00:00').toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </p>
-                  <p className="text-[#8B949E] text-xs mt-0.5">
-                    {new Date(location.checkInDate + 'T00:00:00').toLocaleDateString('en-US', {
-                      weekday: 'short',
-                    })}
-                  </p>
-                </div>
-              )}
-              {location.checkOutDate && (
-                <div>
-                  <span className="text-[#8B949E] text-xs">Check-out</span>
-                  <p className="text-[#C9D1D9] font-medium mt-0.5">
-                    {new Date(location.checkOutDate + 'T00:00:00').toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </p>
-                  <p className="text-[#8B949E] text-xs mt-0.5">
-                    {new Date(location.checkOutDate + 'T00:00:00').toLocaleDateString('en-US', {
-                      weekday: 'short',
-                    })}
-                  </p>
-                </div>
-              )}
+        ) : (
+          (location.checkInDate || location.checkOutDate) && (
+            <div className="pt-2 border-t border-[#30363D]">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                {location.checkInDate && (
+                  <div>
+                    <span className="text-[#8B949E] text-xs">Check-in</span>
+                    <p className="text-[#C9D1D9] font-medium mt-0.5">
+                      {new Date(location.checkInDate + 'T00:00:00').toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </p>
+                    <p className="text-[#8B949E] text-xs mt-0.5">
+                      {new Date(location.checkInDate + 'T00:00:00').toLocaleDateString('en-US', {
+                        weekday: 'short',
+                      })}
+                    </p>
+                  </div>
+                )}
+                {location.checkOutDate && (
+                  <div>
+                    <span className="text-[#8B949E] text-xs">Check-out</span>
+                    <p className="text-[#C9D1D9] font-medium mt-0.5">
+                      {new Date(location.checkOutDate + 'T00:00:00').toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </p>
+                    <p className="text-[#8B949E] text-xs mt-0.5">
+                      {new Date(location.checkOutDate + 'T00:00:00').toLocaleDateString('en-US', {
+                        weekday: 'short',
+                      })}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )
         )}
 
         {/* Summary */}

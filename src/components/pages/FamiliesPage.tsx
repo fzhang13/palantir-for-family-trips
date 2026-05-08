@@ -74,7 +74,7 @@ export function FamiliesPage() {
       ) : (
         /* Family Grid */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {families.map((family) => (
+          {families.map(family => (
             <FamilyCard
               key={family.id}
               family={family}
@@ -87,10 +87,7 @@ export function FamiliesPage() {
       )}
 
       {/* Add Family Modal */}
-      <AddFamilyModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-      />
+      <AddFamilyModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
 
       {/* Edit Family Modal */}
       {editingFamily && (
@@ -106,14 +103,16 @@ export function FamiliesPage() {
 
 interface FamilyCardProps {
   family: Family
-  tripMetadata?: {
-    id: string
-    title: string
-    start_date: string | null
-    end_date: string | null
-    timezone: string
-    status: string
-  } | undefined
+  tripMetadata?:
+    | {
+        id: string
+        title: string
+        start_date: string | null
+        end_date: string | null
+        timezone: string
+        status: string
+      }
+    | undefined
   onEdit: (family: Family) => void
   onDelete: (familyId: string) => void
 }
@@ -176,8 +175,6 @@ function FamilyCard({ family, tripMetadata, onEdit, onDelete }: FamilyCardProps)
             <span className="text-[#C9D1D9]">{family.headcount}</span>
           </div>
         )}
-
-
       </div>
     </div>
   )
@@ -185,14 +182,16 @@ function FamilyCard({ family, tripMetadata, onEdit, onDelete }: FamilyCardProps)
 
 function getDayLabel(
   dayId: string,
-  tripMetadata?: {
-    id: string
-    title: string
-    start_date: string | null
-    end_date: string | null
-    timezone: string
-    status: string
-  } | undefined
+  tripMetadata?:
+    | {
+        id: string
+        title: string
+        start_date: string | null
+        end_date: string | null
+        timezone: string
+        status: string
+      }
+    | undefined
 ): string {
   if (!dayId.startsWith('day')) {
     return dayId

@@ -14,12 +14,7 @@ export interface ConflictCheck {
 /**
  * Check if two time ranges overlap
  */
-function timesOverlap(
-  start1: string,
-  end1: string,
-  start2: string,
-  end2: string
-): boolean {
+function timesOverlap(start1: string, end1: string, start2: string, end2: string): boolean {
   return start1 < end2 && end1 > start2
 }
 
@@ -44,13 +39,13 @@ export function checkMealConflicts(
   excludeId?: string
 ): ConflictCheck {
   const conflicts = existingMeals
-    .filter((meal) => {
+    .filter(meal => {
       if (meal.id === excludeId) return false
       if (meal.mealDate !== mealDate) return false
       if (meal.mealType !== mealType) return false
       return true
     })
-    .map((meal) => ({
+    .map(meal => ({
       type: 'meal' as const,
       title: meal.title,
       time: mealType,
@@ -78,19 +73,14 @@ export function checkActivityConflicts(
   }
 
   const conflicts = existingActivities
-    .filter((activity) => {
+    .filter(activity => {
       if (activity.id === excludeId) return false
       if (activity.activityDate !== activityDate) return false
       if (!activity.startTime || !activity.endTime) return false
 
-      return timesOverlap(
-        startTime,
-        endTime,
-        activity.startTime,
-        activity.endTime
-      )
+      return timesOverlap(startTime, endTime, activity.startTime, activity.endTime)
     })
-    .map((activity) => ({
+    .map(activity => ({
       type: 'activity' as const,
       title: activity.title,
       time: `${formatTime(activity.startTime!)} - ${formatTime(activity.endTime!)}`,

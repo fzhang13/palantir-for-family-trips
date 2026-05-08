@@ -32,7 +32,7 @@ export function MapContainer({ routes, selectedRouteId }: MapContainerProps) {
 
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        position => {
           const userLocation = {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
@@ -40,7 +40,7 @@ export function MapContainer({ routes, selectedRouteId }: MapContainerProps) {
           map.setCenter(userLocation)
           map.setZoom(12)
         },
-        (error) => {
+        error => {
           console.warn('⚠️ Geolocation failed:', error.message)
           // Keep default SF location
         },
@@ -63,13 +63,11 @@ export function MapContainer({ routes, selectedRouteId }: MapContainerProps) {
     let hasPoints = false
 
     // If there's a selected route, only fit to that route
-    const routesToShow = selectedRouteId
-      ? routes.filter((r) => r.id === selectedRouteId)
-      : routes
+    const routesToShow = selectedRouteId ? routes.filter(r => r.id === selectedRouteId) : routes
 
-    routesToShow.forEach((route) => {
+    routesToShow.forEach(route => {
       if (route.path && route.path.length > 0) {
-        route.path.forEach((point) => {
+        route.path.forEach(point => {
           bounds.extend(new google.maps.LatLng(point.lat, point.lng))
           hasPoints = true
         })
@@ -105,7 +103,9 @@ export function MapContainer({ routes, selectedRouteId }: MapContainerProps) {
       )}
 
       {/* Render routes once map is loaded */}
-      {map && isLoaded && <RouteRenderer map={map} routes={routes} selectedRouteId={selectedRouteId} />}
+      {map && isLoaded && (
+        <RouteRenderer map={map} routes={routes} selectedRouteId={selectedRouteId} />
+      )}
     </div>
   )
 }

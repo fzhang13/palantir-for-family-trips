@@ -15,9 +15,7 @@ export function DayBadge({ date, isCheckout = false }: DayBadgeProps) {
   return (
     <span
       className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-        isCheckout
-          ? 'bg-[#30363D] text-[#8B949E]'
-          : 'bg-[#238636] text-white'
+        isCheckout ? 'bg-[#30363D] text-[#8B949E]' : 'bg-[#238636] text-white'
       }`}
     >
       {dayName} {month} {day}

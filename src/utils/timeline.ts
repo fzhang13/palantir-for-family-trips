@@ -24,10 +24,7 @@ export function getDayVisibleCursorRange(dayIndex: number): [number, number] {
 /**
  * Project cursor to visible timeline ratio (0-1)
  */
-export function projectCursorToVisibleTimelineRatio(
-  cursorSlot: number,
-  dayCount = 4
-): number {
+export function projectCursorToVisibleTimelineRatio(cursorSlot: number, dayCount = 4): number {
   const totalSlots = dayCount * SLOTS_PER_DAY
   return Math.min(1, Math.max(0, cursorSlot / totalSlots))
 }
@@ -35,10 +32,7 @@ export function projectCursorToVisibleTimelineRatio(
 /**
  * Project visible ratio back to cursor slot
  */
-export function projectVisibleTimelineRatioToCursor(
-  ratio: number,
-  dayCount = 4
-): number {
+export function projectVisibleTimelineRatioToCursor(ratio: number, dayCount = 4): number {
   const totalSlots = dayCount * SLOTS_PER_DAY
   return Math.round(ratio * totalSlots)
 }
@@ -103,13 +97,13 @@ export function getCurrentTripCursor(now: Date = new Date()): number {
  */
 export function getCompactTravelLabel(item: any): string {
   if (!item) return ''
-  
+
   // Extract origin and destination from label
   const match = item.label?.match(/(.+?)\s*→\s*(.+)/)
   if (match) {
     const [, origin, dest] = match
     return `${origin.trim()} → ${dest.trim()}`
   }
-  
+
   return item.label || ''
 }

@@ -25,7 +25,8 @@ export function useDirections(options: UseDirectionsOptions): DirectionsResult {
 
   // Serialize coordinates to primitives for dependency comparison
   const originKey = typeof origin === 'string' ? origin : `${origin.lat},${origin.lng}`
-  const destKey = typeof destination === 'string' ? destination : `${destination.lat},${destination.lng}`
+  const destKey =
+    typeof destination === 'string' ? destination : `${destination.lat},${destination.lng}`
 
   useEffect(() => {
     // Check if Google Maps API is loaded
@@ -63,7 +64,7 @@ export function useDirections(options: UseDirectionsOptions): DirectionsResult {
 
           // Extract polyline coordinates
           const path: Array<{ lat: number; lng: number }> = []
-          route.overview_path.forEach((point) => {
+          route.overview_path.forEach(point => {
             path.push({
               lat: point.lat(),
               lng: point.lng(),

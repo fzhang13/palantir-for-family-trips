@@ -22,12 +22,9 @@ export function useTripSelection(
     return getEntityBySelection(doc, selection)
   }, [doc, selection])
 
-  const selectEntity = useCallback(
-    (entityType: string, entityId: string) => {
-      setSelection({ type: entityType, id: entityId })
-    },
-    []
-  )
+  const selectEntity = useCallback((entityType: string, entityId: string) => {
+    setSelection({ type: entityType, id: entityId })
+  }, [])
 
   const selectEntityByRef = useCallback(
     (entity: Entity) => {

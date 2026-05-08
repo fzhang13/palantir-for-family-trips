@@ -26,13 +26,13 @@ export function ItineraryPage() {
   }
 
   const getFamilyName = (familyId: string) => {
-    const family = families.find((f) => f.id === familyId)
+    const family = families.find(f => f.id === familyId)
     return family ? family.name : '(Deleted Family)'
   }
 
   const getLocationTitle = (locationId?: string) => {
     if (!locationId) return null
-    const location = locations.find((l) => l.id === locationId)
+    const location = locations.find(l => l.id === locationId)
     return location ? location.title : '(Deleted)'
   }
 
@@ -70,9 +70,7 @@ export function ItineraryPage() {
         <div className="flex w-80 flex-col bg-[#161B22]">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[#30363D] p-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-[#C9D1D9]">
-              Routes
-            </h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-[#C9D1D9]">Routes</h2>
             <button
               onClick={() => setIsAddModalOpen(true)}
               className="flex items-center gap-2 rounded bg-[#238636] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#2EA043]"
@@ -99,7 +97,7 @@ export function ItineraryPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {routes.map((route) => {
+                {routes.map(route => {
                   const familyName = getFamilyName(route.familyId)
                   const destTitle = getLocationTitle(route.destinationLocationId)
                   const duration = formatDuration(route.durationSeconds)
@@ -122,7 +120,7 @@ export function ItineraryPage() {
                         </h3>
                         <div className="flex gap-2">
                           <button
-                            onClick={(e) => {
+                            onClick={e => {
                               e.stopPropagation()
                               setEditingRoute(route)
                             }}
@@ -131,7 +129,7 @@ export function ItineraryPage() {
                             <Edit2 size={14} />
                           </button>
                           <button
-                            onClick={(e) => {
+                            onClick={e => {
                               e.stopPropagation()
                               handleDelete(route.id)
                             }}
@@ -143,9 +141,7 @@ export function ItineraryPage() {
                       </div>
 
                       {/* Route subtitle */}
-                      <p className="mb-2 text-xs text-[#8B949E]">
-                        {route.title}
-                      </p>
+                      <p className="mb-2 text-xs text-[#8B949E]">{route.title}</p>
 
                       {/* Duration */}
                       {duration && (
@@ -171,21 +167,14 @@ export function ItineraryPage() {
 
         {/* Right - Map */}
         <div className="flex-1">
-          <MapContainer
-            routes={routes}
-            selectedRouteId={selectedRouteId}
-          />
+          <MapContainer routes={routes} selectedRouteId={selectedRouteId} />
         </div>
       </div>
 
       {/* Modals */}
       <AddRouteModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
       {editingRoute && (
-        <EditRouteModal
-          isOpen={true}
-          onClose={() => setEditingRoute(null)}
-          route={editingRoute}
-        />
+        <EditRouteModal isOpen={true} onClose={() => setEditingRoute(null)} route={editingRoute} />
       )}
     </>
   )

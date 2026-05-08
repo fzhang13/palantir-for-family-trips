@@ -60,7 +60,7 @@ export function useTimelineSimulation(doc: TripDocument): UseTimelineSimulationR
       // Advance cursor based on playback speed (4 slots per second)
       if (delta > 250) {
         lastTickRef.current = now
-        setCursorSlot((prev) => prev + 1)
+        setCursorSlot(prev => prev + 1)
       }
 
       animationFrameRef.current = requestAnimationFrame(animate)

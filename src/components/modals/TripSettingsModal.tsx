@@ -105,7 +105,7 @@ export function TripSettingsModal({
             <input
               type="text"
               value={tripName}
-              onChange={(e) => setTripName(e.target.value)}
+              onChange={e => setTripName(e.target.value)}
               placeholder="e.g., Summer Family Vacation 2026"
               className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] placeholder-[#6E7681] focus:border-[#58A6FF] focus:outline-none"
               required
@@ -121,7 +121,7 @@ export function TripSettingsModal({
               <input
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={e => setStartDate(e.target.value)}
                 className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
                 required
               />
@@ -134,7 +134,7 @@ export function TripSettingsModal({
               <input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={e => setEndDate(e.target.value)}
                 min={startDate}
                 className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
                 required
@@ -144,12 +144,10 @@ export function TripSettingsModal({
 
           {/* Timezone */}
           <div>
-            <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-              Timezone
-            </label>
+            <label className="block text-sm font-medium text-[#C9D1D9] mb-2">Timezone</label>
             <select
               value={timezone}
-              onChange={(e) => setTimezone(e.target.value)}
+              onChange={e => setTimezone(e.target.value)}
               className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
             >
               <option value="America/Los_Angeles">Pacific Time (PT)</option>
@@ -182,9 +180,7 @@ export function TripSettingsModal({
           <div className="pt-6 border-t border-[#30363D]">
             <div className="space-y-3">
               <div>
-                <h3 className="text-sm font-medium text-[#C9D1D9] mb-1">
-                  Archive Trip
-                </h3>
+                <h3 className="text-sm font-medium text-[#C9D1D9] mb-1">Archive Trip</h3>
                 <p className="text-xs text-[#8B949E]">
                   Archive this trip when it's completed. Archived trips can be restored later.
                 </p>
@@ -205,11 +201,10 @@ export function TripSettingsModal({
                       <span className="text-[#DA3633] text-xs font-bold">!</span>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-[#C9D1D9]">
-                        Are you sure?
-                      </p>
+                      <p className="text-sm font-medium text-[#C9D1D9]">Are you sure?</p>
                       <p className="text-xs text-[#8B949E] mt-1">
-                        This will archive the trip and return you to the trip selection page. You can restore it later from the Archives.
+                        This will archive the trip and return you to the trip selection page. You
+                        can restore it later from the Archives.
                       </p>
                     </div>
                   </div>

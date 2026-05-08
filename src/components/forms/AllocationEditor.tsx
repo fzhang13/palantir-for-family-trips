@@ -24,26 +24,29 @@ export function AllocationEditor({
     () => new Set(Object.keys(initialAllocations).filter(id => initialAllocations[id] > 0))
   )
   const [amounts, setAmounts] = useState<Record<string, number>>(initialAllocations)
-  const [inputValues, setInputValues] = useState<Record<string, string>>(
-    () => Object.entries(initialAllocations).reduce((acc, [id, amount]) => {
-      acc[id] = amount.toFixed(2)
-      return acc
-    }, {} as Record<string, string>)
+  const [inputValues, setInputValues] = useState<Record<string, string>>(() =>
+    Object.entries(initialAllocations).reduce(
+      (acc, [id, amount]) => {
+        acc[id] = amount.toFixed(2)
+        return acc
+      },
+      {} as Record<string, string>
+    )
   )
 
   // Recalculate equal-mode allocations when mode, selection, or total changes
   useEffect(() => {
     if (mode === 'equal') {
-      const equalAllocations = buildEqualExpenseAllocations(
-        totalAmount,
-        Array.from(selectedIds)
-      )
+      const equalAllocations = buildEqualExpenseAllocations(totalAmount, Array.from(selectedIds))
       setAmounts(equalAllocations)
       setInputValues(
-        Object.entries(equalAllocations).reduce((acc, [id, amount]) => {
-          acc[id] = amount.toFixed(2)
-          return acc
-        }, {} as Record<string, string>)
+        Object.entries(equalAllocations).reduce(
+          (acc, [id, amount]) => {
+            acc[id] = amount.toFixed(2)
+            return acc
+          },
+          {} as Record<string, string>
+        )
       )
       onChange('equal', equalAllocations)
     }
@@ -169,14 +172,20 @@ export function AllocationEditor({
       >
         <span className="text-sm text-[#8B949E]">Total Allocated:</span>
         <div className="flex items-center gap-2">
-          <span className={`font-mono text-sm ${validation.valid ? 'text-[#3FB950]' : 'text-[#F85149]'}`}>
+          <span
+            className={`font-mono text-sm ${validation.valid ? 'text-[#3FB950]' : 'text-[#F85149]'}`}
+          >
             ${sum.toFixed(2)}
           </span>
           <span className="text-xs text-[#8B949E]">/ ${totalAmount.toFixed(2)}</span>
           {validation.valid ? (
-            <span className="text-[#3FB950]" aria-hidden="false">✓</span>
+            <span className="text-[#3FB950]" aria-hidden="false">
+              ✓
+            </span>
           ) : (
-            <span className="text-[#F85149]" aria-hidden="false">✗</span>
+            <span className="text-[#F85149]" aria-hidden="false">
+              ✗
+            </span>
           )}
         </div>
       </div>

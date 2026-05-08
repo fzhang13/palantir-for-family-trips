@@ -1,6 +1,12 @@
 import { useState, useMemo } from 'react'
 import { Plus, MapPin } from 'lucide-react'
-import { useActivities, useDeleteActivity, useActiveTripId, useFamilies, useLocations } from '@/hooks'
+import {
+  useActivities,
+  useDeleteActivity,
+  useActiveTripId,
+  useFamilies,
+  useLocations,
+} from '@/hooks'
 import { TimelineGroup } from '@/components/ui/TimelineGroup'
 import { DetailSidePanel } from '@/components/ui/DetailSidePanel'
 import { AddActivityModal, EditActivityModal } from '@/components/modals'
@@ -34,29 +40,33 @@ export function ActivitiesPage() {
       { id: 'all', label: 'All Days' },
       ...availableDates.map(date => ({
         id: date,
-        label: formatFullDate(new Date(date + 'T00:00:00'))
-      }))
+        label: formatFullDate(new Date(date + 'T00:00:00')),
+      })),
     ]
   }, [availableDates])
 
   // Filter activities by selected date
-  const filteredActivities = selectedDate === 'all'
-    ? allActivities
-    : allActivities.filter(activity => {
-        const activityDate = activity.activityDate
-        return activityDate === selectedDate
-      })
+  const filteredActivities =
+    selectedDate === 'all'
+      ? allActivities
+      : allActivities.filter(activity => {
+          const activityDate = activity.activityDate
+          return activityDate === selectedDate
+        })
 
   // Group activities by date
   const groupedActivities = useMemo(() => {
-    return filteredActivities.reduce((groups, activity) => {
-      const date = activity.activityDate || 'unknown'
-      if (!groups[date]) {
-        groups[date] = []
-      }
-      groups[date].push(activity)
-      return groups
-    }, {} as Record<string, Activity[]>)
+    return filteredActivities.reduce(
+      (groups, activity) => {
+        const date = activity.activityDate || 'unknown'
+        if (!groups[date]) {
+          groups[date] = []
+        }
+        groups[date].push(activity)
+        return groups
+      },
+      {} as Record<string, Activity[]>
+    )
   }, [filteredActivities])
 
   // Sort dates chronologically
@@ -157,9 +167,10 @@ export function ActivitiesPage() {
         /* Timeline View */
         <div className="space-y-4">
           {sortedDates.map(date => {
-            const dateLabel = date === 'unknown'
-              ? 'DATE UNKNOWN'
-              : formatFullDate(new Date(date + 'T00:00:00')).toUpperCase()
+            const dateLabel =
+              date === 'unknown'
+                ? 'DATE UNKNOWN'
+                : formatFullDate(new Date(date + 'T00:00:00')).toUpperCase()
 
             return (
               <TimelineGroup
@@ -167,8 +178,8 @@ export function ActivitiesPage() {
                 dayId={date}
                 dayLabel={dateLabel}
                 items={groupedActivities[date]}
-                onItemClick={(item) => setSelectedActivity(item as Activity)}
-                onEdit={(item) => handleEdit(item as Activity)}
+                onItemClick={item => setSelectedActivity(item as Activity)}
+                onEdit={item => handleEdit(item as Activity)}
                 onDelete={handleDelete}
                 locations={locations}
                 families={families}
@@ -188,10 +199,7 @@ export function ActivitiesPage() {
       />
 
       {/* Add Modal */}
-      <AddActivityModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-      />
+      <AddActivityModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
 
       {/* Edit Modal */}
       {editingActivity && (

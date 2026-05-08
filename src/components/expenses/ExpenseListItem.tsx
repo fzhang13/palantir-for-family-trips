@@ -38,25 +38,19 @@ export function ExpenseListItem({ expense, families, onEdit, onDelete }: Expense
         <div className="text-2xl">{icon}</div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-semibold text-[#C9D1D9] mb-1">
-            {expense.title}
-          </h3>
+          <h3 className="text-base font-semibold text-[#C9D1D9] mb-1">{expense.title}</h3>
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[#8B949E]">
             <span>{dateStr}</span>
             <span>•</span>
             <span>Paid by {payer?.name || 'Unknown'}</span>
             <span>•</span>
-            <span className="font-mono text-[#C9D1D9]">
-              {formatCurrency(expense.amount)}
-            </span>
+            <span className="font-mono text-[#C9D1D9]">{formatCurrency(expense.amount)}</span>
           </div>
 
           <div className="mt-1 text-xs text-[#6E7681]">{splitSummary}</div>
 
-          {expense.note && (
-            <div className="mt-2 text-sm text-[#8B949E] italic">{expense.note}</div>
-          )}
+          {expense.note && <div className="mt-2 text-sm text-[#8B949E] italic">{expense.note}</div>}
         </div>
 
         <div className="flex items-center gap-2">

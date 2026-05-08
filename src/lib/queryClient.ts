@@ -12,7 +12,7 @@ export const queryClient = new QueryClient({
       staleTime: QUERY_STALE_TIME_MS,
       gcTime: QUERY_GC_TIME_MS,
       retry: QUERY_RETRY_COUNT,
-      retryDelay: (attemptIndex) =>
+      retryDelay: attemptIndex =>
         Math.min(QUERY_BASE_RETRY_DELAY_MS * 2 ** attemptIndex, QUERY_MAX_RETRY_DELAY_MS),
     },
     mutations: {

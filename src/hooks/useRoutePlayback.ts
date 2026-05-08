@@ -13,18 +13,14 @@ interface UseRoutePlaybackReturn {
   isAnyRouteActive: boolean
 }
 
-export function useRoutePlayback(
-  doc: TripDocument,
-  cursorSlot: number
-): UseRoutePlaybackReturn {
+export function useRoutePlayback(doc: TripDocument, cursorSlot: number): UseRoutePlaybackReturn {
   const activeRoutes = useMemo(() => {
     const routes = doc.routes || []
     const progressList: RouteProgress[] = []
 
-    routes.forEach((route) => {
+    routes.forEach(route => {
       const isActive =
-        cursorSlot >= route.simulationStartSlot &&
-        cursorSlot <= route.simulationEndSlot
+        cursorSlot >= route.simulationStartSlot && cursorSlot <= route.simulationEndSlot
 
       if (isActive) {
         const totalSlots = route.simulationEndSlot - route.simulationStartSlot
@@ -53,10 +49,7 @@ export function useRoutePlayback(
   }
 }
 
-function interpolatePosition(
-  route: Route,
-  progress: number
-): { lat: number; lng: number } | null {
+function interpolatePosition(route: Route, progress: number): { lat: number; lng: number } | null {
   if (!route.path || route.path.length === 0) {
     return route.originCoordinates
   }

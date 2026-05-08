@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  type ReactNode,
-} from 'react'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 
 interface ActiveTripContextValue {
   activeTripId: string | null
@@ -42,11 +36,7 @@ export function ActiveTripProvider({ children }: { children: ReactNode }) {
     isLoading,
   }
 
-  return (
-    <ActiveTripContext.Provider value={value}>
-      {children}
-    </ActiveTripContext.Provider>
-  )
+  return <ActiveTripContext.Provider value={value}>{children}</ActiveTripContext.Provider>
 }
 
 export function useActiveTripContext() {

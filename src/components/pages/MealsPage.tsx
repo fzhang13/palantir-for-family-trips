@@ -34,29 +34,33 @@ export function MealsPage() {
       { id: 'all', label: 'All Days' },
       ...availableDates.map(date => ({
         id: date,
-        label: formatFullDate(new Date(date + 'T00:00:00'))
-      }))
+        label: formatFullDate(new Date(date + 'T00:00:00')),
+      })),
     ]
   }, [availableDates])
 
   // Filter meals by selected date
-  const filteredMeals = selectedDate === 'all'
-    ? allMeals
-    : allMeals.filter(meal => {
-        const mealDate = meal.mealDate
-        return mealDate === selectedDate
-      })
+  const filteredMeals =
+    selectedDate === 'all'
+      ? allMeals
+      : allMeals.filter(meal => {
+          const mealDate = meal.mealDate
+          return mealDate === selectedDate
+        })
 
   // Group meals by date
   const groupedMeals = useMemo(() => {
-    return filteredMeals.reduce((groups, meal) => {
-      const date = meal.mealDate || 'unknown'
-      if (!groups[date]) {
-        groups[date] = []
-      }
-      groups[date].push(meal)
-      return groups
-    }, {} as Record<string, Meal[]>)
+    return filteredMeals.reduce(
+      (groups, meal) => {
+        const date = meal.mealDate || 'unknown'
+        if (!groups[date]) {
+          groups[date] = []
+        }
+        groups[date].push(meal)
+        return groups
+      },
+      {} as Record<string, Meal[]>
+    )
   }, [filteredMeals])
 
   // Sort dates chronologically
@@ -157,9 +161,10 @@ export function MealsPage() {
         /* Timeline View */
         <div className="space-y-4">
           {sortedDates.map(date => {
-            const dateLabel = date === 'unknown'
-              ? 'DATE UNKNOWN'
-              : formatFullDate(new Date(date + 'T00:00:00')).toUpperCase()
+            const dateLabel =
+              date === 'unknown'
+                ? 'DATE UNKNOWN'
+                : formatFullDate(new Date(date + 'T00:00:00')).toUpperCase()
 
             return (
               <TimelineGroup
@@ -167,8 +172,8 @@ export function MealsPage() {
                 dayId={date}
                 dayLabel={dateLabel}
                 items={groupedMeals[date]}
-                onItemClick={(item) => setSelectedMeal(item as Meal)}
-                onEdit={(item) => handleEdit(item as Meal)}
+                onItemClick={item => setSelectedMeal(item as Meal)}
+                onEdit={item => handleEdit(item as Meal)}
                 onDelete={handleDelete}
                 locations={locations}
                 families={families}
@@ -188,18 +193,11 @@ export function MealsPage() {
       />
 
       {/* Add Modal */}
-      <AddMealModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-      />
+      <AddMealModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
 
       {/* Edit Modal */}
       {editingMeal && (
-        <EditMealModal
-          isOpen={true}
-          onClose={() => setEditingMeal(null)}
-          meal={editingMeal}
-        />
+        <EditMealModal isOpen={true} onClose={() => setEditingMeal(null)} meal={editingMeal} />
       )}
     </div>
   )

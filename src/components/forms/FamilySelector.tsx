@@ -8,19 +8,11 @@ interface FamilySelectorProps {
   families: Family[]
 }
 
-export function FamilySelector({
-  selectedFamilyIds,
-  onChange,
-  families,
-}: FamilySelectorProps) {
+export function FamilySelector({ selectedFamilyIds, onChange, families }: FamilySelectorProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
-  const selectedFamilies = families.filter((f) =>
-    selectedFamilyIds.includes(f.id)
-  )
-  const availableFamilies = families.filter(
-    (f) => !selectedFamilyIds.includes(f.id)
-  )
+  const selectedFamilies = families.filter(f => selectedFamilyIds.includes(f.id))
+  const availableFamilies = families.filter(f => !selectedFamilyIds.includes(f.id))
 
   const handleAddFamily = (familyId: string) => {
     onChange([...selectedFamilyIds, familyId])
@@ -28,7 +20,7 @@ export function FamilySelector({
   }
 
   const handleRemoveFamily = (familyId: string) => {
-    onChange(selectedFamilyIds.filter((id) => id !== familyId))
+    onChange(selectedFamilyIds.filter(id => id !== familyId))
   }
 
   return (
@@ -38,7 +30,7 @@ export function FamilySelector({
           <span className="text-[#8B949E] py-1">No owners assigned</span>
         )}
 
-        {selectedFamilies.map((family) => (
+        {selectedFamilies.map(family => (
           <span
             key={family.id}
             className="inline-flex items-center gap-1 px-3 py-1 bg-[#238636] text-white rounded-full text-sm"
@@ -67,14 +59,11 @@ export function FamilySelector({
             {isDropdownOpen && (
               <>
                 {/* Backdrop to close dropdown */}
-                <div
-                  className="fixed inset-0 z-10"
-                  onClick={() => setIsDropdownOpen(false)}
-                />
+                <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
 
                 {/* Dropdown menu */}
                 <div className="absolute top-full left-0 mt-1 bg-[#161B22] border border-[#30363D] rounded shadow-lg z-20 min-w-[200px]">
-                  {availableFamilies.map((family) => (
+                  {availableFamilies.map(family => (
                     <button
                       key={family.id}
                       type="button"

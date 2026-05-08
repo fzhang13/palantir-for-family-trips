@@ -3,10 +3,7 @@ import type { Entity, Family, TripDocument, ItineraryItem, EntitySelection } fro
 /**
  * Add family metadata to entity
  */
-export function stampFamilyMetadata<T extends Entity>(
-  item: T,
-  familyId: string
-): T {
+export function stampFamilyMetadata<T extends Entity>(item: T, familyId: string): T {
   return {
     ...item,
     familyId,
@@ -17,7 +14,7 @@ export function stampFamilyMetadata<T extends Entity>(
  * Get display label for family
  */
 export function getFamilyLabel(families: Family[], familyId: string): string {
-  const family = families.find((f) => f.id === familyId)
+  const family = families.find(f => f.id === familyId)
   return family?.name || familyId
 }
 
@@ -70,7 +67,10 @@ export function getEntityById(doc: TripDocument, type: string, id: string): any 
 /**
  * Get entity by selection from TripDocument
  */
-export function getEntityBySelection(doc: TripDocument, selection: EntitySelection | null): any | null {
+export function getEntityBySelection(
+  doc: TripDocument,
+  selection: EntitySelection | null
+): any | null {
   if (!selection?.type || !selection?.id) return null
   return getEntityById(doc, selection.type, selection.id)
 }
@@ -87,7 +87,7 @@ export function getRelatedTravelItemsForGate(
   const gateSlot = gate.startSlot
   const windowSlots = 4 * 4 // 4 hours in 15-minute slots
 
-  return doc.itineraryItems.filter((item) => {
+  return doc.itineraryItems.filter(item => {
     if (!item.routeId) return false
 
     const slotDiff = Math.abs(item.startSlot - gateSlot)
@@ -99,20 +99,13 @@ export function getRelatedTravelItemsForGate(
 /**
  * Build operation gate context for mission launch
  */
-export function buildOperationGateContext(
-  doc: TripDocument,
-  gate: ItineraryItem
-): any {
+export function buildOperationGateContext(doc: TripDocument, gate: ItineraryItem): any {
   const relatedTravel = getRelatedTravelItemsForGate(doc, gate)
-  const relatedRouteIds = relatedTravel
-    .map((t) => t.routeId)
-    .filter((id): id is string => !!id)
+  const relatedRouteIds = relatedTravel.map(t => t.routeId).filter((id): id is string => !!id)
 
-  const relatedRoutes = doc.routes.filter((r) =>
-    relatedRouteIds.includes(r.id)
-  )
+  const relatedRoutes = doc.routes.filter(r => relatedRouteIds.includes(r.id))
 
-  const estimatedArrivals = relatedRoutes.map((r) => {
+  const estimatedArrivals = relatedRoutes.map(r => {
     // Simplified - actual implementation would calculate ETA
     return r.title
   })

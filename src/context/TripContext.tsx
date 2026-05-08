@@ -62,12 +62,8 @@ export function TripProvider({ children }: { children: ReactNode }) {
     return (
       <div className="h-screen flex items-center justify-center bg-[#0A0C10]">
         <div className="max-w-md p-8 border border-[#30363D] bg-[#0D1117] rounded text-center">
-          <h1 className="text-xl font-semibold text-[#E6EDF3] mb-4">
-            Failed to Load Trip
-          </h1>
-          <p className="text-[#8B949E]">
-            {error?.message || 'Unable to load trip data'}
-          </p>
+          <h1 className="text-xl font-semibold text-[#E6EDF3] mb-4">Failed to Load Trip</h1>
+          <p className="text-[#8B949E]">{error?.message || 'Unable to load trip data'}</p>
         </div>
       </div>
     )
@@ -83,13 +79,10 @@ function TripProviderInner({ doc, children }: { doc: TripDocument; children: Rea
   const timeline = useTimelineSimulation(doc)
   const expenses = useExpenseCalculations(doc)
 
-  const updatePageNote = useCallback(
-    (_page: PageType, _note: string) => {
-      // Page notes are no longer persisted - could add Supabase mutation here if needed
-      console.warn('Page notes are not persisted after LocalStorage removal')
-    },
-    []
-  )
+  const updatePageNote = useCallback((_page: PageType, _note: string) => {
+    // Page notes are no longer persisted - could add Supabase mutation here if needed
+    console.warn('Page notes are not persisted after LocalStorage removal')
+  }, [])
 
   const value: TripContextValue = {
     doc,

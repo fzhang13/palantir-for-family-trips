@@ -60,9 +60,7 @@ export function ExpensesPage() {
       {families.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-96 border border-[#30363D] rounded bg-[#161B22]">
           <p className="text-[#8B949E] text-lg mb-2">No families in this trip</p>
-          <p className="text-[#8B949E] text-sm">
-            Add families before tracking expenses
-          </p>
+          <p className="text-[#8B949E] text-sm">Add families before tracking expenses</p>
         </div>
       ) : (
         <>
@@ -85,10 +83,7 @@ export function ExpensesPage() {
       )}
 
       {/* Add Expense Modal */}
-      <AddExpenseModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-      />
+      <AddExpenseModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
 
       {/* Edit Expense Modal */}
       {editingExpense && (

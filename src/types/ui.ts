@@ -1,10 +1,4 @@
-export type PageType =
-  | 'itinerary'
-  | 'stay'
-  | 'meals'
-  | 'activities'
-  | 'expenses'
-  | 'families'
+export type PageType = 'itinerary' | 'stay' | 'meals' | 'activities' | 'expenses' | 'families'
 
 // NOTE: Unused placeholder types - actual runtime uses inline types in TripDocument
 // Kept for potential future use, but not currently matching runtime structures

@@ -10,41 +10,44 @@ interface DetailSidePanelProps {
   locations?: Location[]
 }
 
-export function DetailSidePanel({ item, onClose, onEdit, onDelete, locations = [] }: DetailSidePanelProps) {
+export function DetailSidePanel({
+  item,
+  onClose,
+  onEdit,
+  onDelete,
+  locations = [],
+}: DetailSidePanelProps) {
   if (!item) return null
 
   const isMeal = item.type === 'meal'
 
   // Get location details
-  const location = item.locationId
-    ? locations.find(loc => loc.id === item.locationId)
-    : undefined
+  const location = item.locationId ? locations.find(loc => loc.id === item.locationId) : undefined
 
   // Generate Google Maps link from coordinates
-  const getGoogleMapsLink = (coords: { lat: number; lng: number } | null | undefined): string | null => {
+  const getGoogleMapsLink = (
+    coords: { lat: number; lng: number } | null | undefined
+  ): string | null => {
     if (!coords || typeof coords.lat !== 'number' || typeof coords.lng !== 'number') {
       return null
     }
     return `https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lng}`
   }
 
-  const mapsLink = location?.coordinates ? getGoogleMapsLink(location.coordinates as { lat: number; lng: number }) : null
+  const mapsLink = location?.coordinates
+    ? getGoogleMapsLink(location.coordinates as { lat: number; lng: number })
+    : null
 
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/50 z-40"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose} />
 
       {/* Panel */}
       <div className="fixed right-0 top-0 bottom-0 w-[400px] bg-[#0A0C10] border-l border-[#30363D] z-50 flex flex-col animate-slide-in-right">
         {/* Header */}
         <div className="p-6 border-b border-[#30363D] flex items-start justify-between">
-          <h2 className="text-xl font-semibold text-[#C9D1D9]">
-            {item.title}
-          </h2>
+          <h2 className="text-xl font-semibold text-[#C9D1D9]">{item.title}</h2>
           <button
             onClick={onClose}
             className="p-1 rounded text-[#8B949E] hover:text-[#C9D1D9] hover:bg-[#21262D] transition-colors"
@@ -61,12 +64,8 @@ export function DetailSidePanel({ item, onClose, onEdit, onDelete, locations = [
             <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">Day</div>
             <div className="text-[#C9D1D9]">
               {(() => {
-                const date = isMeal
-                  ? (item as Meal).mealDate
-                  : (item as Activity).activityDate
-                return date
-                  ? formatFullDate(new Date(date + 'T00:00:00'))
-                  : item.dayId
+                const date = isMeal ? (item as Meal).mealDate : (item as Activity).activityDate
+                return date ? formatFullDate(new Date(date + 'T00:00:00')) : item.dayId
               })()}
             </div>
           </div>
@@ -81,7 +80,9 @@ export function DetailSidePanel({ item, onClose, onEdit, onDelete, locations = [
           {isMeal && (
             <>
               <div>
-                <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">Meal Type</div>
+                <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">
+                  Meal Type
+                </div>
                 <div className="text-[#C9D1D9]">
                   {(() => {
                     const meal = item as Meal
@@ -89,7 +90,7 @@ export function DetailSidePanel({ item, onClose, onEdit, onDelete, locations = [
                       breakfast: 'Breakfast',
                       brunch: 'Brunch',
                       lunch: 'Lunch',
-                      dinner: 'Dinner'
+                      dinner: 'Dinner',
                     }
                     return meal.mealType ? typeLabels[meal.mealType] : 'Not specified'
                   })()}
@@ -103,7 +104,9 @@ export function DetailSidePanel({ item, onClose, onEdit, onDelete, locations = [
               )}
               {(item as Meal).reservationType && (
                 <div>
-                  <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">Reservation Type</div>
+                  <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">
+                    Reservation Type
+                  </div>
                   <div className="text-[#C9D1D9]">{(item as Meal).reservationType}</div>
                 </div>
               )}
@@ -115,35 +118,43 @@ export function DetailSidePanel({ item, onClose, onEdit, onDelete, locations = [
             <>
               <div>
                 <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">Window</div>
-                <div className="text-[#C9D1D9]">
-                  {(item as Activity).window || 'Window TBD'}
-                </div>
+                <div className="text-[#C9D1D9]">{(item as Activity).window || 'Window TBD'}</div>
               </div>
               {(item as Activity).riskLevel && (
                 <div>
-                  <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">Risk Level</div>
+                  <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">
+                    Risk Level
+                  </div>
                   <div className="text-[#C9D1D9]">{(item as Activity).riskLevel}</div>
                 </div>
               )}
               {(item as Activity).weatherData && (
                 <div>
-                  <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">Weather</div>
+                  <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">
+                    Weather
+                  </div>
                   <div className="flex items-center gap-2 text-[#C9D1D9]">
                     <Thermometer size={14} className="text-[#8B949E]" />
                     <span>{(item as Activity).weatherData?.temperature}°F</span>
-                    <span className="text-[#8B949E]">• {(item as Activity).weatherData?.condition}</span>
+                    <span className="text-[#8B949E]">
+                      • {(item as Activity).weatherData?.condition}
+                    </span>
                   </div>
                 </div>
               )}
               {(item as Activity).description && (
                 <div>
-                  <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">Description</div>
+                  <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">
+                    Description
+                  </div>
                   <div className="text-[#C9D1D9]">{(item as Activity).description}</div>
                 </div>
               )}
               {(item as Activity).backup && (
                 <div>
-                  <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">Backup Plan</div>
+                  <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">
+                    Backup Plan
+                  </div>
                   <div className="text-[#C9D1D9]">{(item as Activity).backup}</div>
                 </div>
               )}

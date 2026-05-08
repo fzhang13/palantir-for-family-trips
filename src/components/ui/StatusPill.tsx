@@ -1,14 +1,7 @@
 import { memo, type ReactNode } from 'react'
 import { cn } from '@/lib/cn'
 
-type ToneName =
-  | 'default'
-  | 'Transit'
-  | 'Activity'
-  | 'Meal'
-  | 'Critical'
-  | 'Warning'
-  | 'Success'
+type ToneName = 'default' | 'Transit' | 'Activity' | 'Meal' | 'Critical' | 'Warning' | 'Success'
 
 interface StatusPillProps {
   children: ReactNode

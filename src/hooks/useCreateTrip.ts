@@ -12,7 +12,7 @@ export function useCreateTrip() {
       const repo = getTripRepository()
       return repo.createTrip(input)
     },
-    onSuccess: (trip) => {
+    onSuccess: trip => {
       // Set as active trip
       setActiveTripId(trip.id)
 

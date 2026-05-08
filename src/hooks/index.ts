@@ -9,7 +9,16 @@ export { useDirections } from './useDirections'
 export { useActiveTripId } from './useActiveTripId'
 export { useCreateTrip } from './useCreateTrip'
 export { useArchiveTrip } from './useArchiveTrip'
-export { useFamilies, useLocations, useRoutes, useTrip, useMeals, useActivities, useActiveTrips, useTripMetadata } from './useTripQueries'
+export {
+  useFamilies,
+  useLocations,
+  useRoutes,
+  useTrip,
+  useMeals,
+  useActivities,
+  useActiveTrips,
+  useTripMetadata,
+} from './useTripQueries'
 export {
   useAddFamily,
   useUpdateFamily,

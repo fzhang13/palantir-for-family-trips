@@ -100,7 +100,9 @@ describe('calculateFamilyBalances', () => {
       } as Expense,
     ]
 
-    expect(() => calculateFamilyBalances(expenses, families)).toThrow('Unknown payer family ID: unknown')
+    expect(() => calculateFamilyBalances(expenses, families)).toThrow(
+      'Unknown payer family ID: unknown'
+    )
   })
 
   it('throws error for unknown allocation family ID', () => {
@@ -114,7 +116,9 @@ describe('calculateFamilyBalances', () => {
       } as Expense,
     ]
 
-    expect(() => calculateFamilyBalances(expenses, families)).toThrow('Unknown allocation family ID: unknown')
+    expect(() => calculateFamilyBalances(expenses, families)).toThrow(
+      'Unknown allocation family ID: unknown'
+    )
   })
 })
 
@@ -183,10 +187,13 @@ describe('calculateDebtPairs', () => {
     expect(totalDebts).toBeCloseTo(100, 2)
 
     // Each debtor should pay their exact amount
-    const debtsByDebtor = debts.reduce((acc, d) => {
-      acc[d.debtorId] = (acc[d.debtorId] || 0) + d.amount
-      return acc
-    }, {} as Record<string, number>)
+    const debtsByDebtor = debts.reduce(
+      (acc, d) => {
+        acc[d.debtorId] = (acc[d.debtorId] || 0) + d.amount
+        return acc
+      },
+      {} as Record<string, number>
+    )
 
     expect(debtsByDebtor['f2']).toBeCloseTo(33.33, 2)
     expect(debtsByDebtor['f3']).toBeCloseTo(33.33, 2)

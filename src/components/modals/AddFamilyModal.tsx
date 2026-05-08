@@ -61,43 +61,31 @@ export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Family Name */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
-            Family Name *
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">Family Name *</label>
           <input
             {...register('name')}
             type="text"
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none"
             placeholder="e.g., The Smiths"
           />
-          {errors.name && (
-            <p className="mt-1 text-sm text-[#F85149]">{errors.name.message}</p>
-          )}
+          {errors.name && <p className="mt-1 text-sm text-[#F85149]">{errors.name.message}</p>}
         </div>
 
         {/* Origin City */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
-            Origin City *
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">Origin City *</label>
           <input
             {...register('origin')}
             type="text"
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none"
             placeholder="e.g., San Francisco"
           />
-          {errors.origin && (
-            <p className="mt-1 text-sm text-[#F85149]">
-              {errors.origin.message}
-            </p>
-          )}
+          {errors.origin && <p className="mt-1 text-sm text-[#F85149]">{errors.origin.message}</p>}
         </div>
 
         {/* Origin Address */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
-            Origin Address *
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">Origin Address *</label>
           <AddressAutocomplete
             id="originAddress"
             value={watch('originAddress') || ''}
@@ -117,9 +105,7 @@ export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
 
         {/* Vehicle Type */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
-            Vehicle Type
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">Vehicle Type</label>
           <select
             {...register('vehicle')}
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
@@ -133,9 +119,7 @@ export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
 
         {/* Headcount */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
-            Headcount
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">Headcount</label>
           <input
             {...register('headcount')}
             type="text"
@@ -146,9 +130,7 @@ export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
 
         {/* Responsibility */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
-            Responsibility
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">Responsibility</label>
           <input
             {...register('responsibility')}
             type="text"
@@ -160,24 +142,20 @@ export function AddFamilyModal({ isOpen, onClose }: AddFamilyModalProps) {
         {/* Arrival Day */}
         <SimpleDaySelector
           value={watch('arrivalDayId') || ''}
-          onChange={(value) => setValue('arrivalDayId', value)}
+          onChange={value => setValue('arrivalDayId', value)}
           error={errors.arrivalDayId?.message}
         />
 
         {/* Notes */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
-            Notes
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-1">Notes</label>
           <textarea
             {...register('note')}
             rows={3}
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none resize-none"
             placeholder="Additional notes..."
           />
-          {errors.note && (
-            <p className="mt-1 text-sm text-[#F85149]">{errors.note.message}</p>
-          )}
+          {errors.note && <p className="mt-1 text-sm text-[#F85149]">{errors.note.message}</p>}
         </div>
 
         {/* Actions */}

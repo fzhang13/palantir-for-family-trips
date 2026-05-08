@@ -9,7 +9,12 @@ interface SimpleDaySelectorProps {
   tripId?: string
 }
 
-export function SimpleDaySelector({ value, onChange, error, tripId: propTripId }: SimpleDaySelectorProps) {
+export function SimpleDaySelector({
+  value,
+  onChange,
+  error,
+  tripId: propTripId,
+}: SimpleDaySelectorProps) {
   const { data: activeTripId } = useActiveTripId()
   const tripId = propTripId || activeTripId
   const { data: tripMetadata, isLoading } = useTripMetadata(tripId || '')
@@ -29,34 +34,26 @@ export function SimpleDaySelector({ value, onChange, error, tripId: propTripId }
 
       return {
         value: `day${i + 1}`,
-        label: `Day ${i + 1} - ${formatFullDate(date)}`
+        label: `Day ${i + 1} - ${formatFullDate(date)}`,
       }
     })
   }, [tripMetadata])
 
   if (isLoading) {
-    return (
-      <div className="text-sm text-[#8B949E]">Loading trip days...</div>
-    )
+    return <div className="text-sm text-[#8B949E]">Loading trip days...</div>
   }
 
   if (dayOptions.length === 0) {
-    return (
-      <div className="text-sm text-[#F0883E]">
-        Please set trip dates in Settings first.
-      </div>
-    )
+    return <div className="text-sm text-[#F0883E]">Please set trip dates in Settings first.</div>
   }
 
   return (
     <div>
-      <label className="block text-sm font-medium text-[#C9D1D9] mb-1">
-        Arrival Day
-      </label>
+      <label className="block text-sm font-medium text-[#C9D1D9] mb-1">Arrival Day</label>
 
       <select
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
       >
         <option value="">Select a day...</option>
@@ -67,9 +64,7 @@ export function SimpleDaySelector({ value, onChange, error, tripId: propTripId }
         ))}
       </select>
 
-      {error && (
-        <p className="mt-1 text-sm text-[#F85149]">{error}</p>
-      )}
+      {error && <p className="mt-1 text-sm text-[#F85149]">{error}</p>}
     </div>
   )
 }

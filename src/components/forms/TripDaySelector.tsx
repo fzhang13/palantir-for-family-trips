@@ -21,7 +21,7 @@ export function TripDaySelector({
   value,
   onChange,
   showAllTrips = true,
-  error
+  error,
 }: TripDaySelectorProps) {
   const { data: activeTrips, isLoading } = useActiveTrips()
 
@@ -41,7 +41,7 @@ export function TripDaySelector({
         tripName: trip.title,
         dayNumber: index + 1,
         date: date.toISOString().split('T')[0],
-        label: `${trip.title} - Day ${index + 1} - ${formatFullDate(date)}`
+        label: `${trip.title} - Day ${index + 1} - ${formatFullDate(date)}`,
       }))
     })
   }, [activeTrips, showAllTrips])
@@ -76,13 +76,9 @@ export function TripDaySelector({
         ))}
       </select>
 
-      {error && (
-        <p className="mt-1 text-sm text-[#F85149]">{error}</p>
-      )}
+      {error && <p className="mt-1 text-sm text-[#F85149]">{error}</p>}
 
-      {isLoading && (
-        <p className="mt-1 text-xs text-[#8B949E]">Loading trips...</p>
-      )}
+      {isLoading && <p className="mt-1 text-xs text-[#8B949E]">Loading trips...</p>}
 
       {!isLoading && dayOptions.length === 0 && (
         <p className="mt-1 text-xs text-[#F0883E]">

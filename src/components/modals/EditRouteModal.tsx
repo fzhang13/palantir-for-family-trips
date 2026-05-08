@@ -47,7 +47,7 @@ export function EditRouteModal({ isOpen, onClose, route }: EditRouteModalProps) 
       {
         tripId: activeTripId,
         routeId: route.id,
-        updates: data as any
+        updates: data as any,
       },
       {
         onSuccess: () => {
@@ -79,7 +79,7 @@ export function EditRouteModal({ isOpen, onClose, route }: EditRouteModalProps) 
             className="w-full rounded border border-[#30363D] bg-[#0D1117] px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
             <option value="">Select family</option>
-            {families.map((family) => (
+            {families.map(family => (
               <option key={family.id} value={family.id}>
                 {family.name}
               </option>
@@ -92,7 +92,10 @@ export function EditRouteModal({ isOpen, onClose, route }: EditRouteModalProps) 
 
         {/* Origin Selection */}
         <div>
-          <label htmlFor="originLocationId" className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label
+            htmlFor="originLocationId"
+            className="block text-sm font-medium text-[#C9D1D9] mb-1"
+          >
             Origin (optional)
           </label>
           <select
@@ -102,15 +105,13 @@ export function EditRouteModal({ isOpen, onClose, route }: EditRouteModalProps) 
             disabled={!selectedFamilyId}
           >
             <option value="">Use family origin</option>
-            {locations.map((location) => (
+            {locations.map(location => (
               <option key={location.id} value={location.id}>
                 {location.title}
               </option>
             ))}
           </select>
-          <p className="mt-1 text-xs text-[#8B949E]">
-            Leave blank to use selected family's origin
-          </p>
+          <p className="mt-1 text-xs text-[#8B949E]">Leave blank to use selected family's origin</p>
           {errors.originLocationId && (
             <p className="mt-1 text-sm text-[#F85149]">{errors.originLocationId.message}</p>
           )}
@@ -118,7 +119,10 @@ export function EditRouteModal({ isOpen, onClose, route }: EditRouteModalProps) 
 
         {/* Destination Selection */}
         <div>
-          <label htmlFor="destinationLocationId" className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label
+            htmlFor="destinationLocationId"
+            className="block text-sm font-medium text-[#C9D1D9] mb-1"
+          >
             Destination *
           </label>
           <select
@@ -127,7 +131,7 @@ export function EditRouteModal({ isOpen, onClose, route }: EditRouteModalProps) 
             className="w-full rounded border border-[#30363D] bg-[#0D1117] px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
             <option value="">Select destination</option>
-            {locations.map((location) => (
+            {locations.map(location => (
               <option key={location.id} value={location.id}>
                 {location.title}
               </option>
@@ -165,15 +169,13 @@ export function EditRouteModal({ isOpen, onClose, route }: EditRouteModalProps) 
             className="w-full rounded border border-[#30363D] bg-[#0D1117] px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
             <option value="">Select day</option>
-            {Array.from({ length: 30 }, (_, i) => i + 1).map((day) => (
+            {Array.from({ length: 30 }, (_, i) => i + 1).map(day => (
               <option key={day} value={day}>
                 Day {day}
               </option>
             ))}
           </select>
-          {errors.day && (
-            <p className="mt-1 text-sm text-[#F85149]">{errors.day.message}</p>
-          )}
+          {errors.day && <p className="mt-1 text-sm text-[#F85149]">{errors.day.message}</p>}
         </div>
 
         {/* Notes */}
@@ -188,9 +190,7 @@ export function EditRouteModal({ isOpen, onClose, route }: EditRouteModalProps) 
             className="w-full rounded border border-[#30363D] bg-[#0D1117] px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
             placeholder="Optional route notes..."
           />
-          {errors.notes && (
-            <p className="mt-1 text-sm text-[#F85149]">{errors.notes.message}</p>
-          )}
+          {errors.notes && <p className="mt-1 text-sm text-[#F85149]">{errors.notes.message}</p>}
         </div>
 
         {/* Actions */}

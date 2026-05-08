@@ -16,7 +16,7 @@ export function AtHomeToggle({
   onToggle,
   currentDate,
   onLocationIdChange,
-  tripId
+  tripId,
 }: AtHomeToggleProps) {
   // Get trip metadata to calculate day number
   const { data: tripMeta } = useTripMetadata(tripId)
@@ -48,7 +48,7 @@ export function AtHomeToggle({
       if (error) throw error
       return data
     },
-    enabled: isAtHome && !!currentDate && !!tripMeta
+    enabled: isAtHome && !!currentDate && !!tripMeta,
   })
 
   // Set location ID when toggle is ON and location is found
@@ -88,9 +88,7 @@ export function AtHomeToggle({
       {/* Warning if no stay location */}
       {showWarning && (
         <div className="p-3 bg-[#F0883E]/10 border border-[#F0883E]/30 rounded">
-          <p className="text-sm text-[#F0883E]">
-            ⚠️ No stay location found for this date
-          </p>
+          <p className="text-sm text-[#F0883E]">⚠️ No stay location found for this date</p>
           <p className="text-xs text-[#8B949E] mt-1">
             Please add a stay first or search for a location manually.
           </p>
@@ -98,16 +96,12 @@ export function AtHomeToggle({
       )}
 
       {/* Loading state */}
-      {isLoading && (
-        <p className="text-xs text-[#8B949E]">Finding stay location...</p>
-      )}
+      {isLoading && <p className="text-xs text-[#8B949E]">Finding stay location...</p>}
 
       {/* Auto-filled location indicator */}
       {isAtHome && stayLocation && !isLoading && (
         <div className="p-2 bg-[#1a1f2e] border border-[#58A6FF] rounded">
-          <p className="text-xs text-[#8B949E]">
-            ✓ Auto-filled: {stayLocation.title}
-          </p>
+          <p className="text-xs text-[#8B949E]">✓ Auto-filled: {stayLocation.title}</p>
         </div>
       )}
     </div>

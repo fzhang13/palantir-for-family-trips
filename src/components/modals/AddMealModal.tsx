@@ -5,7 +5,7 @@ import {
   AddressAutocomplete,
   FamilySelector,
   TripDaySelector,
-  AtHomeToggle
+  AtHomeToggle,
 } from '@/components/forms'
 import { useAddMeal, useFamilies, useActiveTripId } from '@/hooks'
 import { useMealsForConflictCheck } from '@/hooks/useTripQueries'
@@ -80,8 +80,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
       // Use locationId when eating at home, createLocation when searching for a place
       ...(isAtHome
         ? { locationId: stayLocationId || undefined }
-        : { createLocation: locationData || undefined }
-      ),
+        : { createLocation: locationData || undefined }),
       // Keep old fields for backward compatibility
       dayId: 'thu', // Will be ignored by new logic
     }
@@ -120,7 +119,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={e => setTitle(e.target.value)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
             placeholder="e.g., Dinner at The Grill"
             required
@@ -130,7 +129,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
         {/* Trip Day Selector (replaces date picker) */}
         <TripDaySelector
           value={mealDate}
-          onChange={(date) => {
+          onChange={date => {
             setMealDate(date)
           }}
           error={!mealDate ? 'Please select a day' : undefined}
@@ -143,7 +142,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
           </label>
           <select
             value={mealType}
-            onChange={(e) => setMealType(e.target.value as any)}
+            onChange={e => setMealType(e.target.value as any)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
             <option value="breakfast">Breakfast</option>
@@ -163,12 +162,10 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
 
         {/* Status */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Status
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">Status</label>
           <select
             value={status}
-            onChange={(e) => setStatus(e.target.value as any)}
+            onChange={e => setStatus(e.target.value as any)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
             <option value="Pending">Pending</option>
@@ -179,9 +176,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
 
         {/* Owners (Family Selector) */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Owners
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">Owners</label>
           <FamilySelector
             selectedFamilyIds={selectedFamilyIds}
             onChange={setSelectedFamilyIds}
@@ -219,9 +214,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
         {/* Location (Google Places) - Hidden when at home */}
         {!isAtHome && (
           <div>
-            <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-              Location
-            </label>
+            <label className="block text-sm font-medium text-[#C9D1D9] mb-2">Location</label>
             <AddressAutocomplete
               value={locationData?.address || ''}
               onChange={(address, place) => {
@@ -231,7 +224,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
                 const lng = place?.geometry?.location?.lng() ?? 0
 
                 setLocationData({
-                  title: place?.name|| address.split(',')[0],
+                  title: place?.name || address.split(',')[0],
                   address,
                   coordinates: { lat, lng },
                   placeId: place?.place_id,
@@ -239,7 +232,7 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
                 })
               }}
               onCoordinatesChange={(lat, lng) => {
-                setLocationData(prev => prev ? { ...prev, coordinates: { lat, lng } } : null)
+                setLocationData(prev => (prev ? { ...prev, coordinates: { lat, lng } } : null))
               }}
               placeholder="Search for restaurant or venue..."
             />
@@ -248,12 +241,10 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
 
         {/* Notes */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Notes
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">Notes</label>
           <textarea
             value={note}
-            onChange={(e) => setNote(e.target.value)}
+            onChange={e => setNote(e.target.value)}
             rows={3}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
             placeholder="Additional notes..."

@@ -34,7 +34,7 @@ export function AddRouteModal({ isOpen, onClose }: AddRouteModalProps) {
   const onSubmit = async (data: CreateRouteInput) => {
     if (!activeTripId) return
     // Get origin coordinates
-    const family = families.find((f) => f.id === data.familyId)
+    const family = families.find(f => f.id === data.familyId)
     if (!family) {
       toast.error('Family not found')
       return
@@ -42,14 +42,14 @@ export function AddRouteModal({ isOpen, onClose }: AddRouteModalProps) {
 
     let originCoords = family.originCoordinates
     if (data.originLocationId) {
-      const originLocation = locations.find((l) => l.id === data.originLocationId)
+      const originLocation = locations.find(l => l.id === data.originLocationId)
       if (originLocation) {
         originCoords = originLocation.coordinates
       }
     }
 
     // Get destination coordinates
-    const destination = locations.find((l) => l.id === data.destinationLocationId)
+    const destination = locations.find(l => l.id === data.destinationLocationId)
     if (!destination) {
       toast.error('Destination location not found')
       return
@@ -83,7 +83,7 @@ export function AddRouteModal({ isOpen, onClose }: AddRouteModalProps) {
       // Extract path from directions result
       const route = result.routes[0]
       const path: Array<{ lat: number; lng: number }> = []
-      route.overview_path.forEach((point) => {
+      route.overview_path.forEach(point => {
         path.push({
           lat: point.lat(),
           lng: point.lng(),
@@ -102,7 +102,7 @@ export function AddRouteModal({ isOpen, onClose }: AddRouteModalProps) {
             ...data,
             path,
             durationSeconds,
-          }
+          },
         },
         {
           onSuccess: () => {
@@ -138,7 +138,7 @@ export function AddRouteModal({ isOpen, onClose }: AddRouteModalProps) {
             className="w-full rounded border border-[#30363D] bg-[#0D1117] px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
             <option value="">Select family</option>
-            {families.map((family) => (
+            {families.map(family => (
               <option key={family.id} value={family.id}>
                 {family.name}
               </option>
@@ -151,7 +151,10 @@ export function AddRouteModal({ isOpen, onClose }: AddRouteModalProps) {
 
         {/* Origin Selection */}
         <div>
-          <label htmlFor="originLocationId" className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label
+            htmlFor="originLocationId"
+            className="block text-sm font-medium text-[#C9D1D9] mb-1"
+          >
             Origin (optional)
           </label>
           <select
@@ -161,15 +164,13 @@ export function AddRouteModal({ isOpen, onClose }: AddRouteModalProps) {
             disabled={!selectedFamilyId}
           >
             <option value="">Use family origin</option>
-            {locations.map((location) => (
+            {locations.map(location => (
               <option key={location.id} value={location.id}>
                 {location.title}
               </option>
             ))}
           </select>
-          <p className="mt-1 text-xs text-[#8B949E]">
-            Leave blank to use selected family's origin
-          </p>
+          <p className="mt-1 text-xs text-[#8B949E]">Leave blank to use selected family's origin</p>
           {errors.originLocationId && (
             <p className="mt-1 text-sm text-[#F85149]">{errors.originLocationId.message}</p>
           )}
@@ -177,7 +178,10 @@ export function AddRouteModal({ isOpen, onClose }: AddRouteModalProps) {
 
         {/* Destination Selection */}
         <div>
-          <label htmlFor="destinationLocationId" className="block text-sm font-medium text-[#C9D1D9] mb-1">
+          <label
+            htmlFor="destinationLocationId"
+            className="block text-sm font-medium text-[#C9D1D9] mb-1"
+          >
             Destination *
           </label>
           <select
@@ -186,7 +190,7 @@ export function AddRouteModal({ isOpen, onClose }: AddRouteModalProps) {
             className="w-full rounded border border-[#30363D] bg-[#0D1117] px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
             <option value="">Select destination</option>
-            {locations.map((location) => (
+            {locations.map(location => (
               <option key={location.id} value={location.id}>
                 {location.title}
               </option>
@@ -224,15 +228,13 @@ export function AddRouteModal({ isOpen, onClose }: AddRouteModalProps) {
             className="w-full rounded border border-[#30363D] bg-[#0D1117] px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
             <option value="">Select day</option>
-            {Array.from({ length: 30 }, (_, i) => i + 1).map((day) => (
+            {Array.from({ length: 30 }, (_, i) => i + 1).map(day => (
               <option key={day} value={day}>
                 Day {day}
               </option>
             ))}
           </select>
-          {errors.day && (
-            <p className="mt-1 text-sm text-[#F85149]">{errors.day.message}</p>
-          )}
+          {errors.day && <p className="mt-1 text-sm text-[#F85149]">{errors.day.message}</p>}
         </div>
 
         {/* Notes */}
@@ -247,9 +249,7 @@ export function AddRouteModal({ isOpen, onClose }: AddRouteModalProps) {
             className="w-full rounded border border-[#30363D] bg-[#0D1117] px-3 py-2 text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
             placeholder="Optional route notes..."
           />
-          {errors.notes && (
-            <p className="mt-1 text-sm text-[#F85149]">{errors.notes.message}</p>
-          )}
+          {errors.notes && <p className="mt-1 text-sm text-[#F85149]">{errors.notes.message}</p>}
         </div>
 
         {/* Actions */}
@@ -266,7 +266,11 @@ export function AddRouteModal({ isOpen, onClose }: AddRouteModalProps) {
             disabled={addRoute.isPending || isFetchingDirections}
             className="rounded bg-[#238636] px-4 py-2 text-sm font-medium text-white hover:bg-[#2EA043] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {isFetchingDirections ? 'Fetching directions...' : addRoute.isPending ? 'Adding...' : 'Add Route'}
+            {isFetchingDirections
+              ? 'Fetching directions...'
+              : addRoute.isPending
+                ? 'Adding...'
+                : 'Add Route'}
           </button>
         </div>
       </form>

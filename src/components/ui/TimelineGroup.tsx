@@ -35,7 +35,7 @@ export function TimelineGroup({
         breakfast: 1,
         brunch: 2,
         lunch: 3,
-        dinner: 4
+        dinner: 4,
       }
 
       const orderA = mealTypeOrder[mealTypeA] || 99
@@ -70,7 +70,7 @@ export function TimelineGroup({
         afternoon: 2,
         evening: 3,
         all_day: 4,
-        flexible: 5
+        flexible: 5,
       }
 
       const orderA = periodOrder[timePeriodA] || 99
@@ -102,7 +102,7 @@ export function TimelineGroup({
             No {items[0]?.type === 'meal' ? 'meals' : 'activities'} scheduled
           </div>
         ) : (
-          sortedItems.map((item) => (
+          sortedItems.map(item => (
             <TimelineItem
               key={item.id}
               item={item}

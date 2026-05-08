@@ -19,11 +19,7 @@ describe('conflictDetection', () => {
         },
       ]
 
-      const result = checkMealConflicts(
-        existingMeals,
-        '2026-05-15',
-        'lunch'
-      )
+      const result = checkMealConflicts(existingMeals, '2026-05-15', 'lunch')
 
       expect(result.hasConflict).toBe(true)
       expect(result.conflicts[0]).toMatchObject({
@@ -46,11 +42,7 @@ describe('conflictDetection', () => {
         },
       ]
 
-      const result = checkMealConflicts(
-        existingMeals,
-        '2026-05-15',
-        'lunch'
-      )
+      const result = checkMealConflicts(existingMeals, '2026-05-15', 'lunch')
 
       expect(result.hasConflict).toBe(false)
     })
@@ -98,12 +90,7 @@ describe('conflictDetection', () => {
         },
       ]
 
-      const result = checkActivityConflicts(
-        existingActivities,
-        '2026-05-15',
-        '14:00',
-        '16:00'
-      )
+      const result = checkActivityConflicts(existingActivities, '2026-05-15', '14:00', '16:00')
 
       expect(result.hasConflict).toBe(true)
       expect(result.conflicts[0]).toMatchObject({
@@ -129,12 +116,7 @@ describe('conflictDetection', () => {
         },
       ]
 
-      const result = checkActivityConflicts(
-        existingActivities,
-        '2026-05-15',
-        '14:00',
-        '16:00'
-      )
+      const result = checkActivityConflicts(existingActivities, '2026-05-15', '14:00', '16:00')
 
       expect(result.hasConflict).toBe(false)
     })

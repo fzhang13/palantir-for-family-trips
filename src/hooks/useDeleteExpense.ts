@@ -13,10 +13,7 @@ export function useDeleteExpense() {
     mutationFn: async ({ expenseId }: DeleteExpenseParams) => {
       if (!supabase) throw new Error('Supabase not initialized')
 
-      const { error } = await supabase
-        .from('expenses')
-        .delete()
-        .eq('id', expenseId)
+      const { error } = await supabase.from('expenses').delete().eq('id', expenseId)
 
       if (error) throw error
     },

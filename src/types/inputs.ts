@@ -30,7 +30,7 @@ export interface CreateLocationInput {
   accessNote?: string
   directionsNote?: string
   // New fields for stays
-  checkInDate?: string  // ISO date string
+  checkInDate?: string // ISO date string
   checkOutDate?: string // ISO date string
   placeId?: string
   // WiFi credentials
@@ -39,7 +39,7 @@ export interface CreateLocationInput {
   // Access information
   hostName?: string
   lockNote?: string
-  checkIn?: string  // time string (e.g., "3:00 PM")
+  checkIn?: string // time string (e.g., "3:00 PM")
   checkOut?: string // time string (e.g., "11:00 AM")
 }
 
@@ -90,8 +90,8 @@ export interface CreateActivityInput {
 
 export interface CreateTripInput {
   title: string
-  start_date: string    // ISO 8601 date
-  end_date: string      // ISO 8601 date
+  start_date: string // ISO 8601 date
+  end_date: string // ISO 8601 date
   timezone: string
 }
 

@@ -1,10 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BaseModal } from './BaseModal'
-import {
-  AddressAutocomplete,
-  TripDaySelector,
-  TimePeriodPicker
-} from '@/components/forms'
+import { AddressAutocomplete, TripDaySelector, TimePeriodPicker } from '@/components/forms'
 import { useUpdateActivity, useActiveTripId, useLocations } from '@/hooks'
 import { fetchWeather, type WeatherForecast } from '@/lib/weatherService'
 import type { Activity } from '@/types'
@@ -22,9 +18,9 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
   // Pre-populate from existing activity
   const [title, setTitle] = useState(activity.title)
   const [activityDate, setActivityDate] = useState(activity.activityDate || '')
-  const [timePeriod, setTimePeriod] = useState<'morning' | 'afternoon' | 'evening' | 'all_day' | 'flexible'>(
-    (activity.timePeriod || 'all_day') as any
-  )
+  const [timePeriod, setTimePeriod] = useState<
+    'morning' | 'afternoon' | 'evening' | 'all_day' | 'flexible'
+  >((activity.timePeriod || 'all_day') as any)
   const [startTime, setStartTime] = useState<string | undefined>(activity.startTime || undefined)
   const [endTime, setEndTime] = useState<string | undefined>(activity.endTime || undefined)
   const [status, setStatus] = useState<'Go' | 'Watch'>(activity.status)
@@ -65,7 +61,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
         address: activityLocation.address,
         coordinates: activityLocation.coordinates,
         placeId: activityLocation.placeId || undefined,
-        category: 'activity'
+        category: 'activity',
       })
     }
 
@@ -81,7 +77,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
         address: backupLocation.address,
         coordinates: backupLocation.coordinates,
         placeId: backupLocation.placeId || undefined,
-        category: 'activity'
+        category: 'activity',
       })
     }
 
@@ -145,7 +141,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
       await updateActivity.mutateAsync({
         tripId: activeTripId,
         activityId: activity.id,
-        updates: input
+        updates: input,
       })
       onClose()
     } catch (error) {
@@ -165,7 +161,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={e => setTitle(e.target.value)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
             placeholder="e.g., Hiking Trail"
             required
@@ -173,10 +169,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
         </div>
 
         {/* Trip Day Selector */}
-        <TripDaySelector
-          value={activityDate}
-          onChange={(date) => setActivityDate(date)}
-        />
+        <TripDaySelector value={activityDate} onChange={date => setActivityDate(date)} />
 
         {/* Time Period Picker */}
         <TimePeriodPicker
@@ -192,12 +185,10 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
 
         {/* Status */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Status
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">Status</label>
           <select
             value={status}
-            onChange={(e) => setStatus(e.target.value as any)}
+            onChange={e => setStatus(e.target.value as any)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
             <option value="Go">Go</option>
@@ -207,12 +198,10 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
 
         {/* Risk Level */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Risk Level
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">Risk Level</label>
           <select
             value={riskLevel}
-            onChange={(e) => setRiskLevel(e.target.value as any)}
+            onChange={e => setRiskLevel(e.target.value as any)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
             <option value="low">Low</option>
@@ -229,7 +218,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
           <input
             type="text"
             value={weatherSensitivity}
-            onChange={(e) => setWeatherSensitivity(e.target.value)}
+            onChange={e => setWeatherSensitivity(e.target.value)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
             placeholder="e.g., High, Moderate, Low"
           />
@@ -249,7 +238,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
               const lng = place?.geometry?.location?.lng() ?? 0
 
               setLocationData({
-                title: place?.name|| address.split(',')[0],
+                title: place?.name || address.split(',')[0],
                 address,
                 coordinates: { lat, lng },
                 placeId: place?.place_id,
@@ -257,7 +246,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
               })
             }}
             onCoordinatesChange={(lat, lng) => {
-              setLocationData(prev => prev ? { ...prev, coordinates: { lat, lng } } : null)
+              setLocationData(prev => (prev ? { ...prev, coordinates: { lat, lng } } : null))
             }}
             placeholder="Search for activity location..."
           />
@@ -266,9 +255,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
         {/* Weather Display */}
         {locationData && activityDate && (
           <div className="p-3 bg-[#161B22] border border-[#30363D] rounded">
-            {weatherLoading && (
-              <p className="text-sm text-[#8B949E]">Fetching weather...</p>
-            )}
+            {weatherLoading && <p className="text-sm text-[#8B949E]">Fetching weather...</p>}
             {weather && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -284,9 +271,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
                       {weather.condition}, {weather.temperature}°F
                     </p>
                     {weather.condition.includes('Rain') && (
-                      <p className="text-xs text-[#F0883E]">
-                        ⚠️ Consider backup plan
-                      </p>
+                      <p className="text-xs text-[#F0883E]">⚠️ Consider backup plan</p>
                     )}
                   </div>
                 </div>
@@ -335,7 +320,7 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
                   const lng = place?.geometry?.location?.lng() ?? 0
 
                   setBackupLocationData({
-                    title: place?.name|| address.split(',')[0],
+                    title: place?.name || address.split(',')[0],
                     address,
                     coordinates: { lat, lng },
                     placeId: place?.place_id,
@@ -343,7 +328,9 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
                   })
                 }}
                 onCoordinatesChange={(lat, lng) => {
-                  setBackupLocationData(prev => prev ? { ...prev, coordinates: { lat, lng } } : null)
+                  setBackupLocationData(prev =>
+                    prev ? { ...prev, coordinates: { lat, lng } } : null
+                  )
                 }}
                 placeholder="Alternative if primary doesn't work..."
               />
@@ -353,12 +340,10 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
 
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Description
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">Description</label>
           <textarea
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={e => setDescription(e.target.value)}
             rows={2}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
             placeholder="What is this activity about?"
@@ -367,12 +352,10 @@ export function EditActivityModal({ isOpen, onClose, activity }: EditActivityMod
 
         {/* Notes */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Notes
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">Notes</label>
           <textarea
             value={note}
-            onChange={(e) => setNote(e.target.value)}
+            onChange={e => setNote(e.target.value)}
             rows={2}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
             placeholder="Additional notes..."

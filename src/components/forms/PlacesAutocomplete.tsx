@@ -38,10 +38,7 @@ export function PlacesAutocomplete({
       fields: ['formatted_address', 'geometry', 'name', 'place_id'],
     }
 
-    autocompleteRef.current = new google.maps.places.Autocomplete(
-      inputRef.current,
-      options
-    )
+    autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current, options)
 
     // Handle place selection
     const listener = autocompleteRef.current.addListener('place_changed', () => {
@@ -76,7 +73,7 @@ export function PlacesAutocomplete({
         ref={inputRef}
         type="text"
         value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
+        onChange={e => setInputValue(e.target.value)}
         className={`w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none ${className}`}
         placeholder={placeholder}
       />

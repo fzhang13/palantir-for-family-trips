@@ -10,9 +10,7 @@ interface UseGoogleMapsReturn {
   error: Error | null
 }
 
-export function useGoogleMaps(
-  options: Partial<google.maps.MapOptions> = {}
-): UseGoogleMapsReturn {
+export function useGoogleMaps(options: Partial<google.maps.MapOptions> = {}): UseGoogleMapsReturn {
   const [container, setContainer] = useState<HTMLDivElement | null>(null)
   const [map, setMap] = useState<google.maps.Map | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)

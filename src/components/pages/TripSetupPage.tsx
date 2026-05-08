@@ -36,9 +36,7 @@ export function TripSetupPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#0A0C10]">
       <div className="bg-[#161B22] border border-[#30363D] rounded-lg w-full max-w-md mx-4 p-8">
         <h1 className="text-2xl font-bold text-[#C9D1D9] mb-2">Set Up Your Trip</h1>
-        <p className="text-sm text-[#8B949E] mb-6">
-          Let's start by configuring your trip details
-        </p>
+        <p className="text-sm text-[#8B949E] mb-6">Let's start by configuring your trip details</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Trip Name */}
@@ -49,7 +47,7 @@ export function TripSetupPage() {
             <input
               type="text"
               value={tripName}
-              onChange={(e) => setTripName(e.target.value)}
+              onChange={e => setTripName(e.target.value)}
               placeholder="e.g., Summer Family Vacation 2026"
               className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] placeholder-[#6E7681] focus:border-[#58A6FF] focus:outline-none"
               disabled={createTrip.isPending}
@@ -65,7 +63,7 @@ export function TripSetupPage() {
               <input
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={e => setStartDate(e.target.value)}
                 className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
                 disabled={createTrip.isPending}
               />
@@ -78,7 +76,7 @@ export function TripSetupPage() {
               <input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={e => setEndDate(e.target.value)}
                 min={startDate}
                 className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
                 disabled={createTrip.isPending}
@@ -88,12 +86,10 @@ export function TripSetupPage() {
 
           {/* Timezone */}
           <div>
-            <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-              Timezone
-            </label>
+            <label className="block text-sm font-medium text-[#C9D1D9] mb-2">Timezone</label>
             <select
               value={timezone}
-              onChange={(e) => setTimezone(e.target.value)}
+              onChange={e => setTimezone(e.target.value)}
               className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
               disabled={createTrip.isPending}
             >

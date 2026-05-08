@@ -70,7 +70,7 @@ export function AppShell({ currentPage, onPageChange, children }: AppShellProps)
         {/* Sidebar nav */}
         <nav className="w-48 border-r border-zinc-800 bg-[#161B22] overflow-y-auto">
           <div className="p-2 space-y-1">
-            {navItems.map((item) => {
+            {navItems.map(item => {
               const Icon = PAGE_ICONS[item.id]
               const isActive = currentPage === item.id
 

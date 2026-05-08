@@ -52,7 +52,11 @@ export const DARK_MAP_STYLES: google.maps.MapTypeStyle[] = [
   { elementType: 'geometry', stylers: [{ color: '#0b0f14' }] },
   { elementType: 'labels.text.stroke', stylers: [{ color: '#0b0f14' }] },
   { elementType: 'labels.text.fill', stylers: [{ color: '#8b949e' }] },
-  { featureType: 'administrative', elementType: 'geometry.stroke', stylers: [{ color: '#30363d' }] },
+  {
+    featureType: 'administrative',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#30363d' }],
+  },
   { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#11161d' }] },
   { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#0f1712' }] },
   { featureType: 'poi.park', elementType: 'labels.text.fill', stylers: [{ color: '#3fb950' }] },

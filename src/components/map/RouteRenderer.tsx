@@ -21,11 +21,11 @@ export function RouteRenderer({ map, routes, selectedRouteId }: RouteRendererPro
     }
 
     // Clear existing polylines
-    polylinesRef.current.forEach((polyline) => polyline.setMap(null))
+    polylinesRef.current.forEach(polyline => polyline.setMap(null))
     polylinesRef.current = []
 
     // Render each route
-    routes.forEach((route) => {
+    routes.forEach(route => {
       if (!route.path || route.path.length === 0) {
         return
       }
@@ -33,7 +33,7 @@ export function RouteRenderer({ map, routes, selectedRouteId }: RouteRendererPro
       const isSelected = route.id === selectedRouteId
 
       const polyline = new google.maps.Polyline({
-        path: route.path.map((point) => ({
+        path: route.path.map(point => ({
           lat: point.lat,
           lng: point.lng,
         })),
@@ -49,7 +49,7 @@ export function RouteRenderer({ map, routes, selectedRouteId }: RouteRendererPro
 
     // Cleanup on unmount
     return () => {
-      polylinesRef.current.forEach((polyline) => polyline.setMap(null))
+      polylinesRef.current.forEach(polyline => polyline.setMap(null))
       polylinesRef.current = []
     }
   }, [map, routes, selectedRouteId])

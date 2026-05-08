@@ -17,7 +17,9 @@ import { supabase } from '@/lib/supabase'
 export class SupabaseTripRepository implements TripRepository {
   private get client() {
     if (!supabase) {
-      throw new Error('Supabase client not initialized. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
+      throw new Error(
+        'Supabase client not initialized. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.'
+      )
     }
     return supabase
   }
@@ -90,7 +92,13 @@ export class SupabaseTripRepository implements TripRepository {
       ui: {
         searchQuery: '',
         timeline: { mode: 'scenario', cursorSlot: 0 },
-        map: { showRoutes: true, showFacilities: false, showTraffic: false, focusFamilyId: '', focusDayId: '' },
+        map: {
+          showRoutes: true,
+          showFacilities: false,
+          showTraffic: false,
+          focusFamilyId: '',
+          focusDayId: '',
+        },
       },
       families: (families || []).map(this.mapFamilyFromDb),
       locations: (locations || []).map(this.mapLocationFromDb),
@@ -127,10 +135,7 @@ export class SupabaseTripRepository implements TripRepository {
   }
 
   async unarchiveTrip(tripId: string): Promise<void> {
-    const { error } = await this.client
-      .from('trips')
-      .update({ status: 'active' })
-      .eq('id', tripId)
+    const { error } = await this.client.from('trips').update({ status: 'active' }).eq('id', tripId)
 
     if (error) throw new Error(error.message)
   }
@@ -168,10 +173,7 @@ export class SupabaseTripRepository implements TripRepository {
   // ─── Families ──────────────────────────────────────────────────────────────
 
   async getFamilies(tripId: string): Promise<Family[]> {
-    const { data, error } = await this.client
-      .from('families')
-      .select('*')
-      .eq('trip_id', tripId)
+    const { data, error } = await this.client.from('families').select('*').eq('trip_id', tripId)
     if (error) throw new Error(error.message)
     return (data || []).map(this.mapFamilyFromDb)
   }
@@ -210,11 +212,7 @@ export class SupabaseTripRepository implements TripRepository {
       note: input.note || '',
     }
 
-    const { data, error } = await this.client
-      .from('families')
-      .insert(row)
-      .select()
-      .single()
+    const { data, error } = await this.client.from('families').insert(row).select().single()
     if (error) throw new Error(error.message)
     return this.mapFamilyFromDb(data)
   }
@@ -244,10 +242,7 @@ export class SupabaseTripRepository implements TripRepository {
   // ─── Locations ─────────────────────────────────────────────────────────────
 
   async getLocations(tripId: string): Promise<Location[]> {
-    const { data, error } = await this.client
-      .from('locations')
-      .select('*')
-      .eq('trip_id', tripId)
+    const { data, error } = await this.client.from('locations').select('*').eq('trip_id', tripId)
     if (error) throw new Error(error.message)
     return (data || []).map(this.mapLocationFromDb)
   }
@@ -375,7 +370,7 @@ export class SupabaseTripRepository implements TripRepository {
         // Copy day range from location to stay_item
         if ('startDayNumber' in input) stayRow.start_day_number = input.startDayNumber
         if ('endDayNumber' in input) stayRow.end_day_number = input.endDayNumber
-        
+
         const { data: stayData, error: stayErr } = await this.client
           .from('stay_items')
           .insert(stayRow)
@@ -390,7 +385,11 @@ export class SupabaseTripRepository implements TripRepository {
     return { location, entityId }
   }
 
-  async updateLocation(tripId: string, locationId: string, updates: Partial<Location>): Promise<Location> {
+  async updateLocation(
+    tripId: string,
+    locationId: string,
+    updates: Partial<Location>
+  ): Promise<Location> {
     const row = this.mapLocationToDb(updates)
     const { data, error } = await this.client
       .from('locations')
@@ -400,13 +399,13 @@ export class SupabaseTripRepository implements TripRepository {
       .select()
       .single()
     if (error) throw new Error(error.message)
-    
+
     // If this is a stay location and day numbers changed, sync to stay_items
     if (data.category === 'stay' && ('start_day_number' in row || 'end_day_number' in row)) {
       const stayUpdates: Record<string, unknown> = {}
       if ('start_day_number' in row) stayUpdates.start_day_number = row.start_day_number
       if ('end_day_number' in row) stayUpdates.end_day_number = row.end_day_number
-      
+
       if (Object.keys(stayUpdates).length > 0) {
         await this.client
           .from('stay_items')
@@ -415,7 +414,7 @@ export class SupabaseTripRepository implements TripRepository {
           .eq('trip_id', tripId)
       }
     }
-    
+
     return this.mapLocationFromDb(data)
   }
 
@@ -431,10 +430,7 @@ export class SupabaseTripRepository implements TripRepository {
   // ─── Meals ─────────────────────────────────────────────────────────────────
 
   async getMeals(tripId: string): Promise<Meal[]> {
-    const { data, error } = await this.client
-      .from('meals')
-      .select('*')
-      .eq('trip_id', tripId)
+    const { data, error } = await this.client.from('meals').select('*').eq('trip_id', tripId)
     if (error) throw new Error(error.message)
 
     // Fetch all junction table entries for this trip's meals
@@ -526,9 +522,7 @@ export class SupabaseTripRepository implements TripRepository {
         family_id: familyId,
       }))
 
-      const { error: familyError } = await this.client
-        .from('meal_families')
-        .insert(familyInserts)
+      const { error: familyError } = await this.client.from('meal_families').insert(familyInserts)
 
       if (familyError) throw new Error(`Failed to link families to meal: ${familyError.message}`)
 
@@ -541,10 +535,7 @@ export class SupabaseTripRepository implements TripRepository {
       if (families) {
         const ownerText = families.map(f => f.name).join(', ')
 
-        await this.client
-          .from('meals')
-          .update({ owner: ownerText })
-          .eq('id', meal.id)
+        await this.client.from('meals').update({ owner: ownerText }).eq('id', meal.id)
       }
     }
 
@@ -636,10 +627,7 @@ export class SupabaseTripRepository implements TripRepository {
     // Update family associations if provided
     if (updates.familyIds !== undefined) {
       // Delete existing associations
-      await this.client
-        .from('meal_families')
-        .delete()
-        .eq('meal_id', mealId)
+      await this.client.from('meal_families').delete().eq('meal_id', mealId)
 
       // Insert new associations
       if (updates.familyIds.length > 0) {
@@ -648,9 +636,7 @@ export class SupabaseTripRepository implements TripRepository {
           family_id: familyId,
         }))
 
-        await this.client
-          .from('meal_families')
-          .insert(familyInserts)
+        await this.client.from('meal_families').insert(familyInserts)
 
         // Update owner field (backward compat)
         const { data: families } = await this.client
@@ -660,17 +646,11 @@ export class SupabaseTripRepository implements TripRepository {
 
         if (families) {
           const ownerText = families.map(f => f.name).join(', ')
-          await this.client
-            .from('meals')
-            .update({ owner: ownerText })
-            .eq('id', mealId)
+          await this.client.from('meals').update({ owner: ownerText }).eq('id', mealId)
         }
       } else {
         // Clear owner if no families
-        await this.client
-          .from('meals')
-          .update({ owner: '' })
-          .eq('id', mealId)
+        await this.client.from('meals').update({ owner: '' }).eq('id', mealId)
       }
     }
 
@@ -698,10 +678,7 @@ export class SupabaseTripRepository implements TripRepository {
   // ─── Activities ────────────────────────────────────────────────────────────
 
   async getActivities(tripId: string): Promise<Activity[]> {
-    const { data, error } = await this.client
-      .from('activities')
-      .select('*')
-      .eq('trip_id', tripId)
+    const { data, error } = await this.client.from('activities').select('*').eq('trip_id', tripId)
     if (error) throw new Error(error.message)
     return (data || []).map(this.mapActivityFromDb)
   }
@@ -805,7 +782,8 @@ export class SupabaseTripRepository implements TripRepository {
         .from('activity_families')
         .insert(familyInserts)
 
-      if (familyError) throw new Error(`Failed to link families to activity: ${familyError.message}`)
+      if (familyError)
+        throw new Error(`Failed to link families to activity: ${familyError.message}`)
     }
 
     return activity
@@ -828,11 +806,7 @@ export class SupabaseTripRepository implements TripRepository {
     if (updates.timePeriod !== undefined) {
       newFields.time_period = updates.timePeriod
       // Update window if time period or times change
-      oldFields.window = deriveWindow(
-        updates.timePeriod,
-        updates.startTime,
-        updates.endTime
-      )
+      oldFields.window = deriveWindow(updates.timePeriod, updates.startTime, updates.endTime)
     }
     if (updates.startTime !== undefined) newFields.start_time = updates.startTime
     if (updates.endTime !== undefined) newFields.end_time = updates.endTime
@@ -893,10 +867,7 @@ export class SupabaseTripRepository implements TripRepository {
     // Update family associations if provided
     if (updates.familyIds !== undefined) {
       // Delete existing associations
-      await this.client
-        .from('activity_families')
-        .delete()
-        .eq('activity_id', activityId)
+      await this.client.from('activity_families').delete().eq('activity_id', activityId)
 
       // Insert new associations
       if (updates.familyIds.length > 0) {
@@ -905,9 +876,7 @@ export class SupabaseTripRepository implements TripRepository {
           family_id: familyId,
         }))
 
-        await this.client
-          .from('activity_families')
-          .insert(familyInserts)
+        await this.client.from('activity_families').insert(familyInserts)
       }
     }
 
@@ -926,10 +895,7 @@ export class SupabaseTripRepository implements TripRepository {
   // ─── Routes ────────────────────────────────────────────────────────────────
 
   async getRoutes(tripId: string): Promise<Route[]> {
-    const { data, error } = await this.client
-      .from('routes')
-      .select('*')
-      .eq('trip_id', tripId)
+    const { data, error } = await this.client.from('routes').select('*').eq('trip_id', tripId)
     if (error) throw new Error(error.message)
     return (data || []).map(this.mapRouteFromDb)
   }
@@ -963,7 +929,8 @@ export class SupabaseTripRepository implements TripRepository {
       .eq('id', input.destinationLocationId)
       .eq('trip_id', tripId)
       .single()
-    if (destErr || !dest) throw new Error(`Destination location ${input.destinationLocationId} not found`)
+    if (destErr || !dest)
+      throw new Error(`Destination location ${input.destinationLocationId} not found`)
 
     let originCoordinates = family.origin_coordinates
     const stopLocationIds: string[] = []
@@ -975,7 +942,8 @@ export class SupabaseTripRepository implements TripRepository {
         .eq('id', input.originLocationId)
         .eq('trip_id', tripId)
         .single()
-      if (origErr || !originLoc) throw new Error(`Origin location ${input.originLocationId} not found`)
+      if (origErr || !originLoc)
+        throw new Error(`Origin location ${input.originLocationId} not found`)
       originCoordinates = originLoc.coordinates
       stopLocationIds.push(input.originLocationId)
     }
@@ -996,11 +964,7 @@ export class SupabaseTripRepository implements TripRepository {
       dashed: false,
     }
 
-    const { data, error } = await this.client
-      .from('routes')
-      .insert(row)
-      .select()
-      .single()
+    const { data, error } = await this.client.from('routes').insert(row).select().single()
     if (error) throw new Error(error.message)
     return this.mapRouteFromDb(data)
   }
@@ -1037,7 +1001,10 @@ export class SupabaseTripRepository implements TripRepository {
     shortOrigin: (row.short_origin as string) || '',
     origin: (row.origin as string) || '',
     originAddress: (row.origin_address as string) || '',
-    originCoordinates: (row.origin_coordinates as { lat: number; lng: number }) || { lat: 0, lng: 0 },
+    originCoordinates: (row.origin_coordinates as { lat: number; lng: number }) || {
+      lat: 0,
+      lng: 0,
+    },
     arrivalDayId: (row.arrival_day_id as string) || '',
     eta: (row.eta as string) || '',
     driveTime: (row.drive_time as string) || '',
@@ -1096,7 +1063,10 @@ export class SupabaseTripRepository implements TripRepository {
     dayId: (row.day_id as string) || '',
     familyId: (row.family_id as string) || '',
     tone: (row.tone as string) || '#3b82f6',
-    originCoordinates: (row.origin_coordinates as { lat: number; lng: number }) || { lat: 0, lng: 0 },
+    originCoordinates: (row.origin_coordinates as { lat: number; lng: number }) || {
+      lat: 0,
+      lng: 0,
+    },
     stopLocationIds: (row.stop_location_ids as string[]) || [],
     destinationLocationId: row.destination_location_id as string | undefined,
     simulationStartSlot: (row.simulation_start_slot as number) || 0,
@@ -1108,7 +1078,9 @@ export class SupabaseTripRepository implements TripRepository {
     dashed: (row.dashed as boolean) || false,
   })
 
-  private mapItineraryItemFromDb = (row: Record<string, unknown>): import('@/types').ItineraryItem => ({
+  private mapItineraryItemFromDb = (
+    row: Record<string, unknown>
+  ): import('@/types').ItineraryItem => ({
     id: row.id as string,
     type: 'itineraryItem',
     title: (row.title as string) || '',
@@ -1143,7 +1115,7 @@ export class SupabaseTripRepository implements TripRepository {
     mealDate: row.meal_date as string | null,
     mealType: row.meal_type as 'breakfast' | 'brunch' | 'lunch' | 'dinner' | null,
     requiresReservation: row.requires_reservation as boolean | null,
-    familyIds: [],  // Will be populated by caller when fetching from junction table
+    familyIds: [], // Will be populated by caller when fetching from junction table
   })
 
   private mapActivityFromDb = (row: Record<string, unknown>): import('@/types').Activity => ({
@@ -1160,7 +1132,13 @@ export class SupabaseTripRepository implements TripRepository {
     backup: row.backup as string | undefined,
     note: row.note as string | undefined,
     activityDate: row.activity_date as string | null,
-    timePeriod: row.time_period as 'morning' | 'afternoon' | 'evening' | 'all_day' | 'flexible' | null,
+    timePeriod: row.time_period as
+      | 'morning'
+      | 'afternoon'
+      | 'evening'
+      | 'all_day'
+      | 'flexible'
+      | null,
     startTime: row.start_time as string | null,
     endTime: row.end_time as string | null,
     backupLocationId: row.backup_location_id as string | null,
@@ -1189,7 +1167,8 @@ export class SupabaseTripRepository implements TripRepository {
     type: 'expense',
     title: (row.title as string) || '',
     expenseDate: new Date(row.expense_date as string),
-    category: (row.category as 'food' | 'accommodation' | 'transport' | 'activities' | 'other') || 'other',
+    category:
+      (row.category as 'food' | 'accommodation' | 'transport' | 'activities' | 'other') || 'other',
     payerFamilyId: (row.payer_family_id as string) || '',
     amount: Number(row.amount) || 0,
     allocationMode: (row.allocation_mode as 'equal' | 'manual') || 'equal',
@@ -1276,11 +1255,14 @@ export class SupabaseTripRepository implements TripRepository {
     if (updates.tone !== undefined) row.tone = updates.tone
     if (updates.originCoordinates !== undefined) row.origin_coordinates = updates.originCoordinates
     if (updates.stopLocationIds !== undefined) row.stop_location_ids = updates.stopLocationIds
-    if (updates.destinationLocationId !== undefined) row.destination_location_id = updates.destinationLocationId
-    if (updates.simulationStartSlot !== undefined) row.simulation_start_slot = updates.simulationStartSlot
+    if (updates.destinationLocationId !== undefined)
+      row.destination_location_id = updates.destinationLocationId
+    if (updates.simulationStartSlot !== undefined)
+      row.simulation_start_slot = updates.simulationStartSlot
     if (updates.simulationEndSlot !== undefined) row.simulation_end_slot = updates.simulationEndSlot
     if (updates.durationSeconds !== undefined) row.duration_seconds = updates.durationSeconds
-    if (updates.simulationMilestones !== undefined) row.simulation_milestones = updates.simulationMilestones
+    if (updates.simulationMilestones !== undefined)
+      row.simulation_milestones = updates.simulationMilestones
     if (updates.path !== undefined) row.path = updates.path
     if (updates.dashed !== undefined) row.dashed = updates.dashed
     return row
@@ -1291,7 +1273,11 @@ export class SupabaseTripRepository implements TripRepository {
   private extractShortOrigin(origin: string): string {
     const words = origin.split(' ')
     if (words.length === 1) return words[0].substring(0, 2).toUpperCase()
-    return words.slice(0, 2).map((w) => w[0]).join('').toUpperCase()
+    return words
+      .slice(0, 2)
+      .map(w => w[0])
+      .join('')
+      .toUpperCase()
   }
 }
 
@@ -1310,17 +1296,13 @@ function deriveStartSlot(mealType: string): number {
     breakfast: 8,
     brunch: 10,
     lunch: 12,
-    dinner: 18
+    dinner: 18,
   }
   return slots[mealType] || 12
 }
 
 // Helper: Derive window display string from time period and times
-function deriveWindow(
-  timePeriod: string,
-  startTime?: string,
-  endTime?: string
-): string {
+function deriveWindow(timePeriod: string, startTime?: string, endTime?: string): string {
   // If specific times provided, use them
   if (startTime && endTime) {
     return `${startTime} - ${endTime}`
@@ -1332,7 +1314,7 @@ function deriveWindow(
     afternoon: 'Afternoon',
     evening: 'Evening',
     all_day: 'All Day',
-    flexible: 'Flexible'
+    flexible: 'Flexible',
   }
   return labels[timePeriod] || 'Window TBD'
 }

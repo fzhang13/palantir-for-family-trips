@@ -1,10 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BaseModal } from './BaseModal'
-import {
-  AddressAutocomplete,
-  TimePeriodPicker,
-  TripDaySelector
-} from '@/components/forms'
+import { AddressAutocomplete, TimePeriodPicker, TripDaySelector } from '@/components/forms'
 import { useAddActivity, useActiveTripId } from '@/hooks'
 import { useActivitiesForConflictCheck } from '@/hooks/useTripQueries'
 import { checkActivityConflicts } from '@/lib/conflictDetection'
@@ -20,7 +16,9 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
   const { data: activeTripId } = useActiveTripId()
   const [title, setTitle] = useState('')
   const [activityDate, setActivityDate] = useState('')
-  const [timePeriod, setTimePeriod] = useState<'morning' | 'afternoon' | 'evening' | 'all_day' | 'flexible'>('all_day')
+  const [timePeriod, setTimePeriod] = useState<
+    'morning' | 'afternoon' | 'evening' | 'all_day' | 'flexible'
+  >('all_day')
   const [startTime, setStartTime] = useState<string>()
   const [endTime, setEndTime] = useState<string>()
   const [status, setStatus] = useState<'Go' | 'Watch'>('Go')
@@ -150,7 +148,7 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={e => setTitle(e.target.value)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
             placeholder="e.g., Hiking Trail"
             required
@@ -160,7 +158,7 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
         {/* Trip Day Selector (replaces date picker) */}
         <TripDaySelector
           value={activityDate}
-          onChange={(date) => {
+          onChange={date => {
             setActivityDate(date)
           }}
           error={!activityDate ? 'Please select a day' : undefined}
@@ -182,20 +180,16 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
         {conflict.hasConflict && (
           <div className="p-3 bg-[#F0883E]/10 border border-[#F0883E]/30 rounded">
             <p className="text-sm text-[#F0883E]">⚠️ {conflict.message}</p>
-            <p className="text-xs text-[#8B949E] mt-1">
-              Adjust times or continue anyway.
-            </p>
+            <p className="text-xs text-[#8B949E] mt-1">Adjust times or continue anyway.</p>
           </div>
         )}
 
         {/* Status */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Status
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">Status</label>
           <select
             value={status}
-            onChange={(e) => setStatus(e.target.value as any)}
+            onChange={e => setStatus(e.target.value as any)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
             <option value="Go">Go</option>
@@ -205,12 +199,10 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
 
         {/* Risk Level */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Risk Level
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">Risk Level</label>
           <select
             value={riskLevel}
-            onChange={(e) => setRiskLevel(e.target.value as any)}
+            onChange={e => setRiskLevel(e.target.value as any)}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
           >
             <option value="low">Low</option>
@@ -233,7 +225,7 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
               const lng = place?.geometry?.location?.lng() ?? 0
 
               setLocationData({
-                title: place?.name|| address.split(',')[0],
+                title: place?.name || address.split(',')[0],
                 address,
                 coordinates: { lat, lng },
                 placeId: place?.place_id,
@@ -241,7 +233,7 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
               })
             }}
             onCoordinatesChange={(lat, lng) => {
-              setLocationData(prev => prev ? { ...prev, coordinates: { lat, lng } } : null)
+              setLocationData(prev => (prev ? { ...prev, coordinates: { lat, lng } } : null))
             }}
             placeholder="Search for activity location..."
           />
@@ -250,12 +242,8 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
         {/* Weather Display */}
         {locationData && activityDate && (
           <div className="p-3 bg-[#161B22] border border-[#30363D] rounded">
-            {weatherLoading && (
-              <p className="text-sm text-[#8B949E]">Fetching weather...</p>
-            )}
-            {weatherError && (
-              <p className="text-sm text-[#F85149]">{weatherError}</p>
-            )}
+            {weatherLoading && <p className="text-sm text-[#8B949E]">Fetching weather...</p>}
+            {weatherError && <p className="text-sm text-[#F85149]">{weatherError}</p>}
             {weather && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -271,9 +259,7 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
                       {weather.condition}, {weather.temperature}°F
                     </p>
                     {weather.condition.includes('Rain') && (
-                      <p className="text-xs text-[#F0883E]">
-                        ⚠️ Consider backup plan
-                      </p>
+                      <p className="text-xs text-[#F0883E]">⚠️ Consider backup plan</p>
                     )}
                   </div>
                 </div>
@@ -322,7 +308,7 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
                   const lng = place?.geometry?.location?.lng() ?? 0
 
                   setBackupLocationData({
-                    title: place?.name|| address.split(',')[0],
+                    title: place?.name || address.split(',')[0],
                     address,
                     coordinates: { lat, lng },
                     placeId: place?.place_id,
@@ -330,7 +316,9 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
                   })
                 }}
                 onCoordinatesChange={(lat, lng) => {
-                  setBackupLocationData(prev => prev ? { ...prev, coordinates: { lat, lng } } : null)
+                  setBackupLocationData(prev =>
+                    prev ? { ...prev, coordinates: { lat, lng } } : null
+                  )
                 }}
                 placeholder="Alternative if primary doesn't work..."
               />
@@ -340,12 +328,10 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
 
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Description
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">Description</label>
           <textarea
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={e => setDescription(e.target.value)}
             rows={2}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
             placeholder="What is this activity about?"
@@ -354,12 +340,10 @@ export function AddActivityModal({ isOpen, onClose }: AddActivityModalProps) {
 
         {/* Notes */}
         <div>
-          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">
-            Notes
-          </label>
+          <label className="block text-sm font-medium text-[#C9D1D9] mb-2">Notes</label>
           <textarea
             value={note}
-            onChange={(e) => setNote(e.target.value)}
+            onChange={e => setNote(e.target.value)}
             rows={2}
             className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
             placeholder="Additional notes..."

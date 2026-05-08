@@ -14,7 +14,7 @@ export function DayRangeSelector({
   endDay,
   onChange,
   error,
-  tripId: propTripId
+  tripId: propTripId,
 }: DayRangeSelectorProps) {
   const { data: activeTripId } = useActiveTripId()
   const tripId = propTripId || activeTripId
@@ -25,7 +25,8 @@ export function DayRangeSelector({
   if (tripMetadata?.start_date && tripMetadata?.end_date) {
     const startDate = new Date(tripMetadata.start_date + 'T00:00:00')
     const endDate = new Date(tripMetadata.end_date + 'T00:00:00')
-    const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+    const totalDays =
+      Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
 
     for (let i = 0; i < totalDays; i++) {
       const date = new Date(startDate)
@@ -33,7 +34,7 @@ export function DayRangeSelector({
       tripDays.push({
         dayNumber: i + 1,
         date,
-        label: `Day ${i + 1} - ${formatFullDate(date)}`
+        label: `Day ${i + 1} - ${formatFullDate(date)}`,
       })
     }
   }
@@ -55,17 +56,11 @@ export function DayRangeSelector({
   }
 
   if (isLoading) {
-    return (
-      <div className="text-sm text-[#8B949E]">Loading trip days...</div>
-    )
+    return <div className="text-sm text-[#8B949E]">Loading trip days...</div>
   }
 
   if (tripDays.length === 0) {
-    return (
-      <div className="text-sm text-[#F0883E]">
-        Please set trip dates in Settings first.
-      </div>
-    )
+    return <div className="text-sm text-[#F0883E]">Please set trip dates in Settings first.</div>
   }
 
   return (
@@ -121,9 +116,7 @@ export function DayRangeSelector({
         </p>
       )}
 
-      {error && (
-        <p className="mt-1 text-sm text-[#F85149]">{error}</p>
-      )}
+      {error && <p className="mt-1 text-sm text-[#F85149]">{error}</p>}
     </div>
   )
 }

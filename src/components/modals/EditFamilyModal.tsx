@@ -96,9 +96,7 @@ export function EditFamilyModal({ isOpen, onClose, family }: EditFamilyModalProp
             className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none"
             placeholder="e.g., San Francisco"
           />
-          {errors.origin && (
-            <p className="mt-1 text-sm text-[#F85149]">{errors.origin.message}</p>
-          )}
+          {errors.origin && <p className="mt-1 text-sm text-[#F85149]">{errors.origin.message}</p>}
         </div>
 
         {/* Origin Address */}
@@ -172,7 +170,7 @@ export function EditFamilyModal({ isOpen, onClose, family }: EditFamilyModalProp
         {/* Arrival Day */}
         <SimpleDaySelector
           value={watch('arrivalDayId') || ''}
-          onChange={(value) => setValue('arrivalDayId', value)}
+          onChange={value => setValue('arrivalDayId', value)}
           error={errors.arrivalDayId?.message}
         />
 

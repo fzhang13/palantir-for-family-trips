@@ -70,7 +70,7 @@ export function TimePeriodPicker({
         </label>
         <select
           value={timePeriod}
-          onChange={(e) =>
+          onChange={e =>
             onChange({
               timePeriod: e.target.value as any,
               startTime: undefined,
@@ -100,11 +100,11 @@ export function TimePeriodPicker({
               <label className="block text-xs text-[#8B949E] mb-1">From</label>
               <select
                 value={localStart}
-                onChange={(e) => handleStartTimeChange(e.target.value)}
+                onChange={e => handleStartTimeChange(e.target.value)}
                 className="w-full px-2 py-1.5 bg-[#0A0C10] border border-[#30363D] rounded text-sm text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
               >
                 <option value="">Select time</option>
-                {generateTimeOptions(timePeriod as any).map((time) => (
+                {generateTimeOptions(timePeriod as any).map(time => (
                   <option key={time} value={time}>
                     {time}
                   </option>
@@ -115,11 +115,11 @@ export function TimePeriodPicker({
               <label className="block text-xs text-[#8B949E] mb-1">To</label>
               <select
                 value={localEnd}
-                onChange={(e) => handleEndTimeChange(e.target.value)}
+                onChange={e => handleEndTimeChange(e.target.value)}
                 className="w-full px-2 py-1.5 bg-[#0A0C10] border border-[#30363D] rounded text-sm text-[#C9D1D9] focus:border-[#58A6FF] focus:outline-none"
               >
                 <option value="">Select time</option>
-                {generateTimeOptions(timePeriod as any).map((time) => (
+                {generateTimeOptions(timePeriod as any).map(time => (
                   <option key={time} value={time}>
                     {time}
                   </option>
