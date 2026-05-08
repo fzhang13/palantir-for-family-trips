@@ -29,3 +29,8 @@ export {
   useUpdateActivity,
   useDeleteActivity,
 } from './useTripMutations'
+export { useExpenses } from './useExpenses'
+export { useCreateExpense } from './useCreateExpense'
+export { useUpdateExpense } from './useUpdateExpense'
+export { useDeleteExpense } from './useDeleteExpense'
+export { useExpenseBalances } from './useExpenseBalances'

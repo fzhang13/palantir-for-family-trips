@@ -137,13 +137,13 @@ export interface Meal extends BaseEntity {
 export interface Expense extends BaseEntity {
   type: 'expense'
   title: string
-  payer: string
+  expenseDate: Date
+  category: 'food' | 'accommodation' | 'transport' | 'activities' | 'other'
+  payerFamilyId: string
   amount: number
-  split: string
-  allocationMode: 'equal' | 'manual' | 'individual'
+  allocationMode: 'equal' | 'manual'
   allocations: Record<string, number>
   settled: boolean
-  linkedEntityKeys?: string[]
   note?: string
 }
 

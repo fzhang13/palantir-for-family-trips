@@ -1188,13 +1188,13 @@ export class SupabaseTripRepository implements TripRepository {
     id: row.id as string,
     type: 'expense',
     title: (row.title as string) || '',
-    payer: (row.payer as string) || '',
+    expenseDate: new Date(row.expense_date as string),
+    category: (row.category as 'food' | 'accommodation' | 'transport' | 'activities' | 'other') || 'other',
+    payerFamilyId: (row.payer_family_id as string) || '',
     amount: Number(row.amount) || 0,
-    split: (row.split as string) || '',
-    allocationMode: (row.allocation_mode as 'equal' | 'manual' | 'individual') || 'equal',
+    allocationMode: (row.allocation_mode as 'equal' | 'manual') || 'equal',
     allocations: (row.allocations as Record<string, number>) || {},
     settled: (row.settled as boolean) || false,
-    linkedEntityKeys: [],
     note: row.note as string | undefined,
   })
 

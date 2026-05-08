@@ -1,4 +1,3 @@
-import type { Expense, Family } from '@/types'
 
 /**
  * Format amount as USD currency
@@ -23,68 +22,84 @@ export function parseCurrencyInput(value: string): number {
 
 /**
  * Build equal expense allocations across families
+ * Uses largest-remainder distribution to ensure sum equals original amount
  */
 export function buildEqualExpenseAllocations(
   amount: number,
-  families: Family[]
+  familyIds: string[]
 ): Record<string, number> {
-  const perFamily = amount / families.length
-  const allocations: Record<string, number> = {}
-
-  families.forEach((f) => {
-    allocations[f.id] = Math.round(perFamily * 100) / 100
-  })
-
-  return allocations
-}
-
-/**
- * Get expense allocations (equal or custom)
- */
-export function getExpenseAllocations(
-  expense: Expense,
-  families: Family[]
-): Record<string, number> {
-  if (expense.allocations && Object.keys(expense.allocations).length > 0) {
-    return expense.allocations
+  if (familyIds.length === 0) {
+    return {}
   }
-  return buildEqualExpenseAllocations(expense.amount, families)
-}
 
-/**
- * Calculate total expense burden per family
- */
-export function getFamilyExpenseBurden(
-  expenses: Expense[],
-  families: Family[]
-): Record<string, number> {
-  const burdens: Record<string, number> = {}
-
-  families.forEach((f) => {
-    burdens[f.id] = 0
-  })
-
-  expenses.forEach((expense) => {
-    const allocations = getExpenseAllocations(expense, families)
-    Object.entries(allocations).forEach(([familyId, amount]) => {
-      burdens[familyId] = (burdens[familyId] || 0) + amount
-    })
-  })
-
-  return burdens
-}
-
-/**
- * Build manual allocation seed for custom splitting
- */
-export function buildManualAllocationSeed(
-  families: Family[]
-): Record<string, number> {
+  const perFamily = amount / familyIds.length
   const allocations: Record<string, number> = {}
 
-  families.forEach((f) => {
-    allocations[f.id] = 0
+  // Initial rounding
+  familyIds.forEach((id) => {
+    allocations[id] = Math.round(perFamily * 100) / 100
   })
 
+  // Apply remainder distribution to preserve sum
+  const totalRounded = Object.values(allocations).reduce((sum, val) => sum + val, 0)
+  const remainder = Math.round((amount - totalRounded) * 100)
+
+  if (remainder !== 0) {
+    // Sort families by allocation amount (descending) for stable distribution
+    const sortedIds = [...familyIds].sort((a, b) => allocations[b] - allocations[a])
+    const increment = remainder > 0 ? 0.01 : -0.01
+    const absRemainder = Math.abs(remainder)
+
+    // Distribute pennies to largest amounts
+    for (let i = 0; i < absRemainder && i < sortedIds.length; i++) {
+      allocations[sortedIds[i]] = Math.round((allocations[sortedIds[i]] + increment) * 100) / 100
+    }
+  }
+
   return allocations
+}
+
+/**
+ * Validate expense allocations
+ */
+export function validateAllocations(
+  amount: number,
+  allocations: Record<string, number>,
+  payerFamilyId: string
+): { valid: boolean; error?: string } {
+  const familyIds = Object.keys(allocations)
+
+  // At least one family
+  if (familyIds.length === 0) {
+    return { valid: false, error: 'At least one family must be selected' }
+  }
+
+  // Check for negative allocations
+  const hasNegative = Object.values(allocations).some((val) => val < 0)
+  if (hasNegative) {
+    return { valid: false, error: 'Allocation amounts cannot be negative' }
+  }
+
+  // Payer must be included
+  if (!(payerFamilyId in allocations)) {
+    return { valid: false, error: 'Payer must be included in allocations' }
+  }
+
+  // Payer allocation must be greater than zero
+  if (allocations[payerFamilyId] === 0) {
+    return { valid: false, error: 'Payer allocation must be greater than zero' }
+  }
+
+  // Sum must match amount
+  const sum = Object.values(allocations).reduce((a, b) => a + b, 0)
+  const diff = Math.abs(sum - amount)
+
+  if (diff > 0.01) {
+    return {
+      valid: false,
+      error: `Allocations ($${sum.toFixed(2)}) must equal total amount ($${amount.toFixed(2)})`,
+    }
+  }
+
+  return { valid: true }
 }

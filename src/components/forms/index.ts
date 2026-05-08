@@ -1,4 +1,6 @@
 export { AddressAutocomplete } from './AddressAutocomplete'
+export { AllocationEditor } from './AllocationEditor'
+export { ExpenseForm } from './ExpenseForm'
 export { FamilySelector } from './FamilySelector'
 export { PlacesAutocomplete } from './PlacesAutocomplete'
 export { TimePeriodPicker } from './TimePeriodPicker'

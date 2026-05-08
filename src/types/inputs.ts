@@ -94,3 +94,20 @@ export interface CreateTripInput {
   end_date: string      // ISO 8601 date
   timezone: string
 }
+
+export interface ExpenseFormInputs {
+  title: string
+  expenseDate: Date
+  category: 'food' | 'accommodation' | 'transport' | 'activities' | 'other'
+  payerFamilyId: string
+  amount: number
+  allocationMode: 'equal' | 'manual'
+  allocations: Record<string, number>
+  note?: string
+}
+
+export interface AllocationEditorState {
+  mode: 'equal' | 'manual'
+  selectedFamilyIds: Set<string>
+  amounts: Record<string, number>
+}
