@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { fetchWeather, WeatherForecast } from '../weatherService'
+import { fetchWeather } from '../weatherService'
 
 // Mock fetch globally
 global.fetch = vi.fn()
@@ -25,10 +25,7 @@ describe('weatherService', () => {
       json: async () => mockResponse,
     } as Response)
 
-    const result = await fetchWeather(
-      { lat: 36.05, lng: -112.14 },
-      new Date('2026-05-15')
-    )
+    const result = await fetchWeather({ lat: 36.05, lng: -112.14 }, new Date('2026-05-15'))
 
     expect(result).toMatchObject({
       date: '2026-05-15',
@@ -63,10 +60,7 @@ describe('weatherService', () => {
       json: async () => mockResponse,
     } as Response)
 
-    const result = await fetchWeather(
-      { lat: 36.05, lng: -112.14 },
-      new Date('2026-05-15')
-    )
+    const result = await fetchWeather({ lat: 36.05, lng: -112.14 }, new Date('2026-05-15'))
 
     expect(result.condition).toBe('Rainy')
   })

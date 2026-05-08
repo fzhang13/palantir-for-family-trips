@@ -22,7 +22,7 @@
     "predeploy": "npm run validate",
     "deploy:preview": "vercel",
     "deploy:prod": "vercel --prod",
-    "prepare": "husky"
+    "prepare": "git config core.hooksPath .husky || true"
   },
   "keywords": [
     "react",
