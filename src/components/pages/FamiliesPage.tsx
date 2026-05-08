@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { Plus, Edit2, Trash2, Users, MapPin, Calendar, Car } from 'lucide-react'
-import { useFamilies, useDeleteFamily, useActiveTripId } from '@/hooks'
+import { useFamilies, useDeleteFamily, useActiveTripId, useTripMetadata } from '@/hooks'
 import { AddFamilyModal, EditFamilyModal } from '@/components/modals'
+import { formatFullDate } from '@/lib/dateUtils'
 import type { Family } from '@/types'
 
 export function FamiliesPage() {
   const { data: activeTripId } = useActiveTripId()
   const { data: families = [], isLoading, isError } = useFamilies()
+  const { data: tripMetadata } = useTripMetadata()
   const deleteFamily = useDeleteFamily()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [editingFamily, setEditingFamily] = useState<Family | null>(null)
@@ -76,6 +78,7 @@ export function FamiliesPage() {
             <FamilyCard
               key={family.id}
               family={family}
+              tripMetadata={tripMetadata}
               onEdit={setEditingFamily}
               onDelete={handleDelete}
             />
@@ -103,11 +106,19 @@ export function FamiliesPage() {
 
 interface FamilyCardProps {
   family: Family
+  tripMetadata?: {
+    id: string
+    title: string
+    start_date: string | null
+    end_date: string | null
+    timezone: string
+    status: string
+  } | undefined
   onEdit: (family: Family) => void
   onDelete: (familyId: string) => void
 }
 
-function FamilyCard({ family, onEdit, onDelete }: FamilyCardProps) {
+function FamilyCard({ family, tripMetadata, onEdit, onDelete }: FamilyCardProps) {
   return (
     <div className="border border-[#30363D] rounded bg-[#161B22] p-5 hover:border-[#58A6FF] transition-colors">
       {/* Header */}
@@ -146,7 +157,7 @@ function FamilyCard({ family, onEdit, onDelete }: FamilyCardProps) {
           <Calendar size={14} className="text-[#8B949E]" />
           <span className="text-[#8B949E]">Arrival:</span>
           <span className="text-[#C9D1D9] font-mono">
-            {family.arrivalDayId ? getDayLabel(family.arrivalDayId) : 'Not set'}
+            {family.arrivalDayId ? getDayLabel(family.arrivalDayId, tripMetadata) : 'Not set'}
           </span>
         </div>
 
@@ -172,10 +183,32 @@ function FamilyCard({ family, onEdit, onDelete }: FamilyCardProps) {
   )
 }
 
-function getDayLabel(dayId: string): string {
-  if (dayId.startsWith('day')) {
-    const num = dayId.replace('day', '')
-    return `Day ${num}`
+function getDayLabel(
+  dayId: string,
+  tripMetadata?: {
+    id: string
+    title: string
+    start_date: string | null
+    end_date: string | null
+    timezone: string
+    status: string
+  } | undefined
+): string {
+  if (!dayId.startsWith('day')) {
+    return dayId
   }
-  return dayId
+
+  const dayNum = parseInt(dayId.replace('day', ''))
+
+  // If we have trip metadata, calculate the actual date
+  if (tripMetadata?.start_date) {
+    const startDate = new Date(tripMetadata.start_date + 'T00:00:00')
+    const arrivalDate = new Date(startDate)
+    arrivalDate.setDate(startDate.getDate() + (dayNum - 1))
+
+    return `Day ${dayNum} - ${formatFullDate(arrivalDate)}`
+  }
+
+  // Fallback to just "Day X" if no trip metadata
+  return `Day ${dayNum}`
 }

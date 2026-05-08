@@ -286,13 +286,15 @@ function StayCard({ location, onEdit, onDelete }: StayCardProps) {
                 </div>
               )}
               {location.wifiNetwork && location.wifiPassword && (
-                <div className="bg-white p-3 rounded inline-block">
-                  <QRCodeSVG
-                    value={`WIFI:T:WPA;S:${location.wifiNetwork};P:${location.wifiPassword};;`}
-                    size={120}
-                    level="M"
-                  />
-                  <p className="text-[#8B949E] text-xs text-center mt-2">Scan to connect</p>
+                <div className="flex justify-center mt-2">
+                  <div className="bg-white p-3 rounded">
+                    <QRCodeSVG
+                      value={`WIFI:T:WPA;S:${location.wifiNetwork};P:${location.wifiPassword};;`}
+                      size={120}
+                      level="M"
+                    />
+                    <p className="text-[#8B949E] text-xs text-center mt-2">Scan to connect</p>
+                  </div>
                 </div>
               )}
             </div>

@@ -33,6 +33,14 @@ export interface CreateLocationInput {
   checkInDate?: string  // ISO date string
   checkOutDate?: string // ISO date string
   placeId?: string
+  // WiFi credentials
+  wifiNetwork?: string
+  wifiPassword?: string
+  // Access information
+  hostName?: string
+  lockNote?: string
+  checkIn?: string  // time string (e.g., "3:00 PM")
+  checkOut?: string // time string (e.g., "11:00 AM")
 }
 
 export type CreateRouteInput = z.infer<typeof createRouteSchema>

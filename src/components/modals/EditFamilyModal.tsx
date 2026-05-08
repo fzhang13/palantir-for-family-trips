@@ -2,7 +2,7 @@ import { useForm, useFormState } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'react-hot-toast'
 import { BaseModal } from './BaseModal'
-import { AddressAutocomplete } from '@/components/forms'
+import { AddressAutocomplete, SimpleDaySelector } from '@/components/forms'
 import { createFamilySchema, type CreateFamilyFormData } from '@/schemas'
 import { useUpdateFamily, useActiveTripId } from '@/hooks'
 import type { Family } from '@/types'
@@ -170,19 +170,11 @@ export function EditFamilyModal({ isOpen, onClose, family }: EditFamilyModalProp
         </div>
 
         {/* Arrival Day */}
-        <div>
-          <label htmlFor="arrivalDayId" className="block text-sm font-medium text-[#C9D1D9] mb-1">
-            Arrival Day
-          </label>
-          <input
-            id="arrivalDayId"
-            {...register('arrivalDayId')}
-            type="text"
-            className="w-full px-3 py-2 bg-[#0A0C10] border border-[#30363D] rounded text-[#C9D1D9] placeholder-[#6E7681] focus:border-[#58A6FF] focus:outline-none"
-            placeholder="e.g., day1, day2"
-          />
-          <p className="mt-1 text-xs text-[#8B949E]">Enter day ID (e.g., day1 for first day of trip)</p>
-        </div>
+        <SimpleDaySelector
+          value={watch('arrivalDayId') || ''}
+          onChange={(value) => setValue('arrivalDayId', value)}
+          error={errors.arrivalDayId?.message}
+        />
 
         {/* Notes */}
         <div>

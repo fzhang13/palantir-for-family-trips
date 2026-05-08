@@ -130,8 +130,8 @@ export function DetailSidePanel({ item, onClose, onEdit, onDelete, locations = [
                   <div className="text-xs text-[#8B949E] uppercase tracking-wider mb-1">Weather</div>
                   <div className="flex items-center gap-2 text-[#C9D1D9]">
                     <Thermometer size={14} className="text-[#8B949E]" />
-                    <span>{(item as Activity).weatherData.temperature}°F</span>
-                    <span className="text-[#8B949E]">• {(item as Activity).weatherData.condition}</span>
+                    <span>{(item as Activity).weatherData?.temperature}°F</span>
+                    <span className="text-[#8B949E]">• {(item as Activity).weatherData?.condition}</span>
                   </div>
                 </div>
               )}

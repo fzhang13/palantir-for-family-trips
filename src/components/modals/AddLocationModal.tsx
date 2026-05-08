@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Wifi, Key, Eye, EyeOff } from 'lucide-react'
 import { BaseModal } from './BaseModal'
 import { AddressAutocomplete, DayRangeSelector } from '@/components/forms'
 import { useAddLocation } from '@/hooks/useTripMutations'
@@ -21,6 +22,14 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
   const [summary, setSummary] = useState('')
   const [startDay, setStartDay] = useState<number | null>(null)
   const [endDay, setEndDay] = useState<number | null>(null)
+  const [wifiNetwork, setWifiNetwork] = useState('')
+  const [wifiPassword, setWifiPassword] = useState('')
+  const [showWifiPassword, setShowWifiPassword] = useState(false)
+  const [hostName, setHostName] = useState('')
+  const [lockNote, setLockNote] = useState('')
+  const [checkIn, setCheckIn] = useState('')
+  const [checkOut, setCheckOut] = useState('')
+  const [accessNote, setAccessNote] = useState('')
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -55,6 +64,13 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
       coordinates,
       placeId,
       summary: summary.trim(),
+      wifiNetwork: wifiNetwork.trim(),
+      wifiPassword: wifiPassword.trim(),
+      hostName: hostName.trim(),
+      lockNote: lockNote.trim(),
+      checkIn: checkIn.trim(),
+      checkOut: checkOut.trim(),
+      accessNote: accessNote.trim(),
     }
 
     addLocation.mutate(
@@ -83,6 +99,14 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
     setSummary('')
     setStartDay(null)
     setEndDay(null)
+    setWifiNetwork('')
+    setWifiPassword('')
+    setShowWifiPassword(false)
+    setHostName('')
+    setLockNote('')
+    setCheckIn('')
+    setCheckOut('')
+    setAccessNote('')
     setErrors({})
     onClose()
   }
@@ -140,6 +164,181 @@ export function AddLocationModal({ isOpen, onClose }: AddLocationModalProps) {
           onChange={handleDayRangeChange}
           error={errors.dayRange}
         />
+
+        {/* WiFi Credentials Section */}
+        <div
+          style={{
+            background: '#23863620',
+            border: '1px solid #238636',
+            borderRadius: '6px',
+            padding: '16px',
+            marginBottom: '16px'
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: '12px'
+            }}
+          >
+            <Wifi size={14} className="text-[#238636]" />
+            <label className="text-sm font-medium text-[#238636]">
+              WiFi Credentials (Optional)
+            </label>
+          </div>
+
+          {/* Network Name */}
+          <div style={{ marginBottom: '12px' }}>
+            <label className="block text-[13px] font-medium text-[#C9D1D9] mb-1">
+              Network Name (SSID)
+            </label>
+            <input
+              value={wifiNetwork}
+              onChange={(e) => setWifiNetwork(e.target.value)}
+              type="text"
+              className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none text-[13px]"
+              placeholder="e.g., Parc Omega Guest"
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="block text-[13px] font-medium text-[#C9D1D9] mb-1">
+              Password
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                value={wifiPassword}
+                onChange={(e) => setWifiPassword(e.target.value)}
+                type={showWifiPassword ? 'text' : 'password'}
+                className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 pr-10 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none text-[13px]"
+                placeholder="WiFi password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowWifiPassword(!showWifiPassword)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[#8B949E] hover:text-[#C9D1D9] transition-colors"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
+              >
+                {showWifiPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Info text */}
+          <div
+            style={{
+              marginTop: '8px',
+              fontSize: '12px',
+              color: '#8B949E',
+              display: 'flex',
+              alignItems: 'start',
+              gap: '6px'
+            }}
+          >
+            <span style={{ marginTop: '2px' }}>ℹ️</span>
+            <span>When both fields are filled, a QR code will appear on the stay card for easy mobile connection</span>
+          </div>
+        </div>
+
+        {/* Access Information Section */}
+        <div
+          style={{
+            background: '#58A6FF20',
+            border: '1px solid #58A6FF',
+            borderRadius: '6px',
+            padding: '16px',
+            marginBottom: '16px'
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: '12px'
+            }}
+          >
+            <Key size={14} className="text-[#58A6FF]" />
+            <label className="text-sm font-medium text-[#58A6FF]">
+              Access Information (Optional)
+            </label>
+          </div>
+
+          {/* Host Name */}
+          <div style={{ marginBottom: '12px' }}>
+            <label className="block text-[13px] font-medium text-[#C9D1D9] mb-1">
+              Host Name
+            </label>
+            <input
+              value={hostName}
+              onChange={(e) => setHostName(e.target.value)}
+              type="text"
+              className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none text-[13px]"
+              placeholder="e.g., John Smith"
+            />
+          </div>
+
+          {/* Lock Code */}
+          <div style={{ marginBottom: '12px' }}>
+            <label className="block text-[13px] font-medium text-[#C9D1D9] mb-1">
+              Lock/Access Code
+            </label>
+            <input
+              value={lockNote}
+              onChange={(e) => setLockNote(e.target.value)}
+              type="text"
+              className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none text-[13px] font-mono"
+              placeholder="e.g., 1234# or lockbox code"
+            />
+          </div>
+
+          {/* Check-in / Check-out Times (side-by-side) */}
+          <div style={{ marginBottom: '12px' }}>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[13px] font-medium text-[#C9D1D9] mb-1">
+                  Check-in Time
+                </label>
+                <input
+                  value={checkIn}
+                  onChange={(e) => setCheckIn(e.target.value)}
+                  type="text"
+                  className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none text-[13px]"
+                  placeholder="e.g., 3:00 PM"
+                />
+              </div>
+              <div>
+                <label className="block text-[13px] font-medium text-[#C9D1D9] mb-1">
+                  Check-out Time
+                </label>
+                <input
+                  value={checkOut}
+                  onChange={(e) => setCheckOut(e.target.value)}
+                  type="text"
+                  className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none text-[13px]"
+                  placeholder="e.g., 11:00 AM"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Access Instructions */}
+          <div>
+            <label className="block text-[13px] font-medium text-[#C9D1D9] mb-1">
+              Access Instructions
+            </label>
+            <textarea
+              value={accessNote}
+              onChange={(e) => setAccessNote(e.target.value)}
+              rows={3}
+              className="w-full bg-[#0d1117] border border-[#30363D] rounded px-3 py-2 text-[#C9D1D9] placeholder-[#8B949E] focus:border-[#58A6FF] focus:outline-none resize-none text-[13px]"
+              placeholder="Enter through side gate, key in lockbox by door..."
+            />
+          </div>
+        </div>
 
         {/* Summary (Optional) */}
         <div>

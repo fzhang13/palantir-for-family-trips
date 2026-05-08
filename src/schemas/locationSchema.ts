@@ -13,6 +13,15 @@ export const createLocationSchema = z.object({
   // New fields for stays
   checkInDate: z.string().min(1).optional().or(z.literal('')), // ISO date string or empty
   checkOutDate: z.string().min(1).optional().or(z.literal('')), // ISO date string or empty
+  // NEW: WiFi credentials (optional)
+  wifiNetwork: z.string().max(200, 'Network name too long').optional(),
+  wifiPassword: z.string().max(200, 'Password too long').optional(),
+  // NEW: Access information (optional)
+  hostName: z.string().max(200, 'Host name too long').optional(),
+  lockNote: z.string().max(200, 'Lock code too long').optional(),
+  checkIn: z.string().max(50, 'Check-in time too long').optional(),
+  checkOut: z.string().max(50, 'Check-out time too long').optional(),
+  accessNote: z.string().max(1000, 'Access instructions too long').optional(),
 })
   .refine(
     (data) => {
