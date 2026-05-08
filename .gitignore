@@ -1,10 +1,51 @@
-node_modules
-dist
-test-results
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.vite/
+
+# Environment variables
 .env
 .env.local
-.env.*
+.env.*.local
 !.env.example
+
+# Testing
+test-results/
+coverage/
+playwright-report/
+.vitest/
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Temporary files
+*.tmp
+.cache/
+
+# Vercel
+.vercel/
+
+# Claude Code
+.superpowers/
+.full-review/
+
+# Documentation images (keep in repo for README)
+# Uncomment the line below to ignore /docs directory:
 /docs
-.superpowers
-.full-review

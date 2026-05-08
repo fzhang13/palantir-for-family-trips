@@ -1,7 +1,5 @@
 # Family Trip Command Center
 
-> A Palantir-ish dashboard for a very non-Palantir problem: getting a few families to Pine Mountain Lake and Yosemite without losing the plot.
-
 Instead of a normal trip planner, this repo treats a long weekend like an operation: convoy routes, arrival windows, mission launches, meal logistics, family checklists, and a giant map that makes everything feel more serious than it needs to be.
 
 ![Family Trip Command Center dashboard overview](docs/dashboard-overview.png)
@@ -33,55 +31,106 @@ Because “three families are trying to get to the same cabin” is already a sy
 
 The repo is intentionally overbuilt for a small real-life use case. That is the point. It is a fun UI experiment, a trip-planning toy, and a mildly absurd attempt to make a family weekend feel like a live operations room.
 
-## Stack
+## Tech Stack
 
-- React 19
-- Vite
-- Google Maps JavaScript API
-- Lucide icons
-- Framer Motion
+- **Frontend**: React 19, TypeScript 6
+- **Build Tool**: Vite 8
+- **Database**: Supabase (PostgreSQL)
+- **State Management**: TanStack React Query
+- **Styling**: Tailwind CSS 4
+- **Maps**: Google Maps JavaScript API
+- **Icons**: Lucide React
+- **Animations**: Framer Motion
+- **Forms**: React Hook Form + Zod
+- **Testing**: Vitest, Playwright
 
 ## Running It Locally
 
 ```bash
+# Install dependencies
 npm install
+
+# Copy environment template
 cp .env.example .env
+
+# Add your API keys to .env:
+# - VITE_SUPABASE_URL (from Supabase dashboard)
+# - VITE_SUPABASE_ANON_KEY (from Supabase dashboard)
+# - VITE_GOOGLE_MAPS_API_KEY (from Google Cloud Console)
+
+# Start development server
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173` or whatever Vite prints.
+Open `http://localhost:5173` in your browser.
 
-## Environment
-
-For the full map experience, add a browser Maps key to `.env`:
+## Available Scripts
 
 ```bash
-VITE_GOOGLE_MAPS_API_KEY=your_browser_maps_key_here
+# Development
+npm run dev          # Start development server
+npm run build        # Build for production (with type checking + linting)
+npm run preview      # Preview production build
+
+# Code Quality
+npm run lint         # Check code with ESLint
+npm run lint:fix     # Auto-fix ESLint issues
+npm run format       # Format code with Prettier
+npm run format:check # Check Prettier formatting
+npm run type-check   # Run TypeScript type checking
+
+# Testing
+npm run test         # Run tests in watch mode
+npm run test:run     # Run tests once
+npm run validate     # Run all checks (type + lint + test)
+
+# Database
+npm run generate:migration <name>  # Create new migration file
+
+# Deployment
+npm run deploy:preview  # Deploy preview to Vercel
+npm run deploy:prod     # Deploy to production
 ```
 
-Optional:
+## Data & Persistence
 
-```bash
-VITE_GOOGLE_MAP_ID=your_optional_google_map_id
-```
-
-Without a key, the app still renders its UI but the live Google map layer will not fully initialize.
-
-## Data / Privacy
+- **Database**: Supabase PostgreSQL cloud instance
+- **Data Model**: Trips, families, stays, meals, activities, expenses
+- **Real-time**: React Query for optimistic updates and cache management
+- **Privacy**: Row Level Security (RLS) enabled on all tables
 
 The trip data in this repo is intentionally sanitized for public sharing.
 
-- Family names are demo names.
-- The basecamp address is generalized.
-- Access instructions, Wi-Fi, host details, and other private trip notes are removed.
+## Deployment
 
-If you publish this with your own Google Maps key, usage is billed to your Google Cloud project.
+The app is deployed on Vercel with automatic deployments from the main branch.
 
-## Repo Notes
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
 
-- State is stored locally in the browser.
-- The project is optimized for desktop and large-screen dashboard vibes.
-- The UI intentionally leans dense, dramatic, and slightly over-the-top.
+**Live Demo**: [https://palantir-for-family-trips.vercel.app](https://palantir-for-family-trips.vercel.app)
+
+## Design System
+
+All design decisions (typography, colors, spacing, layout) are documented in [DESIGN.md](DESIGN.md).
+
+The UI is optimized for:
+- Large desktop displays (1920x1080+)
+- High information density
+- Dark mode operations-center aesthetic
+- Tactical precision over consumer friendliness
+
+## Code Quality
+
+This project uses automated code quality tools:
+
+- **ESLint** - Code linting for TypeScript/React
+- **Prettier** - Automatic code formatting
+- **Husky** - Pre-commit hooks
+- **lint-staged** - Only check staged files
+
+Pre-commit hooks automatically run on every commit to ensure code quality.
+
+See [CODE_QUALITY.md](CODE_QUALITY.md) for detailed setup and troubleshooting.
 
 ## Database Migrations
 
@@ -123,14 +172,51 @@ supabase db reset
 supabase db push
 ```
 
-## If You Want To Hack On It
+## Project Structure
 
-Good places to start:
+```
+src/
+├── components/          # React components
+│   ├── ui/             # Shadcn UI base components
+│   ├── sections/       # Page section components
+│   └── ...             # Feature-specific components
+├── context/            # React Context providers
+├── hooks/              # Custom React hooks
+├── lib/                # Utilities (API clients, env, etc.)
+├── repositories/       # Data layer (Supabase)
+├── types/              # TypeScript type definitions
+└── App.tsx             # Main application shell
+```
 
-- `src/App.jsx` for the main shell, timeline, and overlays
-- `src/CommandMap.jsx` for route rendering, playback, and map behavior
-- `src/tripModel.js` for the seeded trip document and helper logic
+## Key Files
 
-## Status
+- **[src/App.tsx](src/App.tsx)** - Main application, routing, and layout
+- **[src/repositories/SupabaseTripRepository.ts](src/repositories/SupabaseTripRepository.ts)** - Database operations
+- **[src/context/TripContext.tsx](src/context/TripContext.tsx)** - Trip state management
+- **[DESIGN.md](DESIGN.md)** - Design system documentation
+- **[CLAUDE.md](CLAUDE.md)** - Development guidelines
+
+## Contributing
+
+This is a personal project, but if you find it useful and want to improve it:
+
+1. Fork the repository
+2. Create a feature branch
+3. Follow the design system in [DESIGN.md](DESIGN.md)
+4. Ensure type safety (`npm run type-check`)
+5. Add tests for new features
+6. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details
+
+## Acknowledgments
+
+- Inspired by Palantir's operations-center aesthetic
+- Built for real family trip coordination
+- Intentionally overengineered for fun and learning
+
+---
 
 Built for fun. Surprisingly usable. Not pretending to be enterprise software.

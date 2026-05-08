@@ -1,0 +1,36 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dark background matching Palantir theme -->
+  <rect width="1200" height="630" fill="#0a0f1a"/>
+
+  <!-- Gradient overlay -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.1" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grad)"/>
+
+  <!-- Grid pattern -->
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e40af" stroke-width="0.5" opacity="0.1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+
+  <!-- Logo centered -->
+  <g transform="translate(500, 200) scale(5)">
+    <path d="M20.147 18 12 21.178 3.853 18 2.5 20.343 12 24l9.5 -3.657L20.147 18zM12 0a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0 -19zm0 16.078a6.568 6.568 0 1 1 0 -13.136 6.568 6.568 0 0 1 0 13.136z" fill="#3b82f6" opacity="0.8"/>
+  </g>
+
+  <!-- Title -->
+  <text x="600" y="450" font-family="Inter, system-ui, sans-serif" font-size="56" font-weight="700" fill="#e5e7eb" text-anchor="middle">
+    Family Trip Command Center
+  </text>
+
+  <!-- Subtitle -->
+  <text x="600" y="510" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="400" fill="#9ca3af" text-anchor="middle">
+    Mission Planning • Route Tracking • Operations Dashboard
+  </text>
+</svg>

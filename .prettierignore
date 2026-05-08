@@ -1,0 +1,23 @@
+# Build output
+dist
+build
+coverage
+
+# Dependencies
+node_modules
+
+# Generated files
+*.min.js
+*.min.css
+
+# Config files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Vercel
+.vercel
+
+# Temp
+.cache
+.temp

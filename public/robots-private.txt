@@ -1,0 +1,5 @@
+# Private version - blocks all search engines
+# To use this version, rename to robots.txt
+
+User-agent: *
+Disallow: /
