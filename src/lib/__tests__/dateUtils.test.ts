@@ -11,7 +11,7 @@ import {
 describe('dateUtils', () => {
   describe('getDayName', () => {
     it('returns correct day name for date', () => {
-      const date = new Date('2026-05-15') // Thursday
+      const date = new Date(2026, 4, 14) // May 14, 2026 is Thursday (month is 0-indexed)
       expect(getDayName(date)).toBe('Thursday')
     })
   })
