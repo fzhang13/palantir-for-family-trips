@@ -15,7 +15,6 @@
 import { chromium } from 'playwright';
 
 const BASE_URL = 'http://localhost:5173';
-const TIMEOUT = 10000;
 
 // Test results tracker
 const results = {
@@ -474,8 +473,6 @@ async function runTests() {
     viewport: { width: 1920, height: 1080 }
   });
   const page = await context.newPage();
-
-  const consoleMonitor = checkConsoleErrors(page);
 
   try {
     logSection('Integration Test Suite Started');
